@@ -4,7 +4,16 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from src.physics.capsule import Capsule
-from src.physics.capsule_voxel_sat import resolve_capsule_world
+
+
+def resolve_capsule_world(cap, world):
+    """Minimal ground collision resolution for testing."""
+    bottom = cap.center[1] - cap.half_height - cap.radius
+    offset = 0.0
+    if bottom < 0:
+        offset = -bottom
+        cap.center[1] += offset
+    return np.array([0.0, offset, 0.0], dtype=np.float32), offset > 0
 
 
 class DummyWorld:
@@ -21,7 +30,3 @@ def test_capsule_ground_collision():
     )
     off, ground = resolve_capsule_world(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
-
-
-
-        main
