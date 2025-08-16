@@ -46,6 +46,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/cache@v3
+      with:
+        path: |
+          build/bin/**
+          build/spv/**
+        key: ${{ runner.os }}-cmake-${{ matrix.c_compiler }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
