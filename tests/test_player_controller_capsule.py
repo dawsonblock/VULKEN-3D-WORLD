@@ -1,5 +1,9 @@
 import numpy as np
-from src.physics.player_controller_capsule import PlayerControllerCapsule
+from src.physics.player_controller_capsule import (
+    PlayerControllerCapsule,
+    SPRINT_SPEED_MULTIPLIER,
+    get_horizontal_speed,
+)
 
 
 class FlatWorld:
@@ -18,7 +22,9 @@ class StepWorld:
 
 def test_jump_and_land():
     world = FlatWorld()
-    player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
+    player = PlayerControllerCapsule(
+        world, np.array([0.0, 1.2, 0.0], dtype=np.float32)
+    )
     forward = np.array([0.0, 0.0, 1.0], dtype=np.float32)
     right = np.array([1.0, 0.0, 0.0], dtype=np.float32)
 
@@ -43,7 +49,9 @@ def test_jump_and_land():
 
 def test_step_climb():
     world = StepWorld()
-    player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
+    player = PlayerControllerCapsule(
+        world, np.array([0.0, 1.2, 0.0], dtype=np.float32)
+    )
     forward = np.array([1.0, 0.0, 0.0], dtype=np.float32)
     right = np.array([0.0, 0.0, 1.0], dtype=np.float32)
 
@@ -57,7 +65,9 @@ def test_step_climb():
 
 def test_sprint_speed_limit():
     world = FlatWorld()
-    player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
+    player = PlayerControllerCapsule(
+        world, np.array([0.0, 1.2, 0.0], dtype=np.float32)
+    )
     forward = np.array([1.0, 0.0, 0.0], dtype=np.float32)
     right = np.array([0.0, 0.0, 1.0], dtype=np.float32)
 
@@ -65,16 +75,10 @@ def test_sprint_speed_limit():
     player.set_input({"f": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
-    speed = float(np.linalg.norm(player.vel[[0, 2]]))
-    assert speed <= player.max_speed + 1e-3
-
-    player.set_input({"sprint": 1})
-    for _ in range(20):
-        player.update(0.1, forward, right)
     speed = get_horizontal_speed(player)
     assert speed <= player.max_speed + 1e-3
 
-    player.set_input({"sprint": 1})
+    player.set_input({"f": 1, "sprint": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
     sprint_speed = get_horizontal_speed(player)
