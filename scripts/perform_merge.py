@@ -29,7 +29,17 @@ def main() -> None:
         sys.exit(1)
 
     src = Path(args.src)
+    src = Path(args.src)
     dst = Path(args.dst)
+
+    # Only check for external/VULKEN-3D-WORLD/CMakeLists.txt if src or dst is (or is within) external/VULKEN-3D-WORLD
+    external_dir = Path('external/VULKEN-3D-WORLD')
+    if (external_dir in src.parents or src.resolve() == external_dir.resolve() or
+        external_dir in dst.parents or dst.resolve() == external_dir.resolve()):
+        external_cmake = external_dir / 'CMakeLists.txt'
+        if not external_cmake.exists():
+            print("Missing external/VULKEN-3D-WORLD. Clone with:\n  gh repo clone VULKEN-3D/VULKEN-3D-WORLD external/VULKEN-3D-WORLD", file=sys.stderr)
+            sys.exit(1)
     if not src.exists():
         print(f"Source {src} does not exist", file=sys.stderr)
         sys.exit(1)
