@@ -32,6 +32,10 @@ def run():
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
 
 
+def test_capsule_resolves_to_ground():
+    run()
+
+
 if __name__ == "__main__":
     run()
        main
