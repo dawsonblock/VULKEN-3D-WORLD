@@ -1,6 +1,6 @@
 # VoxelVK Elite ALL (Release-Ready Skeleton)
 
-[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
+[![CI](https://github.com/dawsonblock/VULKEN-3D-WORLD/actions/workflows/ci.yml/badge.svg)](https://github.com/dawsonblock/VULKEN-3D-WORLD/actions/workflows/ci.yml)
 
 This repo contains:
 - Vulkan shader pipeline (SPIR-V under `build/spv/**`)
