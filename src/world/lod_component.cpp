@@ -10,7 +10,10 @@ LODComponent::LODComponent(const std::string& cfgPath) {
 
 void LODComponent::LoadConfig(const std::string& cfgPath) {
     std::ifstream f(cfgPath);
-    if(!f.is_open()) return;
+    if(!f.is_open()) {
+        std::cerr << "Error: Could not open config file '" << cfgPath << "' in LODComponent::LoadConfig.\n";
+        return;
+    }
     std::string line;
     while(std::getline(f, line)){
         if(line.empty() || line[0]=='#') continue;
