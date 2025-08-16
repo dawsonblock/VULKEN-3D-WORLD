@@ -97,7 +97,7 @@ class ChunkStore:
 
     def wait_all(self):
         errors = []
-        for f in self.futures.values():
+        for f in list(self.futures.values()):
             try:
                 f.result(timeout=5)
             except Exception as exc:
