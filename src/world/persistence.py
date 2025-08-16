@@ -1,8 +1,10 @@
 
-import json, numpy as np
+import json
+import logging
+import numpy as np
 from pathlib import Path
 from typing import Dict, Optional
-from concurrent.futures import ThreadPoolExecutor, Future
+from concurrent.futures import Future, ThreadPoolExecutor
 from .rle import rle_encode, rle_decode
 
 try:
@@ -42,27 +44,38 @@ class ChunkStore:
         return b
 
     def save_chunk_sync(self, chunk):
-        cx, cz = chunk.position
-        vox = chunk.voxels.astype(np.uint8)
-        if self.use_rle:
-            vals, counts, shape = rle_encode(vox)
-            header = np.array([shape[0], shape[1], shape[2], vals.size, counts.size], dtype=np.int32).tobytes()
-            payload = vals.tobytes() + counts.tobytes()
-            data = header + payload
-        else:
-            header = np.array([vox.shape[0], vox.shape[1], vox.shape[2], 0, 0],dtype=np.int32).tobytes()
-            data = header + vox.tobytes()
-        blob = self._compress(data)
-        self.chunk_path(cx,cz).write_bytes(blob)
-        idx = self._region_dir(cx, cz) / "index.json"
-        table = {}
-        if idx.exists():
-            try: table = json.loads(idx.read_text())
-            except: table = {}
-        table[f"{cx},{cz}"] = {"saved": True}
-        idx.write_text(json.dumps(table))
+        try:
+            cx, cz = chunk.position
+            vox = chunk.voxels.astype(np.uint8)
+            if self.use_rle:
+                vals, counts, shape = rle_encode(vox)
+                header = np.array([shape[0], shape[1], shape[2], vals.size, counts.size], dtype=np.int32).tobytes()
+                payload = vals.tobytes() + counts.tobytes()
+                data = header + payload
+            else:
+                header = np.array([vox.shape[0], vox.shape[1], vox.shape[2], 0, 0], dtype=np.int32).tobytes()
+                data = header + vox.tobytes()
+            blob = self._compress(data)
+            self.chunk_path(cx, cz).write_bytes(blob)
+            idx = self._region_dir(cx, cz) / "index.json"
+            table = {}
+            if idx.exists():
+                try:
+                    table = json.loads(idx.read_text())
+                except Exception:
+                    table = {}
+            table[f"{cx},{cz}"] = {"saved": True}
+            idx.write_text(json.dumps(table))
+        except Exception as exc:
+            raise RuntimeError(f"failed to save chunk at {chunk.position}") from exc
 
     def save_async(self, chunk):
+        """Schedule a chunk to be saved on a background thread.
+
+        Callers must subsequently invoke :meth:`wait_all` and handle any
+        exceptions raised during the save operations.
+        """
+
         key = f"{chunk.position[0]},{chunk.position[1]}"
         self.futures[key] = self.pool.submit(self.save_chunk_sync, chunk)
 
@@ -83,8 +96,14 @@ class ChunkStore:
         return {"voxels": vox, "height": int(Y), "size": int(S)}
 
     def wait_all(self):
+        errors = []
         for f in list(self.futures.values()):
-            try: f.result(timeout=5)
-            except Exception: pass
+            try:
+                f.result(timeout=5)
+            except Exception as exc:
+                logging.exception("chunk save failed: %s", exc)
+                errors.append(exc)
         self.futures.clear()
         self.pool.shutdown(wait=True)
+        if errors:
+            raise RuntimeError(f"{len(errors)} chunk saves failed") from errors[0]

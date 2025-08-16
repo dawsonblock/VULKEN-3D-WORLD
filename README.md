@@ -21,3 +21,26 @@ The compute expects image formats:
 - 2D height: `VK_FORMAT_R32_SFLOAT` (GENERAL)
 - 2D biome: `VK_FORMAT_R8_UINT` (GENERAL)
 - Output 3D blocks: `VK_FORMAT_R16_UINT` (GENERAL)
+
+
+## Python setup
+
+Some utilities and tests in `src/` and `tests/` require Python. Create a virtual environment and install the required packages:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run the test suite:
+
+```bash
+pytest
+
+## Linting
+To check JavaScript or TypeScript sources, run:
+```bash
+npx eslint .
+        main
+```
