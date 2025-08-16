@@ -1,16 +1,19 @@
-
 import numpy as np
 from dataclasses import dataclass
+
 
 @dataclass
 class AABB:
     center: np.ndarray  # (x,y,z) float32
-    half:   np.ndarray  # (hx,hy,hz) float32
+    half: np.ndarray  # (hx,hy,hz) float32
 
     @property
-    def min(self): return self.center - self.half
+    def min(self):
+        return self.center - self.half
+
     @property
-    def max(self): return self.center + self.half
+    def max(self):
+        return self.center + self.half
 
     def moved(self, delta: np.ndarray) -> "AABB":
         return AABB(self.center + delta, self.half)

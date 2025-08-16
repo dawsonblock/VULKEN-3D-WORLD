@@ -13,16 +13,37 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
-          path: ~/.cache
+          path: |
+            build/bin/**
+            build/spv/**
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
+      - name: Set Vulkan env
+        run: echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Upload build artifacts
+
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-linux-${{ runner.os }}
+          path: build
+
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ runner.os }}
+          path: |
+            build/**
+          if-no-files-found: ignore
+        main
 
   windows:
     runs-on: windows-latest
@@ -30,13 +51,34 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/cache@v3
         with:
-          path: C:\\Users\\runneradmin\\AppData\\Local\\cache
+          path: |
+            build/bin/**
+            build/spv/**
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install Ninja and CMake
         run: choco install ninja cmake --yes
+      - name: Install Vulkan SDK and GLFW
+        run: choco install vulkan-sdk glfw --yes
+      - name: Set Vulkan env
+        run: echo "VULKAN_SDK=C:\VulkanSDK\latest" >> $Env:GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Upload build artifacts
+
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ runner.os }}
+          path: build
+
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ runner.os }}
+          path: |
+            build/**
+          if-no-files-found: ignore
+        main
