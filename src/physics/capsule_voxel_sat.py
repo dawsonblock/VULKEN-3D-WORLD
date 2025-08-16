@@ -29,7 +29,7 @@ def closest_point_on_segment(
     """Return the closest point on the line segment *ab* to *p*."""
 
     ab = b - a
-    t = float(np.dot(p - a, ab) / (np.dot(ab, ab) + 1e-9))
+    t = np.dot(p - a, ab) / (np.dot(ab, ab) + 1e-9)
     return a + np.clip(t, 0.0, 1.0) * ab
 
 
