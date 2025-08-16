@@ -17,6 +17,8 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install deps
         run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
+      - name: Install Python deps
+        run: pip install -r requirements.txt
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
@@ -34,6 +36,8 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install Ninja and CMake
         run: choco install ninja cmake --yes
+      - name: Install Python deps
+        run: pip install -r requirements.txt
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
