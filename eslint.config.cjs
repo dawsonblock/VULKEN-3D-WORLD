@@ -4,7 +4,6 @@ const globals = require('globals');
 module.exports = [
   {
     ignores: [
-
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -14,21 +13,10 @@ module.exports = [
       'tools/**',
       'tests/**',
       'src/**',
+'eslint.config.js',
       'apps/**',
-      'scripts/**'
-
-    'apps',
-      'assets',
-      'build_ci_sanity',
-      'cmake',
-      'docs',
-      'node_modules',
-      'scripts',
-      'shaders',
-      'shaders_vk',
-      'tests',
-      'tools'
-        main
+      'scripts/**',
+      'node_modules/**'
     ]
   },
   js.configs.recommended,
