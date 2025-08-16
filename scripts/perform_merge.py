@@ -37,5 +37,5 @@ if __name__ == '__main__':
     try:
         raise SystemExit(main())
     except Exception as exc:  # pragma: no cover
-        print(f'fATAL: {exc}', file=sys.stderr)
+        print(f'FATAL: {exc}', file=sys.stderr)
         raise SystemExit(1)
