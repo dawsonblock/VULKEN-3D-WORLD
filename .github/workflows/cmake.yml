@@ -23,6 +23,14 @@ jobs:
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ runner.os }}
+          path: |
+            build/**
+            build/spv/**
+          if-no-files-found: ignore
 
   windows:
     runs-on: windows-latest
@@ -40,3 +48,11 @@ jobs:
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ runner.os }}
+          path: |
+            build/**
+            build/spv/**
+          if-no-files-found: ignore
