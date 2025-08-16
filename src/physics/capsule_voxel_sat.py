@@ -97,7 +97,7 @@ def resolve_capsule_world(
         offset = hit_n * max_pen
         cap.center += offset
         total_offset += offset
-        if hit_n[1] > 0.707:
+        if hit_n[1] > GROUND_CONTACT_THRESHOLD:
             grounded = True
 
     return total_offset, grounded
