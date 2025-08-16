@@ -1,5 +1,6 @@
 
 #include "csm_cpu.hpp"
+#include "csm_pass.hpp" // for CSMGpuUBO
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <array>
@@ -161,6 +162,26 @@ CSMCPUResult compute_csm_snapped(const CameraParams& cam, const glm::vec3& light
         out.lightVP[i] = ortho_fit_points_snapped(lightV, sliceCorners, margin, mapSize);
     }
     return out;
+}
+
+CSMGpuUBO build_csm_ubo(const CSMCPUResult& cpu,
+                        float mapTexelSize,
+                        float pcssMin,
+                        float pcssMax,
+                        float pcssSearch)
+{
+    CSMGpuUBO u{};
+    int count = std::max(1, std::min(cpu.cascadeCount, 4));
+    for(int i=0;i<count;i++){
+        u.lightVP[i] = cpu.lightVP[i];
+        u.splits[i]  = cpu.splits[i];
+    }
+    u.cascadeCount = count;
+    u.mapTexelSize = mapTexelSize;
+    u.pcssMin = pcssMin;
+    u.pcssMax = pcssMax;
+    u.pcssSearch = pcssSearch;
+    return u;
 }
 
 } // namespace voxelvk

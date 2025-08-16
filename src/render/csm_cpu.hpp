@@ -19,6 +19,9 @@ struct CSMCPUResult {
     int                     cascadeCount{4};
 };
 
+// Forward declaration of GPU-side UBO
+struct CSMGpuUBO;
+
 // lambda in [0,1], 0=uniform, 1=logarithmic. 0.6..0.7 is typical.
 CSMCPUResult compute_csm(const CameraParams& cam, const glm::vec3& lightDir,
                          int cascades = 4, float lambda = 0.65f, float margin = 10.0f);
@@ -27,5 +30,12 @@ CSMCPUResult compute_csm(const CameraParams& cam, const glm::vec3& lightDir,
 // mapSize is your shadow map resolution (e.g., 2048).
 CSMCPUResult compute_csm_snapped(const CameraParams& cam, const glm::vec3& lightDir,
                                  int cascades, float lambda, float margin, int mapSize);
+
+// Convenience: populate a GPU UBO from the CPU result. PCSS parameters are optional.
+CSMGpuUBO build_csm_ubo(const CSMCPUResult& cpu,
+                        float mapTexelSize,
+                        float pcssMin = 1.0f,
+                        float pcssMax = 6.0f,
+                        float pcssSearch = 25.0f);
 
 } // namespace voxelvk

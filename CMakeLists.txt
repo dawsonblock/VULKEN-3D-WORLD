@@ -142,20 +142,12 @@ message(STATUS "=====================")
 
 # --- Build tagging sources ---
 if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
+  list(APPEND VOXELVK_ELITE_SOURCES
     src/core/build_info_print.cpp
     src/core/runtime_debug.cpp
-    src/core/gpu_compat.cpp)
-endif()
-
-# --- CSM integration sources ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
+    src/core/gpu_compat.cpp
     src/render/csm_cpu.cpp
-    src/render/csm_pass.cpp)
-endif()
-
-# --- CSM descriptor layout helper ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
+    src/render/csm_pass.cpp
+    src/render/csm_layout.cpp)
+  target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
 endif()
