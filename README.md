@@ -21,3 +21,7 @@ The compute expects image formats:
 - 2D height: `VK_FORMAT_R32_SFLOAT` (GENERAL)
 - 2D biome: `VK_FORMAT_R8_UINT` (GENERAL)
 - Output 3D blocks: `VK_FORMAT_R16_UINT` (GENERAL)
+
+## Documentation
+
+- [ChunkStore and Player Controller Capsule](docs/chunkstore_player_controller.md)
