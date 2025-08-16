@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
+  "devDependencies": {
     "@eslint/js": "^9.33.0"
   }
 }
