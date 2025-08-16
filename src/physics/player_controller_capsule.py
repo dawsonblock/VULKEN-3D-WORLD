@@ -91,5 +91,5 @@ class PlayerControllerCapsule:
             "r": 0,
             "jump": 0,
             "sprint": 0,
-        }
+        self._reset_input()
 
