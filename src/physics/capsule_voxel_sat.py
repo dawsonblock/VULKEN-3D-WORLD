@@ -42,7 +42,7 @@ def capsule_box_penetration(
     q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
     q_box = closest_point_on_aabb(q_seg, mn, mx)
     v = q_seg - q_box
-    dist = float(np.linalg.norm(v))
+    dist = np.linalg.norm(v)
     pen = cap.radius - dist
     if pen > 0.0:
         normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0, 1, 0], dtype=np.float32)
