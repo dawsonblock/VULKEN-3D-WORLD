@@ -1,6 +1,6 @@
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  { ignores: ['**/build/**', 'eslint.config.cjs'] },
+  { ignores: ['**/build/**'] },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: { ecmaVersion: 2020, sourceType: 'module' },
