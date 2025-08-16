@@ -30,7 +30,6 @@ def get_horizontal_speed(pc: "PlayerControllerCapsule") -> float:
         return min(speed, pc.max_speed + 1e-3)
     return speed
 
-
 class PlayerControllerCapsule:
     """Basic kinematic character controller represented by a capsule."""
 
