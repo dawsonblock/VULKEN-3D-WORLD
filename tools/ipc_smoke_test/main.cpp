@@ -33,7 +33,16 @@ int main() {
     const char* msg = "ping";
     send(client, msg, std::strlen(msg), 0);
     char buf[16] = {0};
-    recv(conn, buf, sizeof(buf), 0);
+    if (client < 0) { std::cerr << "client socket failed\n"; return 1; }
+    if (connect(client, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) { perror("connect"); return 1; }
+    int conn = accept(server, nullptr, nullptr);
+    if (conn < 0) { perror("accept"); return 1; }
+    const char* msg = "ping";
+    ssize_t sent = send(client, msg, std::strlen(msg), 0);
+    if (sent < 0) { perror("send"); return 1; }
+    char buf[16] = {0};
+    ssize_t recvd = recv(conn, buf, sizeof(buf), 0);
+    if (recvd < 0) { perror("recv"); return 1; }
     std::cout << buf << std::endl;
 #if defined(_WIN32)
     closesocket(client);
