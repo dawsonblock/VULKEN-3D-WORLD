@@ -1,6 +1,3 @@
-
-"""Definition of a vertical capsule shape used for collision queries."""
-
 import numpy as np
 from dataclasses import dataclass
 
@@ -24,24 +21,11 @@ class Capsule:
     radius: float
 
     @property
-
-    def seg_a(self) -> np.ndarray:  # top cap center
+    def seg_a(self) -> np.ndarray:
         """Center of the top spherical cap."""
         return self.center + np.array([0, self.half_height, 0], dtype=np.float32)
 
     @property
-    def seg_b(self) -> np.ndarray:  # bottom cap center
+    def seg_b(self) -> np.ndarray:
         """Center of the bottom spherical cap."""
         return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
-
-    def seg_a(self):  # top cap center
-        return self.center + np.array(
-            [0, self.half_height, 0], dtype=np.float32
-        )
-
-    @property
-    def seg_b(self):  # bottom cap center
-        return self.center - np.array(
-            [0, self.half_height, 0], dtype=np.float32
-        )
-        main
