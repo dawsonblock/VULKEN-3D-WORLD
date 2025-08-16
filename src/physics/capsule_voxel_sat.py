@@ -25,7 +25,7 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> Tuple[np.ndarray, bool]:
     for y in range(bb_min[1], bb_max[1] + 1):
         for z in range(bb_min[2], bb_max[2] + 1):
             for x in range(bb_min[0], bb_max[0] + 1):
-                if not world.get_block_at_world_position(float(x), float(y), float(z)):
+                if not is_solid(world.get_block_at_world_position(float(x), float(y), float(z))):
                     continue
                 # push upwards so bottom sits on top of block
                 block_top = y + 1.0
