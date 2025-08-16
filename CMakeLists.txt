@@ -159,3 +159,10 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
+
+# --- World streaming and LOD ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE
+    src/world/chunk_streamer.cpp
+    src/world/lod_component.cpp)
+endif()
