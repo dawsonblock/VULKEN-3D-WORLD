@@ -6,8 +6,6 @@
 
 from __future__ import annotations
 
-
-        main
 import numpy as np
         main
 from dataclasses import dataclass
@@ -29,8 +27,11 @@ class AABB:
     @property
 
 
+
+
     def max(self) -> NDArray[np.float32]:
 
+        main
         main
     def min(self) -> np.ndarray:
         """Minimum corner of the box."""
@@ -41,6 +42,7 @@ class AABB:
         """Maximum corner of the box."""
 
 
+        main
         main
         main
         return self.center + self.half

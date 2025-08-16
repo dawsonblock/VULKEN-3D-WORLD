@@ -17,14 +17,24 @@ class Capsule:
     radius: float
 
     @property
+
+    def seg_a(self) -> np.ndarray:
+
     def seg_a(self) -> NDArray[np.float32]:
+        main
         """Center of the top spherical cap."""
 
         return self.center + np.array([0.0, self.half_height, 0.0], dtype=np.float32)
 
     @property
+
+    def seg_b(self) -> np.ndarray:
+        """Center of the bottom spherical cap."""
+        return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
+
     def seg_b(self) -> NDArray[np.float32]:
         """Center of the bottom spherical cap."""
 
         return self.center - np.array([0.0, self.half_height, 0.0], dtype=np.float32)
 
+        main

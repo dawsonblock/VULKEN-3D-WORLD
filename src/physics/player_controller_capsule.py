@@ -1,8 +1,10 @@
 
+
 """Simple capsule-based player controller used in tests."""
 
 from __future__ import annotations
 
+        main
 """Capsule-based player controller using SAT collision resolution."""
         main
 
@@ -17,6 +19,15 @@ from .capsule_voxel_sat import resolve_capsule_world
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
+
+
+def get_horizontal_speed(pc: "PlayerControllerCapsule") -> float:
+    """Return the horizontal speed magnitude of the player."""
+    return float(np.linalg.norm(pc.vel[[0, 2]]))
+
+
+class PlayerControllerCapsule:
+    """Capsule-based player controller."""
 
 _first_speed_call = True
 
@@ -49,6 +60,7 @@ class PlayerControllerCapsule:
     >>> pc.update(0.016, forward, right)
         main
     """
+        main
 
     global _first_speed_call
     speed = float(np.linalg.norm(pc.vel[[0, 2]]))
@@ -117,6 +129,7 @@ class PlayerControllerCapsule:
 
 
         main
+        main
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
@@ -134,13 +147,18 @@ class PlayerControllerCapsule:
 
 
     def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
+
+
+    def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
         wish = forward * (self.input["f"] - self.input["b"]) + right * (
             self.input["r"] - self.input["l"]
 
     def update(
         self, dt: float, forward: np.ndarray, right: np.ndarray
     ) -> None:
+        main
         wish = (
+            forward * (self.input["f"] - self.input["b"]) +
             forward * (self.input["f"] - self.input["b"])
             + right * (self.input["r"] - self.input["l"])
         main
@@ -154,12 +172,16 @@ class PlayerControllerCapsule:
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
 
         wish = wish / n if n > 1e-6 else wish
+
         
         target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        main
 
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
+
+        main
         main
         hv = self.vel.copy()
         hv[1] = 0
@@ -195,7 +217,9 @@ class PlayerControllerCapsule:
             self.vel[1] = 0.0
 
 
+
 import builtins as _builtins
 
 _builtins.get_horizontal_speed = get_horizontal_speed  # type: ignore[attr-defined]
 _builtins.SPRINT_SPEED_MULTIPLIER = SPRINT_SPEED_MULTIPLIER  # type: ignore[attr-defined]
+        main

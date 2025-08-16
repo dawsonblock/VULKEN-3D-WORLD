@@ -1,5 +1,8 @@
 module.exports = [
   {
+
+    ignores: ['node_modules/**'],
+
     ignores: [
 
 
@@ -43,6 +46,7 @@ module.exports = [
     ],
         main
        main
+        main
   },
   js.configs.recommended,
   {
@@ -56,10 +60,20 @@ module.exports = [
         ...globals.node,
         ...globals.es2021,
       },
+
+    },
+
+    rules: {
+      'no-unused-vars': 'warn',
+      semi: ['error', 'always'],
+    },
+  },
+
         main
     },
     rules: {},
   },
+        main
         main
 ];
 

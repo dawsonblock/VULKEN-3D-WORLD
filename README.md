@@ -47,6 +47,7 @@ npx eslint .
 
 
 
+
 ## Samples
 
 ### demo_window
@@ -58,5 +59,6 @@ cmake --build build --target demo_window
 Run it:
 ```bash
 ./build/demo_window
+        main
         main
 ```

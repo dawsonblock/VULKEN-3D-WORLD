@@ -1,8 +1,10 @@
 
+
 """Placeholder AABB-based player controller used for typing tests."""
 
 from __future__ import annotations
 
+        main
 """AABB-based player controller for movement inside a voxel world."""
         main
 
@@ -17,6 +19,9 @@ from .voxel_solid import is_solid
 
 class PlayerController:
 
+    """Axis-aligned bounding box player controller."""
+
+
     """Minimal stub implementation of an axis-aligned player controller."""
 
     """Axis-aligned bounding box player controller.
@@ -29,6 +34,7 @@ class PlayerController:
         Initial spawn position of the player.
     """
         main
+        main
 
     def __init__(
         self,
@@ -36,6 +42,9 @@ class PlayerController:
         spawn: np.ndarray | None = None,
     ) -> None:
 
+
+
+        main
         self.world = world_manager
         self.pos = (
             spawn.astype(np.float32)
@@ -72,6 +81,8 @@ class PlayerController:
         self.step_height = 0.5
         self.on_ground = False
 
+
+        main
         main
         self.input: Dict[str, int] = {
             "f": 0,
@@ -85,6 +96,12 @@ class PlayerController:
         }
 
     def set_input(self, keymap: Dict[str, int]) -> None:
+
+        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+
+    def update(
+        self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
+
         self.input.update(
             {
                 k: int(bool(v))
@@ -102,8 +119,10 @@ class PlayerController:
         camera_forward: np.ndarray,
         camera_right: np.ndarray,
         main
+        main
     ) -> None:
         wish = (
+            camera_forward * (self.input["f"] - self.input["b"]) +
             camera_forward * (self.input["f"] - self.input["b"])
             + camera_right * (self.input["r"] - self.input["l"])
         )
@@ -116,7 +135,7 @@ class PlayerController:
         )
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
-        hv[1] = 0
+        hv[1] = 0.0
         self.vel += (wish * target_speed - hv) * min(1.0, accel * dt)
         if self.on_ground and wl < 1e-6:
             self.vel[0] *= max(0.0, 1.0 - self.friction * dt)
@@ -156,9 +175,13 @@ class PlayerController:
         else:
             self.on_ground = False
 
+
+    def _sweep_axis(self, pos: np.ndarray, axis: int, delta: float) -> Tuple[np.ndarray, bool]:
+
     def _sweep_axis(
         self, pos: np.ndarray, axis: int, delta: float
     ) -> Tuple[np.ndarray, bool]:
+        main
         step = np.sign(delta)
         remaining = abs(delta)
         hit = False
@@ -201,3 +224,14 @@ class PlayerController:
         return True
         main
 
+
+    @staticmethod
+    def _aabb_voxel_overlap(aabb: AABB, x: int, y: int, z: int) -> bool:
+        voxel_aabb = AABB(
+            center=np.array([x + 0.5, y + 0.5, z + 0.5], dtype=np.float32),
+            half=np.array([0.5, 0.5, 0.5], dtype=np.float32),
+        )
+        return aabb.overlap_aabb(voxel_aabb)
+
+
+        main
