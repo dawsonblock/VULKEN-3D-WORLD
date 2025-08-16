@@ -1,0 +1,11 @@
+.venv/
+env/
+.mypy_cache/
+.nox/
+.coverage
+coverage.xml
+.eggs/
+*.egg
+Pipfile.lock
+.DS_Store
+__pycache__/
