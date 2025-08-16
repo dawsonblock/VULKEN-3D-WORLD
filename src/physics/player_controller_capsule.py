@@ -97,7 +97,6 @@ class PlayerControllerCapsule:
         wish[1] = 0
         n = np.linalg.norm(wish)
         wish = wish / n if n > 1e-6 else wish
-        main
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
