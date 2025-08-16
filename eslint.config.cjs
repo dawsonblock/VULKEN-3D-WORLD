@@ -1,10 +1,37 @@
-const js = require('@eslint/js');
-const globals = require('globals');
-
 module.exports = [
   {
+
+    ignores: ['node_modules/**'],
+
     ignores: [
 
+      '**/build/**',
+
+
+
+      'node_modules/',
+      'build_ci_sanity/',
+      'cmake/',
+      'docs/',
+      'assets/',
+      'shaders/',
+      'shaders_vk/',
+      'tools/',
+      'tests/',
+      'src/',
+      'apps/',
+      'scripts/'
+    ]
+  }
+
+
+      'assets/**', 'build_ci_sanity/**', 'cmake/**',
+      'docs/**', 'shaders/**', 'shaders_vk/**',
+      'tools/**'
+    ]
+
+        main
+        main
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -15,32 +42,55 @@ module.exports = [
       'tests/**',
       'src/**',
       'apps/**',
-      'scripts/**'
+      'scripts/**',
 
-    'apps',
-      'assets',
-      'build_ci_sanity',
-      'cmake',
-      'docs',
-      'node_modules',
-      'scripts',
-      'shaders',
-      'shaders_vk',
-      'tests',
-      'tools'
-        main
+      'scripts/**'
     ]
+
+
+      'scripts/**'
+    ]
+
+    ],
+        main
+       main
+        main
+        main
   },
   js.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
+
+      globals: { ...globals.node, ...globals.es2021 }
+
       globals: {
         ...globals.node,
-        ...globals.es2021
-      }
+        ...globals.es2021,
+      },
+
     },
-    rules: {}
+
+    rules: {
+      'no-unused-vars': 'warn',
+      semi: ['error', 'always']
+    }
   }
+
+
+    rules: {
+      'no-unused-vars': 'warn',
+      semi: ['error', 'always'],
+    },
+  },
+
+        main
+    },
+    rules: {},
+  },
+        main
+        main
+        main
 ];
+

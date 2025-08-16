@@ -119,6 +119,14 @@ if(ENABLE_VULKAN)
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+
+  add_executable(demo_window apps/demo_window.cpp)
+  target_link_libraries(demo_window PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  target_compile_definitions(demo_window PRIVATE
+    $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
+    $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
+    $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
+    $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
 endif()
 
 # Tests
@@ -160,9 +168,15 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
 
+
 # --- World streaming and LOD ---
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
     src/world/chunk_streamer.cpp
     src/world/lod_component.cpp)
+
+# --- World persistence ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/world/persistence.cpp)
+        main
 endif()
