@@ -2,6 +2,7 @@ module.exports = [
   {
     ignores: [
 
+
       'node_modules/',
       'build_ci_sanity/',
       'cmake/',
@@ -23,6 +24,7 @@ module.exports = [
       'tools/**'
     ]
 
+        main
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -34,8 +36,13 @@ module.exports = [
       'src/**',
       'apps/**',
       'scripts/**',
+
+      'scripts/**'
+    ]
+
     ],
         main
+       main
   },
   js.configs.recommended,
   {
