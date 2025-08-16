@@ -34,5 +34,4 @@ def resolve_capsule_world(
             cap.center[1] += off[1]
         grounded = True
         off[1] = 0.0
-
     return off, grounded
