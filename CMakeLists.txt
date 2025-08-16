@@ -169,6 +169,13 @@ if(TARGET VoxelVK_Elite_ALL)
 endif()
 
 
+# --- Sky and cloud rendering pass ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/sky_pass.cpp)
+endif()
+
+
+
 # --- World streaming and LOD ---
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
@@ -180,3 +187,4 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/world/persistence.cpp)
         main
 endif()
+        main
