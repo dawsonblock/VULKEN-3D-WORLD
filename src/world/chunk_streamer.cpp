@@ -26,7 +26,6 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
         for(int dz=-radius_; dz<=radius_; ++dz){
             glm::vec2 offset(dx, dz);
             float dist = glm::length(offset);
-            (void)lod_.Select(dist);
             int id = (center.x+dx)*73856093 ^ (center.z+dz)*19349663;
             desired.insert(id);
             if(loading_.find(id)==loading_.end()){
