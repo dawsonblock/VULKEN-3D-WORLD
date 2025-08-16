@@ -31,68 +31,98 @@ class PlayerController:
                 camera_right   * (self.input["r"]-self.input["l"]))
         wish[1] = 0.0
         wl = np.linalg.norm(wish)
-        if wl > 1e-6: wish /= wl
+        if wl > 1e-6:
+            wish /= wl
         target_speed = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
         accel = self.accel if self.on_ground else self.air_accel
-        hv = self.vel.copy(); hv[1]=0
+        hv = self.vel.copy()
+        hv[1] = 0
         self.vel += (wish * target_speed - hv) * min(1.0, accel*dt)
         if self.on_ground and wl < 1e-6:
             self.vel[0] *= max(0.0, 1.0 - self.friction*dt)
             self.vel[2] *= max(0.0, 1.0 - self.friction*dt)
         self.vel[1] -= self.gravity*dt
         if self.on_ground and self.input["jump"]:
-            self.vel[1] = self.jump_speed; self.on_ground = False
+            self.vel[1] = self.jump_speed
+            self.on_ground = False
         pos_before = self.pos.copy()
         self._move_and_collide(dt)
-        if np.allclose(self.pos, pos_before, atol=1e-5) and (self.input["f"] or self.input["l"] or self.input["r"] or self.input["b"]):
-            lifted = self.pos.copy(); lifted[1] += self.step_height
+        if np.allclose(self.pos, pos_before, atol=1e-5) and (
+            self.input["f"]
+            or self.input["l"]
+            or self.input["r"]
+            or self.input["b"]
+        ):
+            lifted = self.pos.copy()
+            lifted[1] += self.step_height
             if self._can_occupy(lifted):
-                self.pos = lifted; self._move_and_collide(dt)
+                self.pos = lifted
+                self._move_and_collide(dt)
 
     def _move_and_collide(self, dt: float):
         delta = self.vel * dt
         self.pos, hit_x = self._sweep_axis(self.pos, 0, delta[0])
         self.pos, hit_z = self._sweep_axis(self.pos, 2, delta[2])
         self.pos, hit_y = self._sweep_axis(self.pos, 1, delta[1])
-        if hit_x: self.vel[0] = 0.0
-        if hit_z: self.vel[2] = 0.0
+        if hit_x:
+            self.vel[0] = 0.0
+        if hit_z:
+            self.vel[2] = 0.0
         if hit_y:
-            if delta[1] < 0: self.on_ground = True
-            if delta[1] > 0 and self.vel[1] > 0: self.vel[1] = 0.0
+            if delta[1] < 0:
+                self.on_ground = True
+            if delta[1] > 0 and self.vel[1] > 0:
+                self.vel[1] = 0.0
         else:
             self.on_ground = False
 
     def _sweep_axis(self, pos, axis, delta):
-        step = np.sign(delta); remaining = abs(delta); hit=False
+        step = np.sign(delta)
+        remaining = abs(delta)
+        hit = False
         while remaining > 1e-6:
             advance = min(remaining, 0.1)
-            trial = pos.copy(); trial[axis] += step*advance
+            trial = pos.copy()
+            trial[axis] += step * advance
             if self._can_occupy(trial):
-                pos = trial; remaining -= advance
+                pos = trial
+                remaining -= advance
             else:
                 hi, lo = advance, 0.0
                 for _ in range(8):
-                    mid = 0.5*(hi+lo)
-                    trial_mid = pos.copy(); trial_mid[axis] += step*mid
-                    if self._can_occupy(trial_mid): lo = mid
-                    else: hi = mid
-                pos[axis] += step*lo; hit=True; break
+                    mid = 0.5 * (hi + lo)
+                    trial_mid = pos.copy()
+                    trial_mid[axis] += step * mid
+                    if self._can_occupy(trial_mid):
+                        lo = mid
+                    else:
+                        hi = mid
+                pos[axis] += step * lo
+                hit = True
+                break
         return pos, hit
 
     def _can_occupy(self, center):
         aabb = AABB(center=center, half=self.aabb.half)
-        mn = np.floor(aabb.min).astype(int); mx = np.floor(aabb.max).astype(int)
-        for y in range(mn[1], mx[1]+1):
-            for z in range(mn[2], mx[2]+1):
-                for x in range(mn[0], mx[0]+1):
-                    bt = self.world.get_block_at_world_position(float(x), float(y), float(z))
+        mn = np.floor(aabb.min).astype(int)
+        mx = np.floor(aabb.max).astype(int)
+        for y in range(mn[1], mx[1] + 1):
+            for z in range(mn[2], mx[2] + 1):
+                for x in range(mn[0], mx[0] + 1):
+                    bt = self.world.get_block_at_world_position(
+                        float(x), float(y), float(z)
+                    )
                     if is_solid(bt):
-                        if self._aabb_voxel_overlap(aabb, x,y,z): return False
+                        if self._aabb_voxel_overlap(aabb, x, y, z):
+                            return False
         return True
 
     @staticmethod
     def _aabb_voxel_overlap(aabb: AABB, x:int, y:int, z:int) -> bool:
-        if aabb.max[0] <= x or aabb.min[0] >= x+1: return False
-        if aabb.max[1] <= y or aabb.min[1] >= y+1: return False
-        if aabb.max[2] <= z or aabb.min[2] >= z+1: return False
+        if aabb.max[0] <= x or aabb.min[0] >= x + 1:
+            return False
+        if aabb.max[1] <= y or aabb.min[1] >= y + 1:
+            return False
+        if aabb.max[2] <= z or aabb.min[2] >= z + 1:
+            return False
         return True

@@ -17,20 +17,29 @@ class PlayerControllerCapsule:
         self.on_ground = False
         self.input = {"f":0,"b":0,"l":0,"r":0,"jump":0,"sprint":0}
 
-    def set_input(self, m): self.input.update(m)
+    def set_input(self, m):
+        self.input.update(m)
 
-    def _capsule(self): return Capsule(self.pos.copy(), self.half_h, self.radius)
+    def _capsule(self):
+        return Capsule(self.pos.copy(), self.half_h, self.radius)
 
     def update(self, dt, forward, right):
-        wish = (forward*(self.input["f"]-self.input["b"]) + right*(self.input["r"]-self.input["l"])); wish[1]=0
-        n=np.linalg.norm(wish);  wish = wish/n if n>1e-6 else wish
+        wish = (
+            forward * (self.input["f"] - self.input["b"])
+            + right * (self.input["r"] - self.input["l"])
+        )
+        wish[1] = 0
+        n = np.linalg.norm(wish)
+        wish = wish / n if n > 1e-6 else wish
         target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
-        hv = self.vel.copy(); hv[1]=0
-        self.vel += (wish*target - hv) * min(1.0, (50.0 if self.on_ground else 10.0)*dt)
+        hv = self.vel.copy()
+        hv[1] = 0
+        self.vel += (wish * target - hv) * min(1.0, (50.0 if self.on_ground else 10.0) * dt)
 
-        self.vel[1] -= self.g*dt
+        self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
-            self.vel[1] = self.jump_speed; self.on_ground = False
+            self.vel[1] = self.jump_speed
+            self.on_ground = False
 
         self.pos += self.vel*dt
         cap = self._capsule()
@@ -42,4 +51,5 @@ class PlayerControllerCapsule:
                 ground = ground or ground2
         self.pos = cap.center
         self.on_ground = ground
-        if ground and self.vel[1] < 0: self.vel[1] = 0.0
+        if ground and self.vel[1] < 0:
+            self.vel[1] = 0.0
