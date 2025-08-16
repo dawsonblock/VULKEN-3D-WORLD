@@ -8,7 +8,10 @@ namespace voxelvk {
 static std::vector<char> readFile(const char* path){
     std::vector<char> data;
     FILE* f = std::fopen(path, "rb");
-    if(!f) return data;
+    if(!f) {
+        std::fprintf(stderr, "Error: Failed to open file '%s' for reading in readFile.\n", path);
+        return data;
+    }
     std::fseek(f, 0, SEEK_END);
     long n = std::ftell(f);
     std::fseek(f, 0, SEEK_SET);
