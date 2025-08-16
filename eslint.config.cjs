@@ -4,7 +4,7 @@ const globals = require('globals');
 module.exports = [
   {
     ignores: [
-
+      '**/build/**',
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -15,20 +15,8 @@ module.exports = [
       'tests/**',
       'src/**',
       'apps/**',
-      'scripts/**'
-
-    'apps',
-      'assets',
-      'build_ci_sanity',
-      'cmake',
-      'docs',
-      'node_modules',
-      'scripts',
-      'shaders',
-      'shaders_vk',
-      'tests',
-      'tools'
-        main
+      'scripts/**',
+      'node_modules/**'
     ]
   },
   js.configs.recommended,
@@ -41,6 +29,9 @@ module.exports = [
         ...globals.es2021
       }
     },
-    rules: {}
+    rules: {
+      'no-unused-vars': 'warn',
+      semi: ['error', 'always']
+    }
   }
 ];
