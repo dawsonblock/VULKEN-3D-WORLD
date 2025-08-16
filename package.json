@@ -1,0 +1,22 @@
+{
+  "name": "vulken-3d-world",
+  "version": "1.0.0",
+  "description": "[![CI](https://github.com/vulken-dev/vulken-3d-world/actions/workflows/ci.yml/badge.svg)](https://github.com/vulken-dev/vulken-3d-world/actions/workflows/ci.yml)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0"
+  }
+}
