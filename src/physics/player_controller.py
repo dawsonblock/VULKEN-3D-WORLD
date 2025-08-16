@@ -39,7 +39,6 @@ class PlayerController:
         self.jump_speed = 9.5
         self.step_height = 0.5
         self.on_ground = False
-
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
