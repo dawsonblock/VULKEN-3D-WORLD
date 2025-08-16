@@ -80,5 +80,4 @@ jobs:
         name: build-${{ matrix.os }}-${{ matrix.c_compiler }}
         path: |
           ${{ steps.strings.outputs.build-output-dir }}/**
-          ${{ steps.strings.outputs.build-output-dir }}/spv/**
         if-no-files-found: ignore
