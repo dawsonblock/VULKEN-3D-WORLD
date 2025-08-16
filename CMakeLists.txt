@@ -168,6 +168,14 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
 
+# --- Physics C++ rewrite ---
+list(APPEND VOXELVK_ELITE_SOURCES
+  src/physics_cpp/physics_c_api.cpp)
+
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
+endif()
+
 
 # --- Sky and cloud rendering pass ---
 if(TARGET VoxelVK_Elite_ALL)
@@ -187,4 +195,5 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/world/persistence.cpp)
         main
 endif()
+        main
         main

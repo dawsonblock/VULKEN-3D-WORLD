@@ -5,6 +5,7 @@ module.exports = [
 
     ignores: [
 
+
       '**/build/**',
 
 
@@ -32,6 +33,7 @@ module.exports = [
 
         main
         main
+        main
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -41,14 +43,19 @@ module.exports = [
       'tools/**',
       'tests/**',
       'src/**',
+      'eslint.config.js',
       'apps/**',
       'scripts/**',
+
+      'node_modules/**'
+
 
       'scripts/**'
     ]
 
 
       'scripts/**'
+        main
     ]
 
     ],

@@ -1,3 +1,9 @@
+
+"""Legacy Python physics helpers.
+
+These modules are retained for reference only. C++ equivalents live in
+``src/physics_cpp`` and should be preferred for production use."""
+
 # Shared helpers for player movement physics.
 
 from typing import Any
@@ -28,3 +34,4 @@ def get_horizontal_speed(player: Any) -> float:
 
 
 __all__ = ["SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
+        main
