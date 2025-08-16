@@ -111,4 +111,3 @@ import builtins as _builtins
 
 _builtins.get_horizontal_speed = get_horizontal_speed  # type: ignore[attr-defined]
 _builtins.SPRINT_SPEED_MULTIPLIER = SPRINT_SPEED_MULTIPLIER  # type: ignore[attr-defined]
-
