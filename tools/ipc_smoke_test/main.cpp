@@ -42,7 +42,15 @@ int main() {
     WSACleanup();
 #else
     close(sock);
-#endif
+    SocketGuard guard(sock);
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(0);
+    if(bind(sock, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
+        std::cerr << "bind failed" << std::endl;
+        return 1;
+    }
     std::cout << "IPC smoke OK" << std::endl;
     return 0;
 }
