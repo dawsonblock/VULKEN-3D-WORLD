@@ -17,3 +17,12 @@ def test_capsule_ground_collision():
     )
     off, ground = resolve_capsule_world(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
+
+
+def run():
+    """Helper to run the test manually."""
+    test_capsule_ground_collision()
+
+
+if __name__ == "__main__":
+    run()
