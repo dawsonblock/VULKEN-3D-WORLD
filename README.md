@@ -21,3 +21,9 @@ The compute expects image formats:
 - 2D height: `VK_FORMAT_R32_SFLOAT` (GENERAL)
 - 2D biome: `VK_FORMAT_R8_UINT` (GENERAL)
 - Output 3D blocks: `VK_FORMAT_R16_UINT` (GENERAL)
+
+## Linting
+To check JavaScript or TypeScript sources, run:
+```bash
+npx eslint .
+```
