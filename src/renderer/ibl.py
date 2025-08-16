@@ -69,7 +69,10 @@ def build_brdf_lut(device: Any, allocator: Any, size: int = 256) -> BRDFLUT:
 
     try:  # Import on demand to keep module import cheap when bindings missing
         from voxelvk import ibl_brdf as _ibl_brdf  # type: ignore
+        codex/implement-c++-createbrdflut-binding-sil6uv
+    except (ImportError, ModuleNotFoundError) as exc:  # pragma: no cover - defensive path
     except Exception as exc:  # pragma: no cover - defensive path
+        codex/enhance-superbuild-cmake-configuration
         raise RuntimeError(
             "voxelvk bindings are required to build the BRDF LUT"
         ) from exc
