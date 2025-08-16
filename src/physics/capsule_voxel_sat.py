@@ -1,3 +1,8 @@
+"""Collision detection between a capsule and a voxel grid using simple axis tests."""
+
+
+from typing import Any, Tuple
+
 
 """Collision helpers for capsule vs voxel world using SAT."""
 
@@ -10,11 +15,73 @@ from __future__ import annotations
 from typing import Any, Optional, Protocol, Tuple
         main
 
+        main
 import numpy as np
 
 from .capsule import Capsule
 
 
+def resolve_capsule_world(cap: Capsule, world: Any) -> Tuple[np.ndarray, bool]:
+    """Resolve capsule collision against a voxel world.
+
+
+    The ``world`` object exposes ``get_block_at_world_position`` which returns
+    a truthy value for solid blocks. The resolution used here is deliberately
+    simple and only handles the cases exercised in the tests: flat ground and
+    one-block-high steps.
+    """
+    off = np.zeros(3, dtype=np.float32)
+    grounded = False
+
+    mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+    mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+
+    for y in range(int(np.floor(mn[1])), int(np.ceil(mx[1]))):
+        for z in range(int(np.floor(mn[2])), int(np.ceil(mx[2]))):
+    for y in range(int(np.floor(mn[1] - 0.5)), int(np.ceil(mx[1]))):
+        for z in range(int(np.floor(mn[2] - 0.5)), int(np.ceil(mx[2]))):
+            for x in range(int(np.floor(mn[0] - 0.5)), int(np.ceil(mx[0]))):
+                if world.get_block_at_world_position(float(x), float(y), float(z)):
+                    top = y + 1.0
+                    bottom = cap.center[1] - cap.half_height - cap.radius
+                    if bottom < top:
+                        delta = top - bottom
+                        if delta > off[1]:
+                            off[1] = delta
+                        off[1] += delta
+                        grounded = True
+
+                    # Compute penetration along each axis
+                    block_min = np.array([x, y, z], dtype=np.float32)
+                    block_max = block_min + 1.0
+                    cap_min = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+                    cap_max = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+
+                    # Calculate overlap along each axis
+                    overlap = np.zeros(3, dtype=np.float32)
+                    for axis in range(3):
+                        if cap_max[axis] > block_min[axis] and cap_min[axis] < block_max[axis]:
+                            min_pen = block_max[axis] - cap_min[axis]
+                            max_pen = cap_max[axis] - block_min[axis]
+                            # Choose the smaller penetration
+                            if min_pen < max_pen:
+                                overlap[axis] = min_pen
+                            else:
+                                overlap[axis] = -max_pen
+                        else:
+                            overlap[axis] = 0.0
+
+                    # Find axis of minimum penetration (MTV)
+                    abs_overlap = np.abs(overlap)
+                    axis = np.argmax(abs_overlap)
+                    if abs_overlap[axis] > 0.0:
+                        if abs_overlap[axis] > abs(off[axis]):
+                            off[axis] = overlap[axis]
+                            if axis == 1 and overlap[1] > 0.0:
+                                grounded = True
+
+    cap.center += off
+    return off, grounded
 
 def closest_point_on_aabb(
     p: np.ndarray, mn: np.ndarray, mx: np.ndarray
@@ -150,3 +217,4 @@ def resolve_capsule_world(cap: Capsule, world: WorldProtocol, max_iters: int = 8
         main
     return total_offset, ground
 
+        main

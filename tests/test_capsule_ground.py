@@ -26,5 +26,7 @@ def test_capsule_ground_collision():
 
 
 
+
+        main
         main
         main

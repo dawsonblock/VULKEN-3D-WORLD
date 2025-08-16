@@ -1,9 +1,12 @@
 
 
+
+
 """Simple capsule-based player controller used in tests."""
 
 from __future__ import annotations
 
+        main
         main
 """Capsule-based player controller using SAT collision resolution."""
         main
@@ -15,6 +18,13 @@ import numpy as np
 from . import SPRINT_SPEED_MULTIPLIER
 from .capsule import Capsule
 from .capsule_voxel_sat import resolve_capsule_world
+
+SPRINT_SPEED_MULTIPLIER = 1.6
+
+
+def get_horizontal_speed(controller: "PlayerControllerCapsule") -> float:
+    """Return the horizontal speed of the controller."""
+    return float(np.linalg.norm(controller.vel[[0, 2]]))
 
 
 SPRINT_SPEED_MULTIPLIER = 1.6
@@ -50,6 +60,8 @@ class PlayerControllerCapsule:
     step_height, gravity, max_speed, jump_speed:
         Tuning parameters for character movement.
 
+
+
     Example
     -------
     >>> pc = PlayerControllerCapsule(
@@ -58,6 +70,7 @@ class PlayerControllerCapsule:
     >>> forward = np.array([0.0, 0.0, 1.0], dtype=np.float32)
     >>> right = np.array([1.0, 0.0, 0.0], dtype=np.float32)
     >>> pc.update(0.016, forward, right)
+        main
         main
     """
         main
@@ -128,6 +141,8 @@ class PlayerControllerCapsule:
 
 
 
+
+        main
         main
         main
         self.input: Dict[str, int] = {
@@ -140,6 +155,17 @@ class PlayerControllerCapsule:
         }
 
     def set_input(self, mapping: Dict[str, int]) -> None:
+
+"""Update input state with values from ``mapping``."""
+        self.input.update(mapping)
+
+    def _capsule(self) -> Capsule:
+        """Return a capsule representing the player's current bounds."""
+        return Capsule(self.pos.copy(), self.half_h, self.radius)
+
+    def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
+        """Advance the controller by ``dt`` seconds."""
+
         self.input.update(mapping)
 
     def _capsule(self) -> Capsule:
@@ -157,6 +183,7 @@ class PlayerControllerCapsule:
         self, dt: float, forward: np.ndarray, right: np.ndarray
     ) -> None:
         main
+        main
         wish = (
             forward * (self.input["f"] - self.input["b"]) +
             forward * (self.input["f"] - self.input["b"])
@@ -168,6 +195,10 @@ class PlayerControllerCapsule:
 
         if n > 1e-6:
             wish /= n
+
+
+        if n > 1e-6:
+            wish /= n
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
 
@@ -176,15 +207,18 @@ class PlayerControllerCapsule:
         
         target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
         main
+        main
 
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
 
+
+        main
         main
         main
         hv = self.vel.copy()
-        hv[1] = 0
+        hv[1] = 0.0
         self.vel += (wish * target - hv) * min(
             1.0, (50.0 if self.on_ground else 10.0) * dt
         main
@@ -213,7 +247,7 @@ class PlayerControllerCapsule:
                 ground = ground or ground2
         self.pos = cap.center
         self.on_ground = ground
-        if ground and self.vel[1] < 0:
+        if ground and self.vel[1] < 0.0:
             self.vel[1] = 0.0
 
 
