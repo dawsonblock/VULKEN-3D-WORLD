@@ -2,6 +2,7 @@
 import numpy as np
 from dataclasses import dataclass
 
+
 @dataclass
 class Capsule:
     center: np.ndarray
@@ -10,8 +11,12 @@ class Capsule:
 
     @property
     def seg_a(self):  # top cap center
-        return self.center + np.array([0, self.half_height, 0], dtype=np.float32)
+        return self.center + np.array(
+            [0, self.half_height, 0], dtype=np.float32
+        )
 
     @property
     def seg_b(self):  # bottom cap center
-        return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
+        return self.center - np.array(
+            [0, self.half_height, 0], dtype=np.float32
+        )
