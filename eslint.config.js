@@ -1,28 +1,9 @@
-
-export default {
-};
-
-
-export default [
-  {
-    files: ["**/*.{js,ts}"]
-
 /** @type {import('eslint').Linter.FlatConfig[]} */
-module.exports = [
+export default [
+  { ignores: ['**/build/**', 'eslint.config.cjs'] },
   {
-    ignores: ["**/build/**"]
-  },
-  {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: "module"
-    },
-    rules: {
-      "no-unused-vars": "warn",
-      "semi": ["error", "always"]
-    }
-        main
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    languageOptions: { ecmaVersion: 2020, sourceType: 'module' },
+    rules: { 'no-unused-vars': 'warn', 'semi': ['error', 'always'] }
   }
 ];
-        main
