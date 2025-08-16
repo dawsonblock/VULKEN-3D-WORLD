@@ -71,6 +71,12 @@ def test_sprint_speed_limit():
     player.set_input({"sprint": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
-    sprint_speed = float(np.linalg.norm(player.vel[[0, 2]]))
+    speed = get_horizontal_speed(player)
+    assert speed <= player.max_speed + 1e-3
+
+    player.set_input({"sprint": 1})
+    for _ in range(20):
+        player.update(0.1, forward, right)
+    sprint_speed = get_horizontal_speed(player)
     assert sprint_speed <= player.max_speed * 1.6 + 1e-3
     assert sprint_speed > speed
