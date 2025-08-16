@@ -19,7 +19,10 @@ int main() {
 #endif
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if (server < 0) { std::cerr << "socket failed\n"; return 1; }
-    sockaddr_in addr{}; addr.sin_family = AF_INET; addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); addr.sin_port = 0;
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = 0;
     if (bind(server, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) { perror("bind"); return 1; }
     socklen_t len = sizeof(addr);
     if (getsockname(server, reinterpret_cast<sockaddr*>(&addr), &len) < 0) { perror("getsockname"); return 1; }
