@@ -1,3 +1,4 @@
-build_ci_sanity/
-CMakeFiles/
+# Ignore CMake build artifacts
 CMakeCache.txt
+CMakeFiles/
+build_ci_sanity/
