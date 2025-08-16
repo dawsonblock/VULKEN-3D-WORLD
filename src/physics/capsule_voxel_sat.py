@@ -63,7 +63,26 @@ def resolve_capsule_world(
             cap.center[1] += delta
             total_offset[1] += delta
             ground = True
-        else:
+        # Compute capsule bounding box
+        min_corner = np.minimum(cap.seg_a, cap.seg_b) - cap.radius
+        max_corner = np.maximum(cap.seg_a, cap.seg_b) + cap.radius
+        min_block = np.floor(min_corner).astype(int)
+        max_block = np.ceil(max_corner).astype(int)
+        collided = False
+        for x in range(min_block[0], max_block[0] + 1):
+            for y in range(min_block[1], max_block[1] + 1):
+                for z in range(min_block[2], max_block[2] + 1):
+                    if world.get_block_at_world_position(x, y, z):
+                        mn = np.array([x, y, z], dtype=np.float32)
+                        mx = mn + 1.0
+                        hit, n, pen = capsule_box_penetration(cap, mn, mx)
+                        if hit and pen > 0.0:
+                            cap.center += n * pen
+                            total_offset += n * pen
+                            collided = True
+                            if n[1] > 0.5:
+                                ground = True
+        if not collided:
             break
 
     return total_offset, ground
