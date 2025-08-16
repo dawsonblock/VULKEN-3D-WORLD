@@ -4,7 +4,6 @@ endif()
 
 include(CheckCXXSourceCompiles)
 set(CMAKE_REQUIRED_QUIET TRUE)
-set(_code "#include <cuda_runtime.h>\nint main(){return 0;}")
 try_compile(CUDA_INCLUDES_FOUND
   "${CMAKE_BINARY_DIR}/cmake_cuda_check"
   SOURCES "${CMAKE_CURRENT_LIST_DIR}/try_no_cuda_guard.cpp")
