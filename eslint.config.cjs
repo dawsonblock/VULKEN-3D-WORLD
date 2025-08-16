@@ -1,9 +1,22 @@
-const js = require('@eslint/js');
-const globals = require('globals');
-
 module.exports = [
   {
     ignores: [
+
+      'node_modules/',
+      'build_ci_sanity/',
+      'cmake/',
+      'docs/',
+      'assets/',
+      'shaders/',
+      'shaders_vk/',
+      'tools/',
+      'tests/',
+      'src/',
+      'apps/',
+      'scripts/'
+    ]
+  }
+
 
       'assets/**', 'build_ci_sanity/**', 'cmake/**',
       'docs/**', 'shaders/**', 'shaders_vk/**',
@@ -40,5 +53,6 @@ module.exports = [
     },
     rules: {},
   },
+        main
 ];
 

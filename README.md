@@ -44,7 +44,8 @@ pytest
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
-```
+
+
 
 ## Samples
 
@@ -57,4 +58,5 @@ cmake --build build --target demo_window
 Run it:
 ```bash
 ./build/demo_window
+        main
 ```

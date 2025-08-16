@@ -3,6 +3,13 @@
 from typing import Dict
 
 
+
+from typing import Dict
+
+
+# Adapt this to your engine's block registry
+
+        main
 class BlockType:
     """Enumeration of built-in block types."""
 

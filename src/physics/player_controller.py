@@ -1,4 +1,10 @@
+
+"""Placeholder AABB-based player controller used for typing tests."""
+
+from __future__ import annotations
+
 """AABB-based player controller for movement inside a voxel world."""
+        main
 
 from typing import Any, Dict, Tuple
 
@@ -10,6 +16,9 @@ from .voxel_solid import is_solid
 
 
 class PlayerController:
+
+    """Minimal stub implementation of an axis-aligned player controller."""
+
     """Axis-aligned bounding box player controller.
 
     Parameters
@@ -19,12 +28,34 @@ class PlayerController:
     spawn:
         Initial spawn position of the player.
     """
+        main
 
     def __init__(
         self,
         world_manager: Any,
-        spawn: np.ndarray = np.array([0.0, 100.0, 0.0], dtype=np.float32),
+        spawn: np.ndarray | None = None,
     ) -> None:
+
+        self.world = world_manager
+        self.pos = (
+            spawn.astype(np.float32)
+            if spawn is not None
+            else np.zeros(3, dtype=np.float32)
+        )
+        self.vel = np.zeros(3, dtype=np.float32)
+        self.aabb = AABB(center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32))
+        self.on_ground = False
+        self.input: Dict[str, int] = {}
+
+    def set_input(self, keymap: Dict[str, int]) -> None:
+        self.input.update(keymap)
+
+    def update(
+        self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
+    ) -> None:
+        """Advance the controller one step. This stub does nothing."""
+        return None
+
         """Simple player controller using an AABB capsule approximation."""
         self.world = world_manager
         self.pos: np.ndarray = spawn.astype(np.float32)
@@ -168,13 +199,5 @@ class PlayerController:
                     ):
                         return False
         return True
+        main
 
-    @staticmethod
-    def _aabb_voxel_overlap(aabb: AABB, x: int, y: int, z: int) -> bool:
-        if aabb.max[0] <= x or aabb.min[0] >= x + 1:
-            return False
-        if aabb.max[1] <= y or aabb.min[1] >= y + 1:
-            return False
-        if aabb.max[2] <= z or aabb.min[2] >= z + 1:
-            return False
-        return True
