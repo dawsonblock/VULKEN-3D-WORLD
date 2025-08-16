@@ -1,4 +1,8 @@
+import os
+import sys
 import numpy as np
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from src.physics.capsule import Capsule
 from src.physics.capsule_voxel_sat import resolve_capsule_world
 
@@ -17,3 +21,7 @@ def test_capsule_ground_collision():
     )
     off, ground = resolve_capsule_world(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
+
+
+
+        main

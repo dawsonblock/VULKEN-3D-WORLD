@@ -4,7 +4,20 @@ const globals = require('globals');
 module.exports = [
   {
     ignores: [
-      'apps',
+
+      'assets/**',
+      'build_ci_sanity/**',
+      'cmake/**',
+      'docs/**',
+      'shaders/**',
+      'shaders_vk/**',
+      'tools/**',
+      'tests/**',
+      'src/**',
+      'apps/**',
+      'scripts/**'
+
+    'apps',
       'assets',
       'build_ci_sanity',
       'cmake',
@@ -15,6 +28,7 @@ module.exports = [
       'shaders_vk',
       'tests',
       'tools'
+        main
     ]
   },
   js.configs.recommended,
