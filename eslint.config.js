@@ -1,28 +1,29 @@
+const js = require("@eslint/js");
+const globals = require("globals");
 
-export default {
-};
-
-
-export default [
-  {
-    files: ["**/*.{js,ts}"]
-
-/** @type {import('eslint').Linter.FlatConfig[]} */
 module.exports = [
   {
-    ignores: ["**/build/**"]
+    ignores: [
+      "assets/**",
+      "build_ci_sanity/**",
+      "cmake/**",
+      "docs/**",
+      "node_modules/**",
+      "scripts/**",
+      "shaders/**",
+      "shaders_vk/**",
+      "tests/**",
+      "tools/**",
+      "src/**",
+      "apps/**"
+    ]
   },
+  js.configs.recommended,
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      sourceType: "module"
-    },
-    rules: {
-      "no-unused-vars": "warn",
-      "semi": ["error", "always"]
+      globals: {
+        ...globals.node
+      }
     }
-        main
   }
 ];
-        main
