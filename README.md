@@ -38,9 +38,27 @@ Run the test suite:
 ```bash
 pytest
 
+```
+
 ## Linting
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
+
+
+
+
+## Samples
+
+### demo_window
+Build the sample:
+```bash
+cmake -S . -B build
+cmake --build build --target demo_window
+```
+Run it:
+```bash
+./build/demo_window
+        main
         main
 ```

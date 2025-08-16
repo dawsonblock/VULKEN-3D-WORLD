@@ -1,9 +1,28 @@
 import numpy as np
+
+
+        main
 from src.physics.player_controller_capsule import (
     PlayerControllerCapsule,
     SPRINT_SPEED_MULTIPLIER,
     get_horizontal_speed,
 )
+
+
+
+from src.physics import (
+    SPRINT_SPEED_MULTIPLIER,
+    get_horizontal_speed,
+)
+from src.physics.player_controller_capsule import PlayerControllerCapsule
+        main
+
+SPRINT_SPEED_MULTIPLIER = 1.6
+
+
+def get_horizontal_speed(player):
+    return float(np.linalg.norm(player.vel[[0, 2]]))
+        main
 
 
 class FlatWorld:
@@ -69,9 +88,26 @@ def test_sprint_speed_limit():
     player.set_input({"f": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
+
     speed = get_horizontal_speed(player)
     assert speed <= player.max_speed + 1e-3
 
+
+
+
+    speed = get_horizontal_speed(player)
+    assert speed <= player.max_speed + 1e-3
+
+
+    player.set_input({"sprint": 1})
+    for _ in range(20):
+        player.update(0.1, forward, right)
+        main
+    speed = get_horizontal_speed(player)
+    assert speed <= player.max_speed + 1e-3
+
+        main
+        main
     player.set_input({"f": 1, "sprint": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
