@@ -50,7 +50,36 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> Tuple[np.ndarray, bool]:
                             off[1] = delta
                             grounded = True
 
-    cap.center[1] += off[1]
+                    # Compute penetration along each axis
+                    block_min = np.array([x, y, z], dtype=np.float32)
+                    block_max = block_min + 1.0
+                    cap_min = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+                    cap_max = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius])
+
+                    # Calculate overlap along each axis
+                    overlap = np.zeros(3, dtype=np.float32)
+                    for axis in range(3):
+                        if cap_max[axis] > block_min[axis] and cap_min[axis] < block_max[axis]:
+                            min_pen = block_max[axis] - cap_min[axis]
+                            max_pen = cap_max[axis] - block_min[axis]
+                            # Choose the smaller penetration
+                            if min_pen < max_pen:
+                                overlap[axis] = min_pen
+                            else:
+                                overlap[axis] = -max_pen
+                        else:
+                            overlap[axis] = 0.0
+
+                    # Find axis of minimum penetration (MTV)
+                    abs_overlap = np.abs(overlap)
+                    axis = np.argmax(abs_overlap)
+                    if abs_overlap[axis] > 0.0:
+                        if abs_overlap[axis] > abs(off[axis]):
+                            off[axis] = overlap[axis]
+                            if axis == 1 and overlap[1] > 0.0:
+                                grounded = True
+
+    cap.center += off
     return off, grounded
 
 def closest_point_on_aabb(
