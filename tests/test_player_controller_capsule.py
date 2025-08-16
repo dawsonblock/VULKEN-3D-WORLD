@@ -78,5 +78,5 @@ def test_sprint_speed_limit():
     for _ in range(20):
         player.update(0.1, forward, right)
     sprint_speed = get_horizontal_speed(player)
-    assert sprint_speed <= player.max_speed * 1.6 + 1e-3
+    assert sprint_speed <= player.max_speed * SPRINT_SPEED_MULTIPLIER + 1e-3
     assert sprint_speed > speed
