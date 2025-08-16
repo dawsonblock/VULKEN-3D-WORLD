@@ -44,7 +44,7 @@ class PlayerControllerCapsule:
             forward * (self.input["f"] - self.input["b"])
             + right * (self.input["r"] - self.input["l"])
         )
-        wish[1] = 0.0
+        wish[1] = 0
         n = np.linalg.norm(wish)
         wish = wish / n if n > 1e-6 else wish
         target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
