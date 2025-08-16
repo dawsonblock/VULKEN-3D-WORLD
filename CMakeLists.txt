@@ -112,10 +112,11 @@ endif()
 if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
   add_dependencies(smoke_headless VoxelVK_Shaders)
-  target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
+  target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/generated)
   target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
   target_compile_definitions(smoke_headless PRIVATE
     $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
+    $<$<BOOL:${ENABLE_VK_DEBUG_MARKERS}>:ENABLE_VK_DEBUG_MARKERS=1>
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
@@ -141,21 +142,19 @@ message(STATUS "Vulkan Enabled: ${ENABLE_VULKAN}")
 message(STATUS "=====================")
 
 # --- Build tagging sources ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/core/build_info_print.cpp
-    src/core/runtime_debug.cpp
-    src/core/gpu_compat.cpp)
-endif()
+list(APPEND VOXELVK_ELITE_SOURCES
+  src/core/build_info_print.cpp
+  src/core/runtime_debug.cpp
+  src/core/gpu_compat.cpp)
 
 # --- CSM integration sources ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/render/csm_cpu.cpp
-    src/render/csm_pass.cpp)
-endif()
+list(APPEND VOXELVK_ELITE_SOURCES
+  src/render/csm_cpu.cpp
+  src/render/csm_pass.cpp)
 
 # --- CSM descriptor layout helper ---
+list(APPEND VOXELVK_ELITE_SOURCES src/render/csm_layout.cpp)
+
 if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
+  target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
 endif()

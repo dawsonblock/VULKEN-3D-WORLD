@@ -23,4 +23,7 @@ void DebugRuntime_Toggle(DebugRuntime& dr);
 // Call to wire VK_EXT_debug_utils without needing validation layers enabled at startup
 void DebugRuntime_AttachIfAvailable(DebugRuntime& dr);
 
+// Handle key events; toggles debug when F9 is pressed
+void DebugRuntime_HandleKey(DebugRuntime& dr, int key, int action);
+
 } // namespace voxelvk

@@ -4,6 +4,11 @@
 #include <cstring>
 #include <cstdint>
 #include <limits>
+#if __has_include(<GLFW/glfw3.h>)
+#include <GLFW/glfw3.h>
+#endif
+#include "src/core/build_info_print.hpp"
+#include "src/core/runtime_debug.hpp"
 
 static bool has_layer(const char* name){
     uint32_t n=0; vkEnumerateInstanceLayerProperties(&n,nullptr);
@@ -19,6 +24,10 @@ static uint32_t find_memory_type(VkPhysicalDevice phys, uint32_t typeBits, VkMem
 }
 
 int main(){
+    voxelvk::InitBuildInfoLogging();
+    voxelvk::PrintBuildInfoOnce();
+    voxelvk::DebugRuntime gDebug{};
+
     // Instance
     std::vector<const char*> layers;
 #ifndef NDEBUG
@@ -35,6 +44,14 @@ int main(){
     ici.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
     VkInstance instance; if(vkCreateInstance(&ici,nullptr,&instance)!=VK_SUCCESS){ std::puts("vkCreateInstance failed"); return 2; }
+
+#if defined(ENABLE_VK_DEBUG_MARKERS) || defined(ENABLE_VALIDATION_LAYERS)
+    voxelvk::DebugRuntime_Init(gDebug, instance);
+#if defined(GLFW_KEY_F9) && defined(GLFW_PRESS)
+    voxelvk::DebugRuntime_HandleKey(gDebug, GLFW_KEY_F9, GLFW_PRESS);
+    voxelvk::DebugRuntime_HandleKey(gDebug, GLFW_KEY_F9, GLFW_PRESS);
+#endif
+#endif
 
     // Device
     uint32_t pdn=0; vkEnumeratePhysicalDevices(instance,&pdn,nullptr);
@@ -133,6 +150,9 @@ int main(){
     vkDestroyImage(device, img, nullptr);
     vkDestroyCommandPool(device, pool, nullptr);
     vkDestroyDevice(device, nullptr);
+#if defined(ENABLE_VK_DEBUG_MARKERS) || defined(ENABLE_VALIDATION_LAYERS)
+    voxelvk::DebugRuntime_Shutdown(gDebug);
+#endif
     vkDestroyInstance(instance, nullptr);
     std::puts("smoke_graphics_headless: OK");
     return 0;
