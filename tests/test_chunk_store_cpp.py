@@ -20,7 +20,7 @@ int main(int argc, char** argv){
     return 0;
 }
 """
-    src_file = tmp_path / "loader.cpp";
+    src_file = tmp_path / "loader.cpp"
     src_file.write_text(code)
     exe = tmp_path / "loader"
     subprocess.check_call([
