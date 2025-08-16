@@ -1,4 +1,8 @@
+import os
+import sys
 import numpy as np
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from src.world.rle import rle_encode, rle_decode
 
 
