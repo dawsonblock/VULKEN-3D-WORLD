@@ -2,8 +2,6 @@
 
 """Axis-aligned bounding box helpers for collision tests."""
 
-
-        main
 import numpy as np
 from dataclasses import dataclass
 
@@ -32,13 +30,6 @@ class AABB:
     @property
     def max(self) -> np.ndarray:
         """Maximum corner of the box."""
-
-    def min(self):
-        return self.center - self.half
-
-    @property
-    def max(self):
-        main
         return self.center + self.half
 
     def moved(self, delta: np.ndarray) -> "AABB":
