@@ -38,7 +38,9 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> Tuple[np.ndarray, bool]:
 
     for y in range(int(np.floor(mn[1])), int(np.ceil(mx[1]))):
         for z in range(int(np.floor(mn[2])), int(np.ceil(mx[2]))):
-            for x in range(int(np.floor(mn[0])), int(np.ceil(mx[0]))):
+    for y in range(int(np.floor(mn[1] - 0.5)), int(np.ceil(mx[1]))):
+        for z in range(int(np.floor(mn[2] - 0.5)), int(np.ceil(mx[2]))):
+            for x in range(int(np.floor(mn[0] - 0.5)), int(np.ceil(mx[0]))):
                 if world.get_block_at_world_position(float(x), float(y), float(z)):
                     top = y + 1.0
                     bottom = cap.center[1] - cap.half_height - cap.radius
