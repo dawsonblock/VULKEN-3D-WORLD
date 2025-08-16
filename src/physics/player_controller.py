@@ -1,19 +1,15 @@
-
-
 """AABB-based player controller for movement inside a voxel world."""
 
 from typing import Any, Dict, Tuple
 
-
-        main
 import numpy as np
 
+from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
 from .voxel_solid import is_solid
 
 
 class PlayerController:
-
     """Axis-aligned bounding box player controller.
 
     Parameters
@@ -29,15 +25,7 @@ class PlayerController:
         world_manager: Any,
         spawn: np.ndarray = np.array([0.0, 100.0, 0.0], dtype=np.float32),
     ) -> None:
-
-    """Simple player controller using an AABB capsule approximation."""
-
-    def __init__(
-        self,
-        world_manager,
-        spawn=np.array([0.0, 100.0, 0.0], dtype=np.float32),
-    ):
-        main
+        """Simple player controller using an AABB capsule approximation."""
         self.world = world_manager
         self.pos = spawn.astype(np.float32)
         self.vel = np.zeros(3, dtype=np.float32)
@@ -52,11 +40,9 @@ class PlayerController:
         self.friction = 12.0
         self.jump_speed = 9.5
         self.step_height = 0.5
+        self.on_ground = False
 
         self.input: Dict[str, int] = {
-
-        self.input = {
-        main
             "f": 0,
             "b": 0,
             "l": 0,
@@ -67,19 +53,13 @@ class PlayerController:
             "sprint": 0,
         }
 
-
     def set_input(self, keymap: Dict[str, int]) -> None:
-        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
-
-    def update(
-        self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
-    ) -> None:
-        wish = (camera_forward * (self.input["f"]-self.input["b"]) +
-                camera_right   * (self.input["r"]-self.input["l"]))
-
-    def set_input(self, keymap: dict):
         self.input.update(
-            {k: int(bool(v)) for k, v in keymap.items() if k in self.input}
+            {
+                k: int(bool(v))
+                for k, v in keymap.items()
+                if k in self.input
+            }
         )
 
     def update(
@@ -87,17 +67,18 @@ class PlayerController:
         dt: float,
         camera_forward: np.ndarray,
         camera_right: np.ndarray,
-    ):
+    ) -> None:
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
             + camera_right * (self.input["r"] - self.input["l"])
         )
-        main
         wish[1] = 0.0
         wl = np.linalg.norm(wish)
         if wl > 1e-6:
             wish /= wl
-        target_speed = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
         hv[1] = 0
@@ -140,17 +121,12 @@ class PlayerController:
         else:
             self.on_ground = False
 
-
     def _sweep_axis(
         self, pos: np.ndarray, axis: int, delta: float
     ) -> Tuple[np.ndarray, bool]:
-        step = np.sign(delta); remaining = abs(delta); hit = False
-
-    def _sweep_axis(self, pos, axis, delta):
         step = np.sign(delta)
         remaining = abs(delta)
         hit = False
-        main
         while remaining > 1e-6:
             advance = min(remaining, 0.1)
             trial = pos.copy()
@@ -161,13 +137,6 @@ class PlayerController:
             else:
                 hi, lo = advance, 0.0
                 for _ in range(8):
-
-                    mid = 0.5*(hi+lo)
-                    trial_mid = pos.copy(); trial_mid[axis] += step*mid
-                    if self._can_occupy(trial_mid): lo = mid
-                    else: hi = mid
-                pos[axis] += step*lo; hit = True; break
-
                     mid = 0.5 * (hi + lo)
                     trial_mid = pos.copy()
                     trial_mid[axis] += step * mid
@@ -178,7 +147,6 @@ class PlayerController:
                 pos[axis] += step * lo
                 hit = True
                 break
-        main
         return pos, hit
 
     def _can_occupy(self, center: np.ndarray) -> bool:
@@ -191,9 +159,10 @@ class PlayerController:
                     bt = self.world.get_block_at_world_position(
                         float(x), float(y), float(z)
                     )
-                    if is_solid(bt):
-                        if self._aabb_voxel_overlap(aabb, x, y, z):
-                            return False
+                    if is_solid(bt) and self._aabb_voxel_overlap(
+                        aabb, x, y, z
+                    ):
+                        return False
         return True
 
     @staticmethod
