@@ -1,14 +1,8 @@
-
-
-"""Utilities to query whether a voxel block type is solid."""
+# Utilities to query whether a voxel block type is solid.
 
 from typing import Dict
 
 
-from typing import Dict
-
-
-        main
 # Adapt this to your engine's block registry
 class BlockType:
     """Enumeration of built-in block types."""
@@ -25,3 +19,4 @@ def is_solid(block_type: int) -> bool:
         return bool(props.get("solid", block_type != BlockType.AIR))
     except Exception:
         return block_type != BlockType.AIR
+
