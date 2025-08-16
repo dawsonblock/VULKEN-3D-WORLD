@@ -4,10 +4,9 @@
 
 from typing import Any, Dict
 
-
-        main
 import numpy as np
 
+from . import SPRINT_SPEED_MULTIPLIER
 from .capsule import Capsule
 from .capsule_voxel_sat import resolve_capsule_world
 
@@ -99,7 +98,9 @@ class PlayerControllerCapsule:
         n = np.linalg.norm(wish)
         wish = wish / n if n > 1e-6 else wish
         main
-        target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        target = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
         hv = self.vel.copy()
         hv[1] = 0
         self.vel += (wish * target - hv) * min(
