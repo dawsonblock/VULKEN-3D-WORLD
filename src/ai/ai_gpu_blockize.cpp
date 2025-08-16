@@ -18,7 +18,6 @@ bool AIGpuBlockizer::init(VkDevice device, VkPipelineCache cache){
   VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO}; smci.codeSize=spirv.size()*4; smci.pCode=spirv.data(); VkShaderModule sm; if(vkCreateShaderModule(device,&smci,nullptr,&sm)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create shader module\n"); destroy(device); return false; }
   VkComputePipelineCreateInfo cpci{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO}; cpci.stage={VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO}; cpci.stage.stage=VK_SHADER_STAGE_COMPUTE_BIT; cpci.stage.module=sm; cpci.stage.pName="main"; cpci.layout=m_pipe_layout;
   if(vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create compute pipeline\n"); vkDestroyShaderModule(device,sm,nullptr); destroy(device); return false; }
-  vkDestroyShaderModule(device,sm,nullptr);
   VkDescriptorPoolSize ps{}; ps.type=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount=4;
   VkDescriptorPoolCreateInfo dpci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dpci.maxSets=1; dpci.poolSizeCount=1; dpci.pPoolSizes=&ps;
   if(vkCreateDescriptorPool(device,&dpci,nullptr,&m_pool)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create descriptor pool\n"); destroy(device); return false; }
