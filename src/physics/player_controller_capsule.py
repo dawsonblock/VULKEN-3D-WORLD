@@ -54,7 +54,7 @@ class PlayerControllerCapsule:
         self.pos += self.vel * dt
         cap = self._capsule()
         off, ground = resolve_capsule_world(cap, self.world)
-        self.pos = cap.center
+        self.pos += off
         self.on_ground = ground
         if ground and self.vel[1] < 0:
             self.vel[1] = 0.0
