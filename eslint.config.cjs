@@ -5,6 +5,9 @@ module.exports = [
 
     ignores: [
 
+      '**/build/**',
+
+
 
       'node_modules/',
       'build_ci_sanity/',
@@ -28,6 +31,7 @@ module.exports = [
     ]
 
         main
+        main
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -43,9 +47,14 @@ module.exports = [
       'scripts/**'
     ]
 
+
+      'scripts/**'
+    ]
+
     ],
         main
        main
+        main
         main
   },
   js.configs.recommended,
@@ -65,6 +74,13 @@ module.exports = [
 
     rules: {
       'no-unused-vars': 'warn',
+      semi: ['error', 'always']
+    }
+  }
+
+
+    rules: {
+      'no-unused-vars': 'warn',
       semi: ['error', 'always'],
     },
   },
@@ -73,6 +89,7 @@ module.exports = [
     },
     rules: {},
   },
+        main
         main
         main
 ];
