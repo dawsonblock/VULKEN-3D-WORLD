@@ -213,7 +213,10 @@ void ChunkStore::wait_all() {
         try {
             f.get();
         } catch (...) {
-            // swallow errors for simplicity
+        } catch (const std::exception &e) {
+            std::cerr << "[ChunkStore::wait_all] Exception in async save: " << e.what() << std::endl;
+        } catch (...) {
+            std::cerr << "[ChunkStore::wait_all] Unknown exception in async save." << std::endl;
         }
     }
     futures_.clear();
