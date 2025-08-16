@@ -147,7 +147,25 @@ void SkyPass::destroy(){
     if(skyPipeline) vkDestroyPipeline(device, skyPipeline, nullptr);
     if(pipelineLayout) vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     if(noiseSetLayout) vkDestroyDescriptorSetLayout(device, noiseSetLayout, nullptr);
-    device = VK_NULL_HANDLE;
+    if (device != VK_NULL_HANDLE) {
+        if(cloudPipeline != VK_NULL_HANDLE) {
+            vkDestroyPipeline(device, cloudPipeline, nullptr);
+            cloudPipeline = VK_NULL_HANDLE;
+        }
+        if(skyPipeline != VK_NULL_HANDLE) {
+            vkDestroyPipeline(device, skyPipeline, nullptr);
+            skyPipeline = VK_NULL_HANDLE;
+        }
+        if(pipelineLayout != VK_NULL_HANDLE) {
+            vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+            pipelineLayout = VK_NULL_HANDLE;
+        }
+        if(noiseSetLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(device, noiseSetLayout, nullptr);
+            noiseSetLayout = VK_NULL_HANDLE;
+        }
+        device = VK_NULL_HANDLE;
+    }
 }
 
 void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc){
