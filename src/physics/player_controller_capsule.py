@@ -57,7 +57,8 @@ class PlayerControllerCapsule:
     def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
         wish = (
             forward * (self.input["f"] - self.input["b"]) +
-            right * (self.input["r"] - self.input["l"])
+            forward * (self.input["f"] - self.input["b"])
+            + right * (self.input["r"] - self.input["l"])
         )
         wish[1] = 0
         n = np.linalg.norm(wish)
