@@ -159,3 +159,8 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
+
+# --- World persistence ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/world/persistence.cpp)
+endif()
