@@ -16,7 +16,7 @@ module.exports = [
       'src/**',
       'apps/**',
       'scripts/**',
-      'node_modules/**'
+      'scripts/**'
     ]
   },
   js.configs.recommended,
