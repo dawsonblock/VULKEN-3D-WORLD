@@ -41,7 +41,7 @@ jobs:
       - name: Install Vulkan SDK and GLFW
         run: choco install vulkan-sdk glfw --yes
       - name: Set Vulkan env
-        run: echo "VULKAN_SDK=$Env:VULKAN_SDK" >> $Env:GITHUB_ENV
+        run: echo "VULKAN_SDK=C:\VulkanSDK\latest" >> $Env:GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
