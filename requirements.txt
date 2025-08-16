@@ -1,3 +1,5 @@
 numpy
 zstandard
 lz4
+pytest
+mypy
