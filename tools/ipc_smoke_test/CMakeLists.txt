@@ -1,0 +1,5 @@
+add_executable(ipc_smoke_test main.cpp)
+if(WIN32)
+  target_compile_definitions(ipc_smoke_test PRIVATE _WIN32_WINNT=0x0601)
+  target_link_libraries(ipc_smoke_test PRIVATE ws2_32)
+endif()
