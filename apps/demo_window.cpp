@@ -5,7 +5,7 @@
 #include <cstring>
 
 int main() {
-    if(!glfwInit()) return 1;
+    if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window = glfwCreateWindow(800,600,"demo_window",nullptr,nullptr);
     if(!window){ glfwTerminate(); return 1; }
