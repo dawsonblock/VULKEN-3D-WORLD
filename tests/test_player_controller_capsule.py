@@ -7,7 +7,12 @@ import numpy as np
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
+from src.physics.player_controller_capsule import PlayerControllerCapsule, SPRINT_SPEED_MULTIPLIER
 
+
+import numpy as np
+
+from src.physics.player_controller_capsule import PlayerControllerCapsule, SPRINT_SPEED_MULTIPLIER
 def get_horizontal_speed(player: PlayerControllerCapsule) -> float:
     return float(np.linalg.norm(player.vel[[0, 2]]))
 
