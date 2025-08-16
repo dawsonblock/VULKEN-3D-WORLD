@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 
+from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
 from .voxel_solid import is_solid
 
@@ -75,7 +76,9 @@ class PlayerController:
         wl = np.linalg.norm(wish)
         if wl > 1e-6:
             wish /= wl
-        target_speed = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
         hv[1] = 0
