@@ -82,6 +82,5 @@ def test_sprint_speed_limit():
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
-
 def get_horizontal_speed(player: PlayerControllerCapsule) -> float:
     return float(np.linalg.norm(player.vel[[0, 2]]))
