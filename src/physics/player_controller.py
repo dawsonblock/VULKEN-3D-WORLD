@@ -27,11 +27,10 @@ class PlayerController:
     ) -> None:
         """Simple player controller using an AABB capsule approximation."""
         self.world = world_manager
-        self.pos = spawn.astype(np.float32)
-        self.vel = np.zeros(3, dtype=np.float32)
+        self.pos: np.ndarray = spawn.astype(np.float32)
+        self.vel: np.ndarray = np.zeros(3, dtype=np.float32)
         self.aabb = AABB(
-            center=self.pos,
-            half=np.array([0.3, 0.9, 0.3], dtype=np.float32),
+            center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32)
         )
         self.gravity = 28.0
         self.max_speed = 11.0
@@ -42,6 +41,7 @@ class PlayerController:
         self.step_height = 0.5
         self.on_ground = False
 
+        main
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
@@ -63,10 +63,14 @@ class PlayerController:
         )
 
     def update(
+
+        self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
+
         self,
         dt: float,
         camera_forward: np.ndarray,
         camera_right: np.ndarray,
+        main
     ) -> None:
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
