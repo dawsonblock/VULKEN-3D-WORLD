@@ -48,7 +48,8 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> Tuple[np.ndarray, bool]:
                         delta = top - bottom
                         if delta > off[1]:
                             off[1] = delta
-                            grounded = True
+                        off[1] += delta
+                        grounded = True
 
                     # Compute penetration along each axis
                     block_min = np.array([x, y, z], dtype=np.float32)
