@@ -6,7 +6,7 @@ module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'module',
+      sourceType: 'script',
       globals: {
         ...globals.node,
         ...globals.es2021
