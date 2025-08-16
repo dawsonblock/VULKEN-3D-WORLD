@@ -1,19 +1,38 @@
 
 import numpy as np
+from typing import Any, Optional, Tuple
+
 from .capsule import Capsule
 
 
+        codex/add-type-annotations-and-typing-imports
+def closest_point_on_aabb(
+    p: np.ndarray, mn: np.ndarray, mx: np.ndarray
+) -> np.ndarray:
+    return np.minimum(np.maximum(p, mn), mx)
+
+
+def closest_point_on_segment(
+    p: np.ndarray, a: np.ndarray, b: np.ndarray
+) -> np.ndarray:
+==
 def closest_point_on_aabb(p, mn, mx):
     return np.minimum(np.maximum(p, mn), mx)
 
 
 def closest_point_on_segment(p, a, b):
+>>       main
     ab = b - a
     t = np.dot(p - a, ab) / (np.dot(ab, ab) + 1e-9)
     return a + np.clip(t, 0.0, 1.0) * ab
 
 
+def capsule_box_penetration(
+    cap: Capsule, mn: np.ndarray, mx: np.ndarray
+) -> Tuple[bool, Optional[np.ndarray], float]:
+
 def capsule_box_penetration(cap: Capsule, mn, mx):
+        main
     box_center = (mn + mx) * 0.5
     q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
     q_box = closest_point_on_aabb(q_seg, mn, mx)
@@ -21,14 +40,37 @@ def capsule_box_penetration(cap: Capsule, mn, mx):
     dist = np.linalg.norm(v)
     pen = cap.radius - dist
     if pen > 0.0:
+
+        n: np.ndarray = (
+            v / (dist + 1e-9)
+
         n = (
             (v / (dist + 1e-9))
+        main
             if dist > 1e-8
             else np.array([0, 1, 0], dtype=np.float32)
         )
         return True, n, pen
     return False, None, 0.0
 
+
+def resolve_capsule_world(
+    cap: Capsule, world: WorldProtocol, max_iters: int = 8
+) -> Tuple[np.ndarray, bool]:
+    mn = cap.center - np.array(
+        [
+            cap.radius,
+            cap.half_height + cap.radius,
+            cap.radius,
+        ],
+        dtype=np.float32,
+    )
+    mx = cap.center + np.array(
+        [
+            cap.radius,
+            cap.half_height + cap.radius,
+            cap.radius,
+        ],
 
 def resolve_capsule_world(cap: Capsule, world, max_iters=8):
     mn = cap.center - np.array(
@@ -37,6 +79,7 @@ def resolve_capsule_world(cap: Capsule, world, max_iters=8):
     )
     mx = cap.center + np.array(
         [cap.radius, cap.half_height + cap.radius, cap.radius],
+        main
         dtype=np.float32,
     )
     bb_min = np.floor(mn).astype(int)
@@ -46,8 +89,13 @@ def resolve_capsule_world(cap: Capsule, world, max_iters=8):
     ground = False
     for _ in range(max_iters):
         max_pen = 0.0
+
+        hit_n: Optional[np.ndarray] = None
+        contact_n: Optional[np.ndarray] = None
+
         hit_n = None
         contact_n = None
+        main
         for y in range(bb_min[1] - 1, bb_max[1] + 2):
             for z in range(bb_min[2] - 1, bb_max[2] + 2):
                 for x in range(bb_min[0] - 1, bb_max[0] + 2):
