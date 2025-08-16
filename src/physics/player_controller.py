@@ -51,7 +51,8 @@ class PlayerController:
     ) -> None:
         wish = (
             camera_forward * (self.input["f"] - self.input["b"]) +
-            camera_right * (self.input["r"] - self.input["l"])
+            camera_forward * (self.input["f"] - self.input["b"])
+            + camera_right * (self.input["r"] - self.input["l"])
         )
         wish[1] = 0.0
         wl = np.linalg.norm(wish)
