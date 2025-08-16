@@ -36,7 +36,10 @@ int main() {
     recv(conn, buf, sizeof(buf), 0);
     std::cout << buf << std::endl;
 #if defined(_WIN32)
-    closesocket(client); closesocket(conn); closesocket(server); WSACleanup();
+    closesocket(client);
+    closesocket(conn);
+    closesocket(server);
+    WSACleanup();
 #else
     close(client); close(conn); close(server);
 #endif
