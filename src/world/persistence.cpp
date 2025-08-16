@@ -151,7 +151,7 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
     std::vector<std::uint8_t> data;
     if (use_rle_) {
         rle_encode(vox, vals, counts);
-        std::int32_t header[5] = {chunk.size, chunk.height, chunk.size,
+        std::int32_t header[5] = {chunk.size, chunk.height, chunk.height,
                                   static_cast<std::int32_t>(vals.size()),
                                   static_cast<std::int32_t>(counts.size())};
         data.insert(data.end(), reinterpret_cast<std::uint8_t *>(header),
