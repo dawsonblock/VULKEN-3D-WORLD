@@ -1,10 +1,41 @@
 
+"""Capsule-based player controller using SAT collision resolution."""
+
+from typing import Any, Dict
+
 import numpy as np
 from .capsule import Capsule
 from .capsule_voxel_sat import resolve_capsule_world
 
 class PlayerControllerCapsule:
-    def __init__(self, world_manager, spawn, step_height=0.5, gravity=28.0, max_speed=11.0, jump_speed=9.5):
+    """Capsule-based player controller.
+
+    Parameters
+    ----------
+    world_manager:
+        World accessor providing ``get_block_at_world_position``.
+    spawn:
+        Initial spawn position of the player.
+    step_height, gravity, max_speed, jump_speed:
+        Tuning parameters for character movement.
+
+    Example
+    -------
+    >>> pc = PlayerControllerCapsule(world, np.array([0.0, 1.0, 0.0], dtype=np.float32))
+    >>> forward = np.array([0.0, 0.0, 1.0], dtype=np.float32)
+    >>> right = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+    >>> pc.update(0.016, forward, right)
+    """
+
+    def __init__(
+        self,
+        world_manager: Any,
+        spawn: np.ndarray,
+        step_height: float = 0.5,
+        gravity: float = 28.0,
+        max_speed: float = 11.0,
+        jump_speed: float = 9.5,
+    ) -> None:
         self.world = world_manager
         self.pos = spawn.astype(np.float32)
         self.vel = np.zeros(3, dtype=np.float32)
@@ -15,13 +46,15 @@ class PlayerControllerCapsule:
         self.max_speed = max_speed
         self.jump_speed = jump_speed
         self.on_ground = False
-        self.input = {"f":0,"b":0,"l":0,"r":0,"jump":0,"sprint":0}
+        self.input: Dict[str, int] = {"f":0,"b":0,"l":0,"r":0,"jump":0,"sprint":0}
 
-    def set_input(self, m): self.input.update(m)
+    def set_input(self, m: Dict[str, int]) -> None:
+        self.input.update(m)
 
-    def _capsule(self): return Capsule(self.pos.copy(), self.half_h, self.radius)
+    def _capsule(self) -> Capsule:
+        return Capsule(self.pos.copy(), self.half_h, self.radius)
 
-    def update(self, dt, forward, right):
+    def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
         wish = (forward*(self.input["f"]-self.input["b"]) + right*(self.input["r"]-self.input["l"])); wish[1]=0
         n=np.linalg.norm(wish);  wish = wish/n if n>1e-6 else wish
         target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
