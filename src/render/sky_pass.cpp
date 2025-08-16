@@ -58,7 +58,20 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     VkShaderModule vs = loadShader(device, FULLSCREEN_VERT_SHADER_PATH);
     VkShaderModule fsSky = loadShader(device, ATMOSPHERE_FRAG_SHADER_PATH);
     VkShaderModule fsCloud = loadShader(device, CLOUDS_FRAG_SHADER_PATH);
-    if(!vs || !fsSky || !fsCloud) return false;
+    if (!vs) {
+        std::fprintf(stderr, "Failed to load shader: spv/common/fullscreen.vert.spv\n");
+        return false;
+    }
+    VkShaderModule fsSky = loadShader(device, "spv/post/atmosphere.frag.spv");
+    if (!fsSky) {
+        std::fprintf(stderr, "Failed to load shader: spv/post/atmosphere.frag.spv\n");
+        return false;
+    }
+    VkShaderModule fsCloud = loadShader(device, "spv/post/clouds.frag.spv");
+    if (!fsCloud) {
+        std::fprintf(stderr, "Failed to load shader: spv/post/clouds.frag.spv\n");
+        return false;
+    }
 
     VkPipelineShaderStageCreateInfo stages[2]{};
     stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
