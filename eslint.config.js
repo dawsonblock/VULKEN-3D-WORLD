@@ -1,3 +1,8 @@
+
+export default [
+  {
+    files: ["**/*.{js,ts}"]
+
 /** @type {import('eslint').Linter.FlatConfig[]} */
 module.exports = [
   {
@@ -13,5 +18,6 @@ module.exports = [
       "no-unused-vars": "warn",
       "semi": ["error", "always"]
     }
+        main
   }
 ];
