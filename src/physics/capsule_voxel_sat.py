@@ -26,7 +26,7 @@ def capsule_box_penetration(
     q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
     q_box = closest_point_on_aabb(q_seg, mn, mx)
     v = q_seg - q_box
-    dist = float(np.linalg.norm(v))
+    dist = np.linalg.norm(v)
     pen = float(cap.radius - dist)
     if pen > 0.0:
         n: np.ndarray = (
