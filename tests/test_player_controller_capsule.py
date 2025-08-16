@@ -12,7 +12,9 @@ if not LIB_PATH.exists():
     subprocess.check_call([
         "g++", "-std=c++17", "-shared", "-fPIC", str(src),
         "-I" + str(ROOT / "src/physics_cpp"), "-o", str(LIB_PATH)
-    ])
+    raise FileNotFoundError(
+        f"Required shared library {LIB_PATH} not found. Please build it before running tests."
+    )
 
 lib = ctypes.CDLL(str(LIB_PATH))
 
