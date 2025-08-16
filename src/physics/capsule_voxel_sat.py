@@ -60,5 +60,5 @@ def resolve_capsule_world(cap: Capsule, world, max_iters=8):
         mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
         mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
         bb_min = np.floor(mn).astype(int)
-        bb_max = np.floor(mx).astype(int)
+        bb_min, bb_max = compute_capsule_voxel_bounds(cap)
     return total_offset, ground
