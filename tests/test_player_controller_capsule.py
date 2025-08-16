@@ -16,6 +16,12 @@ class StepWorld:
         return 0
 
 
+def get_horizontal_speed(player: PlayerControllerCapsule) -> float:
+    return float(np.linalg.norm(player.vel[[0, 2]]))
+
+
+SPRINT_SPEED_MULTIPLIER = 1.6
+
 def test_jump_and_land():
     world = FlatWorld()
     player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
@@ -65,16 +71,10 @@ def test_sprint_speed_limit():
     player.set_input({"f": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
-    speed = float(np.linalg.norm(player.vel[[0, 2]]))
-    assert speed <= player.max_speed + 1e-3
-
-    player.set_input({"sprint": 1})
-    for _ in range(20):
-        player.update(0.1, forward, right)
     speed = get_horizontal_speed(player)
     assert speed <= player.max_speed + 1e-3
 
-    player.set_input({"sprint": 1})
+    player.set_input({"f": 1, "sprint": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
     sprint_speed = get_horizontal_speed(player)

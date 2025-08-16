@@ -4,20 +4,7 @@ const globals = require('globals');
 module.exports = [
   {
     ignores: [
-
-      'assets/**',
-      'build_ci_sanity/**',
-      'cmake/**',
-      'docs/**',
-      'shaders/**',
-      'shaders_vk/**',
-      'tools/**',
-      'tests/**',
-      'src/**',
-      'apps/**',
-      'scripts/**'
-
-    'apps',
+      'apps',
       'assets',
       'build_ci_sanity',
       'cmake',
@@ -27,9 +14,8 @@ module.exports = [
       'shaders',
       'shaders_vk',
       'tests',
-      'tools'
-        main
-    ]
+      'tools',
+    ],
   },
   js.configs.recommended,
   {
@@ -38,9 +24,9 @@ module.exports = [
       sourceType: 'script',
       globals: {
         ...globals.node,
-        ...globals.es2021
-      }
+        ...globals.es2021,
+      },
     },
-    rules: {}
-  }
+    rules: {},
+  },
 ];

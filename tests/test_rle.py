@@ -34,3 +34,4 @@ def test_shape_preserved() -> None:
     decoded = rle_decode(vals, counts, shape)
     assert decoded.shape == (2, 3, 4)
     assert np.array_equal(decoded, arr)
+
