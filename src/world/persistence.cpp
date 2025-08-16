@@ -160,7 +160,7 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
         data.insert(data.end(), reinterpret_cast<const std::uint8_t *>(counts.data()),
                     reinterpret_cast<const std::uint8_t *>(counts.data()) + counts.size() * sizeof(std::int32_t));
     } else {
-        std::int32_t header[5] = {chunk.size, chunk.height, chunk.size, 0, 0};
+        std::int32_t header[5] = {chunk.height, chunk.size, chunk.size, 0, 0};
         data.insert(data.end(), reinterpret_cast<std::uint8_t *>(header),
                     reinterpret_cast<std::uint8_t *>(header) + 20);
         data.insert(data.end(), vox.begin(), vox.end());
