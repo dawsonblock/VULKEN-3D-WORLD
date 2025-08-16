@@ -76,7 +76,7 @@ def resolve_capsule_world(
                         mn = np.array([x, y, z], dtype=np.float32)
                         mx = mn + 1.0
                         hit, n, pen = capsule_box_penetration(cap, mn, mx)
-                        if hit and pen > 0.0:
+                        if hit and pen > 0.0 and n is not None:
                             cap.center += n * pen
                             total_offset += n * pen
                             collided = True
