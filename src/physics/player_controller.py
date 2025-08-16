@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 
+from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
 from .voxel_solid import is_solid
 
@@ -39,6 +40,8 @@ class PlayerController:
         self.jump_speed = 9.5
         self.step_height = 0.5
         self.on_ground = False
+
+        main
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
@@ -52,11 +55,22 @@ class PlayerController:
 
     def set_input(self, keymap: Dict[str, int]) -> None:
         self.input.update(
-            {k: int(bool(v)) for k, v in keymap.items() if k in self.input}
+            {
+                k: int(bool(v))
+                for k, v in keymap.items()
+                if k in self.input
+            }
         )
 
     def update(
+
         self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
+
+        self,
+        dt: float,
+        camera_forward: np.ndarray,
+        camera_right: np.ndarray,
+        main
     ) -> None:
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
@@ -66,7 +80,9 @@ class PlayerController:
         wl = np.linalg.norm(wish)
         if wl > 1e-6:
             wish /= wl
-        target_speed = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
         hv[1] = 0
@@ -147,9 +163,10 @@ class PlayerController:
                     bt = self.world.get_block_at_world_position(
                         float(x), float(y), float(z)
                     )
-                    if is_solid(bt):
-                        if self._aabb_voxel_overlap(aabb, x, y, z):
-                            return False
+                    if is_solid(bt) and self._aabb_voxel_overlap(
+                        aabb, x, y, z
+                    ):
+                        return False
         return True
 
     @staticmethod
