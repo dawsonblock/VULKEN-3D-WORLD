@@ -24,6 +24,7 @@ class Capsule(ctypes.Structure):
 lib.resolve_capsule_ground.argtypes = [ctypes.POINTER(Capsule), ctypes.POINTER(Vec3)]
 lib.resolve_capsule_ground.restype = ctypes.c_int
 
+
 def test_capsule_ground_collision():
     cap = Capsule(Vec3(0.0, 0.2, 0.0), 0.9, 0.3)
     off = Vec3()
@@ -31,3 +32,11 @@ def test_capsule_ground_collision():
     assert grounded == 1
     assert abs(cap.center.y - 1.2) < 1e-4
     assert off.y == pytest.approx(1.0, abs=1e-4)
+
+
+
+
+        main
+        main
+        main
+        main
