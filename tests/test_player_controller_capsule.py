@@ -4,7 +4,6 @@ from src.physics.player_controller_capsule import PlayerControllerCapsule
 
 import numpy as np
 
-from src.physics.player_controller_capsule import PlayerControllerCapsule
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
