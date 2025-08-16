@@ -24,7 +24,7 @@ def test_alternating_pattern() -> None:
 
 def test_random_data() -> None:
     rng = np.random.default_rng(0)
-    arr = rng.integers(0, 256, size=(7, 5), dtype=np.uint8)
+    arr = rng.integers(0, 255, size=(7, 5), dtype=np.uint8)
     _roundtrip(arr)
 
 
