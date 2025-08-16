@@ -1,4 +1,8 @@
 import numpy as np
+from src.physics import (
+    SPRINT_SPEED_MULTIPLIER,
+    get_horizontal_speed,
+)
 from src.physics.player_controller_capsule import PlayerControllerCapsule
 
 
@@ -65,7 +69,7 @@ def test_sprint_speed_limit():
     player.set_input({"f": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
-    speed = float(np.linalg.norm(player.vel[[0, 2]]))
+    speed = get_horizontal_speed(player)
     assert speed <= player.max_speed + 1e-3
 
     player.set_input({"sprint": 1})
