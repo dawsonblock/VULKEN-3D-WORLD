@@ -11,7 +11,11 @@
 
 int main() {
 #if defined(_WIN32)
-    WSADATA wsa; if (WSAStartup(MAKEWORD(2,2), &wsa)!=0) { std::cerr << "WSAStartup failed\n"; return 1; }
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        std::cerr << "WSAStartup failed\n";
+        return 1;
+    }
 #endif
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if (server < 0) { std::cerr << "socket failed\n"; return 1; }
