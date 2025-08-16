@@ -17,6 +17,18 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install deps
         run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt pytest mypy ruff
+      - name: Lint
+        run: ruff check . --exit-zero
+      - name: Type check
+        run: mypy src tests --ignore-missing-imports --namespace-packages --explicit-package-bases
+      - name: Pytest
+        run: PYTHONPATH=. pytest tests
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
@@ -34,6 +46,20 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install Ninja and CMake
         run: choco install ninja cmake --yes
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt pytest mypy ruff
+      - name: Lint
+        run: ruff check . --exit-zero
+      - name: Type check
+        run: mypy src tests --ignore-missing-imports --namespace-packages --explicit-package-bases
+      - name: Pytest
+        run: |
+          $env:PYTHONPATH = '.'
+          pytest tests
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
