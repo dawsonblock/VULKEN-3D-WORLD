@@ -16,7 +16,11 @@ jobs:
           path: ~/.cache
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
+      - name: Set Vulkan env
+        run: echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
@@ -34,6 +38,10 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
       - name: Install Ninja and CMake
         run: choco install ninja cmake --yes
+      - name: Install Vulkan SDK and GLFW
+        run: choco install vulkan-sdk glfw --yes
+      - name: Set Vulkan env
+        run: echo "VULKAN_SDK=$Env:VULKAN_SDK" >> $Env:GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
