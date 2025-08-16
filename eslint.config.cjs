@@ -6,7 +6,7 @@ module.exports = [
     ignores: [
       'assets/**', 'build_ci_sanity/**', 'cmake/**',
       'docs/**', 'shaders/**', 'shaders_vk/**',
-      'tools/**', 'tests/**'
+      'tools/**'
     ]
   },
   js.configs.recommended,
