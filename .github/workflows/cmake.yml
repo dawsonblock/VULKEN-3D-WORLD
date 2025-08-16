@@ -53,5 +53,4 @@ jobs:
           name: build-${{ runner.os }}
           path: |
             build/**
-            build/spv/**
           if-no-files-found: ignore
