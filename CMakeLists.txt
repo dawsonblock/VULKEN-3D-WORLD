@@ -159,3 +159,9 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
+
+# --- Sky and cloud rendering pass ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/sky_pass.cpp)
+endif()
+
