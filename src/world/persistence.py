@@ -11,7 +11,7 @@ try:
 except Exception:
     has_zstd=False
 try:
-    import lz4.frame as lz4f
+    import lz4.frame as lz4f  # type: ignore[import]
     has_lz4=True
 except Exception:
     has_lz4=False
