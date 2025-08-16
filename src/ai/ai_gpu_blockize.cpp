@@ -9,15 +9,19 @@ namespace voxelvk::ai {
 bool AIGpuBlockizer::init(VkDevice device, VkPipelineCache cache){
   m_device=device;
   VkDescriptorSetLayoutBinding b[4] = {}; for(int i=0;i<4;i++){ b[i].binding=i; b[i].descriptorCount=1; b[i].stageFlags=VK_SHADER_STAGE_COMPUTE_BIT; b[i].descriptorType=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; }
-  VkDescriptorSetLayoutCreateInfo dsl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO}; dsl.bindingCount=4; dsl.pBindings=b; vkCreateDescriptorSetLayout(device,&dsl,nullptr,&m_dset_layout);
+  VkDescriptorSetLayoutCreateInfo dsl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO}; dsl.bindingCount=4; dsl.pBindings=b;
+  if(vkCreateDescriptorSetLayout(device,&dsl,nullptr,&m_dset_layout)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create descriptor set layout\n"); return false; }
   VkPushConstantRange pcr{}; pcr.stageFlags=VK_SHADER_STAGE_COMPUTE_BIT; pcr.offset=0; pcr.size=sizeof(GpuBlockizeThresholds);
-  VkPipelineLayoutCreateInfo plci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO}; plci.setLayoutCount=1; plci.pSetLayouts=&m_dset_layout; plci.pushConstantRangeCount=1; plci.pPushConstantRanges=&pcr; vkCreatePipelineLayout(device,&plci,nullptr,&m_pipe_layout);
-  auto spirv=load_spirv_file("spv/ai/blockize.comp.spv"); if(spirv.empty()) return False;
-  VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO}; smci.codeSize=spirv.size()*4; smci.pCode=spirv.data(); VkShaderModule sm; vkCreateShaderModule(device,&smci,nullptr,&sm);
+  VkPipelineLayoutCreateInfo plci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO}; plci.setLayoutCount=1; plci.pSetLayouts=&m_dset_layout; plci.pushConstantRangeCount=1; plci.pPushConstantRanges=&pcr;
+  if(vkCreatePipelineLayout(device,&plci,nullptr,&m_pipe_layout)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create pipeline layout\n"); destroy(device); return false; }
+  auto spirv=load_spirv_file("spv/ai/blockize.comp.spv"); if(spirv.empty()){ std::fprintf(stderr,"[AI] failed to load blockize shader\n"); destroy(device); return false; }
+  VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO}; smci.codeSize=spirv.size()*4; smci.pCode=spirv.data(); VkShaderModule sm; if(vkCreateShaderModule(device,&smci,nullptr,&sm)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create shader module\n"); destroy(device); return false; }
   VkComputePipelineCreateInfo cpci{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO}; cpci.stage={VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO}; cpci.stage.stage=VK_SHADER_STAGE_COMPUTE_BIT; cpci.stage.module=sm; cpci.stage.pName="main"; cpci.layout=m_pipe_layout;
-  vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline); vkDestroyShaderModule(device,sm,nullptr);
+  if(vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create compute pipeline\n"); vkDestroyShaderModule(device,sm,nullptr); destroy(device); return false; }
+  vkDestroyShaderModule(device,sm,nullptr);
   VkDescriptorPoolSize ps{}; ps.type=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount=4;
-  VkDescriptorPoolCreateInfo dpci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dpci.maxSets=1; dpci.poolSizeCount=1; dpci.pPoolSizes=&ps; vkCreateDescriptorPool(device,&dpci,nullptr,&m_pool);
+  VkDescriptorPoolCreateInfo dpci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dpci.maxSets=1; dpci.poolSizeCount=1; dpci.pPoolSizes=&ps;
+  if(vkCreateDescriptorPool(device,&dpci,nullptr,&m_pool)!=VK_SUCCESS){ std::fprintf(stderr,"[AI] failed to create descriptor pool\n"); destroy(device); return false; }
   return true;
 }
 void AIGpuBlockizer::destroy(VkDevice device){
