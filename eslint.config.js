@@ -1,4 +1,8 @@
 
+export default {
+};
+
+
 export default [
   {
     files: ["**/*.{js,ts}"]
@@ -21,3 +25,4 @@ module.exports = [
         main
   }
 ];
+        main
