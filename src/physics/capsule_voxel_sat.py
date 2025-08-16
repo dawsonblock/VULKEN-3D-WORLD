@@ -39,7 +39,7 @@ def capsule_box_penetration(
 
 
 def resolve_capsule_world(
-    cap: Capsule, world: Any, max_iters: int = 8
+    cap: Capsule, world: WorldProtocol, max_iters: int = 8
 ) -> Tuple[np.ndarray, bool]:
     mn = cap.center - np.array(
         [
