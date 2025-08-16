@@ -5,7 +5,7 @@ from .capsule import Capsule
 
 
 def resolve_capsule_world(
-    cap: Capsule, world: Any, max_iters: int = 8
+    cap: Capsule, world: Any
 ) -> Tuple[np.ndarray, bool]:
     """Resolve capsule collision against a simple voxel world.
 
