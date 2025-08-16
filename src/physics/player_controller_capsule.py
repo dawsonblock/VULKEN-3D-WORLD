@@ -58,7 +58,7 @@ class PlayerControllerCapsule:
         }
 
     def set_input(self, keymap: Dict[str, int]) -> None:
-        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+        self.input.update({k: 1 if v else 0 for k, v in keymap.items() if k in self.input})
 
     def _capsule(self) -> Capsule:
         return Capsule(self.pos.copy(), self.half_h, self.radius)
