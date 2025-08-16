@@ -1,7 +1,7 @@
 {
   "name": "vulken-3d-world",
   "version": "1.0.0",
-  "description": "[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)",
+  "description": "[![CI](https://github.com/vulken-dev/vulken-3d-world/actions/workflows/ci.yml/badge.svg)](https://github.com/vulken-dev/vulken-3d-world/actions/workflows/ci.yml)",
   "main": "index.js",
   "directories": {
     "doc": "docs",
