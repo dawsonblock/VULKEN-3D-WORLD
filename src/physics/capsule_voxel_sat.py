@@ -31,7 +31,9 @@ def resolve_capsule_world(cap: Capsule, world, max_iters=8):
     total_offset = np.zeros(3, dtype=np.float32)
     ground = False
     for _ in range(max_iters):
-        max_pen = 0.0; hit_n = None; contact_n = None
+        max_pen = 0.0
+        hit_n = None
+        contact_n = None
         for y in range(bb_min[1]-1, bb_max[1]+2):
             for z in range(bb_min[2]-1, bb_max[2]+2):
                 for x in range(bb_min[0]-1, bb_max[0]+2):
@@ -44,9 +46,11 @@ def resolve_capsule_world(cap: Capsule, world, max_iters=8):
                     if hit and pen > max_pen:
                         max_pen, hit_n = pen, n
                         contact_n = n
-        if max_pen <= 1e-6 or hit_n is None: break
+        if max_pen <= 1e-6 or hit_n is None:
+            break
         off = hit_n * max_pen
         cap.center += off
         total_offset += off
-        if contact_n is not None and contact_n[1] > 0.7: ground = True
+        if contact_n is not None and contact_n[1] > 0.7:
+            ground = True
     return total_offset, ground
