@@ -176,4 +176,21 @@ add_custom_target(mirror_spv_ibl ALL
 
 if(TARGET VoxelVK_Elite_ALL)
   add_dependencies(VoxelVK_Elite_ALL mirror_spv_ibl)
-endif()
+function(add_brdf_lut_integration target_name)
+  if(TARGET ${target_name})
+    list(APPEND VOXELVK_ELITE_SOURCES src/render/ibl_brdf.cpp)
+    target_sources(${target_name} PRIVATE ${VOXELVK_ELITE_SOURCES})
+    target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
+
+    add_custom_target(mirror_spv_ibl ALL
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/assets/spv/ibl
+      COMMAND ${CMAKE_COMMAND} -E copy
+              ${CMAKE_BINARY_DIR}/spv/ibl/brdf_lut.comp.spv
+              ${CMAKE_BINARY_DIR}/assets/spv/ibl/brdf_lut.comp.spv
+      DEPENDS VoxelVK_Shaders)
+
+    add_dependencies(${target_name} mirror_spv_ibl)
+  endif()
+endfunction()
+
+add_brdf_lut_integration(VoxelVK_Elite_ALL)
