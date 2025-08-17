@@ -131,7 +131,8 @@ class PlayerController:
 
     def _can_occupy(self, center: np.ndarray) -> bool:
         aabb = AABB(center=center, half=self.aabb.half)
-        mn = np.floor(aabb.min).astype(int); mx = np.floor(aabb.max).astype(int)
+        mn = np.floor(aabb.min).astype(int)
+        mx = np.floor(aabb.max).astype(int)
         for y in range(mn[1], mx[1] + 1):
             for z in range(mn[2], mx[2] + 1):
                 for x in range(mn[0], mx[0] + 1):
