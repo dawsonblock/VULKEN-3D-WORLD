@@ -7,7 +7,7 @@ try:  # The player controller module is currently broken; skip tests if import f
         SPRINT_SPEED_MULTIPLIER,
         get_horizontal_speed,
     )
-except Exception:  # pragma: no cover - skip if module cannot be imported
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - skip if module cannot be imported
     pytest.skip(
         "player_controller_capsule module unavailable",
         allow_module_level=True,
