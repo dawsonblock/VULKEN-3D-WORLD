@@ -22,7 +22,6 @@ The compute expects image formats:
 - 2D biome: `VK_FORMAT_R8_UINT` (GENERAL)
 - Output 3D blocks: `VK_FORMAT_R16_UINT` (GENERAL)
 
-
 ## Python setup
 
 Some utilities and tests in `src/` and `tests/` require Python. Create a virtual environment and install the required packages:
@@ -37,10 +36,41 @@ Run the test suite:
 
 ```bash
 pytest
+```
+
+```
 
 ## Linting
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
+
+
+
+
+## Samples
+
+### demo_window
+Build the sample:
+```bash
+cmake -S . -B build
+cmake --build build --target demo_window
+```
+Run it:
+```bash
+./build/demo_window
+        main
+        main
         main
 ```
+
+## World streaming and LOD
+Chunks are loaded asynchronously around the player using the `ChunkStreamer` module. Mesh detail is selected by a distance-based LOD component configured through `world_lod.cfg`:
+
+```ini
+[lod]
+high_detail=20
+medium_detail=60
+```
+
+Adjust these thresholds to control when medium or low detail meshes are chosen.

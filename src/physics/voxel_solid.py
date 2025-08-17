@@ -3,7 +3,22 @@
 from typing import Dict
 
 
+
 class BlockType:
+
+
+
+from typing import Dict
+
+
+        main
+# Adapt this to your engine's block registry
+
+        main
+class BlockType:
+    """Enumeration of built-in block types."""
+
+        main
     AIR = 0
 
 
