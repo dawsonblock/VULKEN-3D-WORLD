@@ -33,20 +33,11 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Upload build artifacts
-
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-linux-${{ runner.os }}
           path: build
-
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-${{ runner.os }}
-          path: |
-            build/**
-          if-no-files-found: ignore
-        main
 
   windows:
     runs-on: windows-latest
@@ -66,7 +57,7 @@ jobs:
       - name: Install Vulkan SDK and GLFW
         run: choco install vulkan-sdk glfw --yes
       - name: Set Vulkan env
-        run: echo "VULKAN_SDK=C:\VulkanSDK\latest" >> $Env:GITHUB_ENV
+        run: echo "VULKAN_SDK=C:\\VulkanSDK\\latest" >> $Env:GITHUB_ENV
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
@@ -74,17 +65,8 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Upload build artifacts
-
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ runner.os }}
+          name: build-windows-${{ runner.os }}
           path: build
-
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-${{ runner.os }}
-          path: |
-            build/**
-          if-no-files-found: ignore
-        main
