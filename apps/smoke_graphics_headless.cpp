@@ -49,7 +49,6 @@ int main(){
     voxelvk::DebugRuntime_Init(gDebug, instance);
 #if defined(GLFW_KEY_F9) && defined(GLFW_PRESS)
     voxelvk::DebugRuntime_HandleKey(gDebug, GLFW_KEY_F9, GLFW_PRESS);
-    voxelvk::DebugRuntime_HandleKey(gDebug, GLFW_KEY_F9, GLFW_PRESS);
 #endif
 #endif
 
