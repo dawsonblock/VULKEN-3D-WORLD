@@ -69,7 +69,7 @@ def _load_cpp_lib() -> ctypes.CDLL:
                 ]
             )
         return ctypes.CDLL(str(LIB_PATH))
-    except Exception:  # pragma: no cover - skip if compilation fails
+    except (subprocess.CalledProcessError, OSError, FileNotFoundError):  # pragma: no cover - skip if compilation fails
         pytest.skip("physics_cpp library unavailable", allow_module_level=True)
 
 
