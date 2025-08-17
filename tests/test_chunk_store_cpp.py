@@ -1,4 +1,5 @@
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -25,7 +26,7 @@ int main(int argc, char** argv){
     exe = tmp_path / "loader"
     subprocess.check_call([
         "g++", "-std=c++20", str(src_file), str(repo_root / "src/world/persistence.cpp"),
-        "-I", str(repo_root / "src"), "-lzstd", "-pthread", "-o", str(exe)
+        "-I", str(repo_root), "-lzstd", "-pthread", "-o", str(exe)
     ], cwd=repo_root)
     return exe
 
@@ -34,12 +35,12 @@ def test_cpp_chunk_store_roundtrip(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parent.parent
     vox = np.arange(64, dtype=np.uint8).reshape((4, 4, 4))
 
+    @dataclass
     class Chunk:
-        pass
+        position: tuple[int, int]
+        voxels: np.ndarray
 
-    chunk = Chunk()
-    chunk.position = (0, 0)
-    chunk.voxels = vox
+    chunk = Chunk(position=(0, 0), voxels=vox)
 
     store = PyChunkStore(root=tmp_path, codec="zstd", use_rle=True, threads=1)
     store.save_chunk_sync(chunk)

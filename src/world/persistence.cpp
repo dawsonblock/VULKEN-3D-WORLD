@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
+#include <iostream>
 
 #if __has_include(<zstd.h>)
 #define VOXELVK_HAS_ZSTD 1
@@ -212,7 +213,6 @@ void ChunkStore::wait_all() {
     for (auto &f : futures_) {
         try {
             f.get();
-        } catch (...) {
         } catch (const std::exception &e) {
             std::cerr << "[ChunkStore::wait_all] Exception in async save: " << e.what() << std::endl;
         } catch (...) {
