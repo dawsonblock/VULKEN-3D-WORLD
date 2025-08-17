@@ -12,7 +12,7 @@ if spec is None:  # pragma: no cover - skip if module cannot be imported
     pytest.skip("capsule_voxel_sat module unavailable", allow_module_level=True)
 try:
     capsule_voxel_sat = importlib.import_module("src.physics.capsule_voxel_sat")
-except Exception:  # pragma: no cover - skip if module import fails
+except (ImportError, ModuleNotFoundError):  # pragma: no cover - skip if module import fails
     pytest.skip("capsule_voxel_sat module unavailable", allow_module_level=True)
 resolve_capsule_world = capsule_voxel_sat.resolve_capsule_world
 
