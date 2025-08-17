@@ -26,7 +26,19 @@ def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
         cap.center[1] += delta
         off[1] = delta
         ground = True
-    return off, ground
+def resolve_capsule_world(cap: CapsulePy, world) -> tuple[CapsulePy, np.ndarray, bool]:
+    """Push the capsule upward if it intersects the ground. Returns a new CapsulePy instance."""
+    off = np.zeros(3, dtype=np.float32)
+    bottom = cap.center[1] - (cap.half_height + cap.radius)
+    ground = False
+    new_center = np.copy(cap.center)
+    if world.get_block_at_world_position(cap.center[0], bottom - 1e-4, cap.center[2]):
+        delta = -bottom
+        new_center[1] += delta
+        off[1] = delta
+        ground = True
+    new_cap = CapsulePy(new_center, cap.half_height, cap.radius)
+    return new_cap, off, ground
 
 
 class DummyWorld:
