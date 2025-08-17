@@ -1,0 +1,9 @@
+{
+  "biomes": {
+    "plains": 0
+  },
+  "textures": {
+    "grass": 0,
+    "dirt": 1
+  }
+}

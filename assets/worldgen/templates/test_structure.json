@@ -1,0 +1,7 @@
+{
+  "name": "test_structure",
+  "blocks": [
+    {"position": [0, 0, 0], "type": "grass"},
+    {"position": [1, 0, 0], "type": "dirt"}
+  ]
+}

@@ -1,4 +1,6 @@
-import numpy as np
+import pytest
+
+np = pytest.importorskip("numpy")
 from src.physics.capsule import Capsule
 
 def test_seg_properties():

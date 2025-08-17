@@ -1,4 +1,12 @@
-import numpy as np
+from typing import TYPE_CHECKING
+
+import pytest
+
+if TYPE_CHECKING:
+    import numpy as np
+else:  # pragma: no cover - skip if numpy is missing
+    np = pytest.importorskip("numpy")
+
 from src.world.rle import rle_encode, rle_decode
 
 
