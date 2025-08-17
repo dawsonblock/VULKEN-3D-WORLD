@@ -7,9 +7,11 @@
 from __future__ import annotations
 
         main
+        main
 import numpy as np
         main
 from dataclasses import dataclass
+import numpy as np
 
 import numpy as np
 
@@ -37,8 +39,10 @@ class AABB:
 
 
 
+
     def max(self) -> NDArray[np.float32]:
 
+        main
         main
         main
         main
@@ -55,6 +59,8 @@ class AABB:
         """Maximum corner of the box."""
 
 
+
+        main
         main
         main
         main
