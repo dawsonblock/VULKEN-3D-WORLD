@@ -19,7 +19,21 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> tuple[NDArray[np.float32]
     ground after resolution.
     """
     bottom = cap.center[1] - cap.half_height - cap.radius
-    if world.get_block_at_world_position(cap.center[0], bottom, cap.center[2]):
+    # Check multiple points around the bottom edge of the capsule
+    num_samples = 8
+    angle_step = 2 * np.pi / num_samples
+    collision = False
+    for i in range(num_samples):
+        angle = i * angle_step
+        x = cap.center[0] + cap.radius * np.cos(angle)
+        z = cap.center[2] + cap.radius * np.sin(angle)
+        if world.get_block_at_world_position(x, bottom, z):
+            collision = True
+            break
+    # Also check the center point for completeness
+    if not collision and world.get_block_at_world_position(cap.center[0], bottom, cap.center[2]):
+        collision = True
+    if collision:
         offset = np.array([0.0, -bottom, 0.0], dtype=np.float32)
         cap.center = cap.center + offset
         return offset, True
