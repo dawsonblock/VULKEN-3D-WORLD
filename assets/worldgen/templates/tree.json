@@ -1,0 +1,12 @@
+{
+  "name": "tree",
+  "structure": [
+    {"block": "wood", "position": [0, 0, 0]},
+    {"block": "wood", "position": [0, 1, 0]},
+    {"block": "leaf", "position": [0, 2, 0]},
+    {"block": "leaf", "position": [1, 2, 0]},
+    {"block": "leaf", "position": [-1, 2, 0]},
+    {"block": "leaf", "position": [0, 2, 1]},
+    {"block": "leaf", "position": [0, 2, -1]}
+  ]
+}
