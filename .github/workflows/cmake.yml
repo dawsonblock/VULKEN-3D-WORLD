@@ -16,11 +16,14 @@ jobs:
           path: |
             build/bin/**
             build/spv/**
-          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-cmake-3.27.9-${{ hashFiles('**/CMakeLists.txt') }}
+      - uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.27.9'
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build cmake g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
+          sudo apt-get install -y ninja-build g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
       - name: Set Vulkan env
         run: echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
       - name: Configure
@@ -54,9 +57,12 @@ jobs:
           path: |
             build/bin/**
             build/spv/**
-          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
-      - name: Install Ninja and CMake
-        run: choco install ninja cmake --yes
+          key: ${{ runner.os }}-cmake-3.27.9-${{ hashFiles('**/CMakeLists.txt') }}
+      - uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.27.9'
+      - name: Install Ninja
+        run: choco install ninja --yes
       - name: Install Vulkan SDK and GLFW
         run: choco install vulkan-sdk glfw --yes
       - name: Set Vulkan env
