@@ -1,5 +1,6 @@
 
 #include "csm_pass.hpp"
+#include "csm_descriptor.hpp"
 #include <stdexcept>
 #include <cstring>
 
@@ -216,6 +217,10 @@ void CSMShadowPass::updateUBO(const CSMGpuUBO& data){
     vmaMapMemory(allocator, uboAlloc, &p);
     std::memcpy(p, &data, sizeof(data));
     vmaUnmapMemory(allocator, uboAlloc);
+}
+
+void CSMShadowPass::bindDepthDescriptor(VkDescriptorSet set, uint32_t binding) const{
+    bind_csm_depth_array(device, set, binding, depthArrayView, depthSampler);
 }
 
 void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawScene){

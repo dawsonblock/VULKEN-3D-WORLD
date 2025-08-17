@@ -68,6 +68,7 @@ struct CSMShadowPass {
     // utility: get descriptor info for sampling in lighting pass
     VkImageView getDepthArrayView() const { return depthArrayView; }
     VkSampler   getDepthSampler()   const { return depthSampler; }
+    void bindDepthDescriptor(VkDescriptorSet set, uint32_t binding) const;
 
 private:
     bool createDepthArray(VkPhysicalDevice phys);
