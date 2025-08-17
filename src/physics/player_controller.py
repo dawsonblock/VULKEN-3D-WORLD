@@ -81,7 +81,8 @@ class PlayerController:
             or self.input["r"]
             or self.input["b"]
         ):
-            lifted = self.pos.copy(); lifted[1] += self.step_height
+            lifted = self.pos.copy()
+            lifted[1] += self.step_height
             if self._can_occupy(lifted):
                 self.pos = lifted
                 self._move_and_collide(dt)
