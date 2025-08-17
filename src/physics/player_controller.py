@@ -113,7 +113,8 @@ class PlayerController:
             trial = pos.copy()
             trial[axis] += step * advance
             if self._can_occupy(trial):
-                pos = trial; remaining -= advance
+                pos = trial
+                remaining -= advance
             else:
                 hi, lo = advance, 0.0
                 for _ in range(8):
