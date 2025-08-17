@@ -9,6 +9,8 @@ This repo contains:
 - Self-contained smoke test + CTest
 - GitHub Actions CI (Linux & Windows) that installs Vulkan SDK, builds, tests, and publishes artifacts
 
+For a quick start, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
+
 ## Local build
 ```bash
 cmake -S . -B build -G Ninja -DENABLE_IMGUI_OVERLAY=ON -DVOXELVK_ENABLE_CUDA=OFF -DVOXELVK_ENABLE_TENSORRT=OFF
