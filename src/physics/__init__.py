@@ -1,37 +1,18 @@
-
-"""Legacy Python physics helpers.
-
-These modules are retained for reference only. C++ equivalents live in
-``src/physics_cpp`` and should be preferred for production use."""
-
-# Shared helpers for player movement physics.
+"""Simple physics helpers used in tests."""
 
 from typing import Any
 
 import numpy as np
 
-
 # Multiplier applied to ``max_speed`` when sprint input is active.
-SPRINT_SPEED_MULTIPLIER = 1.6
-
+SPRINT_SPEED_MULTIPLIER: float = 1.6
 
 def get_horizontal_speed(player: Any) -> float:
-    """Return the horizontal speed of the player.
+    """Return the magnitude of the horizontal velocity of ``player``.
 
-    Parameters
-    ----------
-    player:
-        Object with a ``vel`` attribute representing velocity as a numpy
-        array. Only the X and Z components are considered.
-
-    Returns
-    -------
-    float
-        Magnitude of the horizontal velocity vector.
+    ``player`` is expected to expose a ``vel`` attribute containing an array
+    where the X and Z components represent horizontal motion.
     """
-
     return float(np.linalg.norm(player.vel[[0, 2]]))
 
-
 __all__ = ["SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
-        main
