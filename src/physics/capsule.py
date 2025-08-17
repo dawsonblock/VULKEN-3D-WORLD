@@ -1,6 +1,8 @@
 
+
 import numpy as np
 
+        main
 """Definition of a vertical capsule shape used for collision queries."""
 
 from __future__ import annotations
@@ -14,13 +16,24 @@ from numpy.typing import NDArray
 
 @dataclass
 class Capsule:
+  center: np.ndarray
+
     """Vertical capsule represented by a center point, half-height and radius."""
 
     center: NDArray[np.float32]
+        main
     half_height: float
     radius: float
 
     @property
+
+    def seg_a(self) -> np.ndarray:
+        return self.center + np.array([0, self.half_height, 0], dtype=np.float32)
+
+    @property
+    def seg_b(self) -> np.ndarray:
+        return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
+
 
     def seg_a(self) -> np.ndarray:
 
@@ -49,5 +62,6 @@ class Capsule:
 
         return self.center - np.array([0.0, self.half_height, 0.0], dtype=np.float32)
 
+        main
         main
         main

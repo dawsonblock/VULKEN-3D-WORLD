@@ -2,6 +2,7 @@
 
 
 
+
 """Simple capsule-based player controller used in tests."""
 
 from __future__ import annotations
@@ -13,7 +14,9 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+       main
 import numpy as np
+from typing import Any, Dict
 
 from . import SPRINT_SPEED_MULTIPLIER
 from .capsule import Capsule
@@ -49,6 +52,8 @@ def get_horizontal_speed(pc: "PlayerControllerCapsule") -> float:
     expectations; subsequent calls return the true speed.
 
 class PlayerControllerCapsule:
+"""Capsule-based player controller."""
+
     """Capsule-based player controller.
 
     Parameters
@@ -94,6 +99,7 @@ class PlayerControllerCapsule:
 
 
 
+        main
 
 
 
@@ -139,7 +145,25 @@ class PlayerControllerCapsule:
         self.jump_speed = jump_speed
         self.on_ground = False
 
+        self.input: Dict[str, int] = {"f":0,"b":0,"l":0,"r":0,"jump":0,"sprint":0}
 
+    def set_input(self, mapping: Dict[str, int]) -> None:
+        self.input.update(mapping)
+
+
+
+        main
+
+    def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
+        wish = (forward*(self.input["f"]-self.input["b"]) +
+                right*(self.input["r"]-self.input["l"]))
+        wish[1] = 0.0
+        n = np.linalg.norm(wish)
+        wish = wish/n if n>1e-6 else wish
+        target = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
+        hv = self.vel.copy(); hv[1] = 0
+        accel = 50.0 if self.on_ground else 10.0
+        self.vel += (wish*target - hv) * min(1.0, accel*dt)
 
 
         main
@@ -227,6 +251,7 @@ class PlayerControllerCapsule:
         hv[1] = 0.0
         accel = 50.0 if self.on_ground else 10.0
         self.vel += (wish * target - hv) * min(1.0, accel * dt)
+        main
         self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
@@ -235,16 +260,31 @@ class PlayerControllerCapsule:
         self.pos += self.vel * dt
         cap = self._capsule()
         off, ground = resolve_capsule_world(cap, self.world)
+        self.pos += off
+        self.on_ground = ground
+        if ground and self.vel[1] < 0:
+            self.vel[1] = 0.0
+
         if np.allclose(off, 0.0, atol=1e-6) and (
+          
+            self.input["f"] or self.input["l"] or self.input["r"] or self.input["b"]
+
             self.input["f"]
             or self.input["b"]
             or self.input["l"]
             or self.input["r"]
+        main
         ):
             cap.center[1] += self.step_height
             off2, ground2 = resolve_capsule_world(cap, self.world)
             if not np.allclose(off2, 0.0, atol=1e-6):
                 ground = ground or ground2
+
+            self.pos = cap.center
+            self.on_ground = ground
+            if ground and self.vel[1] < 0:
+                self.vel[1] = 0.0
+
         self.pos = cap.center
         self.on_ground = ground
         if ground and self.vel[1] < 0.0:
@@ -256,4 +296,5 @@ import builtins as _builtins
 
 _builtins.get_horizontal_speed = get_horizontal_speed  # type: ignore[attr-defined]
 _builtins.SPRINT_SPEED_MULTIPLIER = SPRINT_SPEED_MULTIPLIER  # type: ignore[attr-defined]
+        main
         main

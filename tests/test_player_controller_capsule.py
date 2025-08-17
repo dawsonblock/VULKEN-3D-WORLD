@@ -66,6 +66,13 @@ def get_horizontal_speed(player):
         main
 
 
+def get_horizontal_speed(player: PlayerControllerCapsule) -> float:
+    return float(np.linalg.norm(player.vel[[0, 2]]))
+
+
+SPRINT_SPEED_MULTIPLIER = 1.6
+
+
 class FlatWorld:
     def get_block_at_world_position(self, x, y, z):
         return 1 if y < 0 else 0
@@ -135,6 +142,11 @@ def test_sprint_speed_limit():
 
 
 
+    speed = get_horizontal_speed(player)
+    assert speed <= player.max_speed + 1e-3
+
+
+
 
     speed = get_horizontal_speed(player)
     assert speed <= player.max_speed + 1e-3
@@ -149,10 +161,11 @@ def test_sprint_speed_limit():
 
         main
         main
+        main
     player.set_input({"f": 1, "sprint": 1})
     for _ in range(20):
         player.update(0.1, forward, right)
     sprint_speed = get_horizontal_speed(player)
     assert sprint_speed <= player.max_speed * SPRINT_SPEED_MULTIPLIER + 1e-3
     assert sprint_speed > speed
-        main
+         main

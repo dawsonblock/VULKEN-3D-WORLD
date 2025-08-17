@@ -1,9 +1,15 @@
+
+const js = require('@eslint/js');
+
+
+        main
 module.exports = [
   {
 
     ignores: ['node_modules/**'],
 
     ignores: [
+
 
 
       '**/build/**',
@@ -34,6 +40,7 @@ module.exports = [
         main
         main
         main
+        main
       'assets/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -50,11 +57,15 @@ module.exports = [
       'node_modules/**'
 
 
+      'node_modules/**'
+
+
       'scripts/**'
     ]
 
 
       'scripts/**'
+        main
         main
     ]
 
@@ -64,6 +75,9 @@ module.exports = [
         main
         main
   },
+
+  js.configs.recommended
+
   js.configs.recommended,
   {
     languageOptions: {
@@ -96,6 +110,7 @@ module.exports = [
     },
     rules: {},
   },
+        main
         main
         main
         main

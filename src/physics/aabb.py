@@ -6,16 +6,24 @@
 
 from __future__ import annotations
 
+        main
 import numpy as np
         main
 from dataclasses import dataclass
 
 import numpy as np
+
 from numpy.typing import NDArray
 
 
 @dataclass
 class AABB:
+
+    center: np.ndarray
+    half: np.ndarray
+
+    @property
+
     center: NDArray[np.float32]
     half: NDArray[np.float32]
 
@@ -33,12 +41,17 @@ class AABB:
 
         main
         main
+        main
     def min(self) -> np.ndarray:
-        """Minimum corner of the box."""
         return self.center - self.half
 
     @property
     def max(self) -> np.ndarray:
+
+        return self.center + self.half
+
+    def moved(self, delta: np.ndarray) -> "AABB":
+
         """Maximum corner of the box."""
 
 
@@ -48,6 +61,7 @@ class AABB:
         return self.center + self.half
 
     def moved(self, delta: NDArray[np.float32]) -> "AABB":
+        main
         return AABB(self.center + delta, self.half)
 
     def overlap_aabb(self, other: "AABB") -> bool:

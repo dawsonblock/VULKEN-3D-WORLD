@@ -1,5 +1,6 @@
 
 
+
 """Placeholder AABB-based player controller used for typing tests."""
 
 from __future__ import annotations
@@ -10,14 +11,18 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
+        main
 import numpy as np
+from typing import Any, Dict
 
 from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
-from .voxel_solid import is_solid
 
 
 class PlayerController:
+
+    """Simplified AABB-based player controller used only for type checking."""
+
 
     """Axis-aligned bounding box player controller."""
 
@@ -35,6 +40,7 @@ class PlayerController:
     """
         main
         main
+        main
 
     def __init__(
         self,
@@ -44,6 +50,9 @@ class PlayerController:
 
 
 
+
+
+        main
         main
         self.world = world_manager
         self.pos = (
@@ -53,6 +62,8 @@ class PlayerController:
         )
         self.vel = np.zeros(3, dtype=np.float32)
         self.aabb = AABB(center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32))
+
+
         self.on_ground = False
         self.input: Dict[str, int] = {}
 
@@ -72,6 +83,7 @@ class PlayerController:
         self.aabb = AABB(
             center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32)
         )
+        main
         self.gravity = 28.0
         self.max_speed = 11.0
         self.accel = 50.0
@@ -82,6 +94,8 @@ class PlayerController:
         self.on_ground = False
 
 
+
+        main
         main
         main
         self.input: Dict[str, int] = {
@@ -98,6 +112,11 @@ class PlayerController:
     def set_input(self, keymap: Dict[str, int]) -> None:
 
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+
+
+    def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
+        """Placeholder update; real implementation omitted."""
+        pass
 
     def update(
         self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
@@ -234,4 +253,5 @@ class PlayerController:
         return aabb.overlap_aabb(voxel_aabb)
 
 
+        main
         main

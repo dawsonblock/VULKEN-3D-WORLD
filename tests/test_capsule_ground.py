@@ -26,6 +26,16 @@ lib.resolve_capsule_ground.restype = ctypes.c_int
 
 
 def test_capsule_ground_collision():
+
+    world = DummyWorld()
+    cap = Capsule(
+        center=np.array([0.0, 0.2, 0.0], dtype=np.float32),
+        half_height=0.9,
+        radius=0.3,
+    )
+    off, ground = resolve_capsule_world(cap, world)
+    assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
+
     cap = Capsule(Vec3(0.0, 0.2, 0.0), 0.9, 0.3)
     off = Vec3()
     grounded = lib.resolve_capsule_ground(ctypes.byref(cap), ctypes.byref(off))
@@ -36,6 +46,7 @@ def test_capsule_ground_collision():
 
 
 
+        main
         main
         main
         main
