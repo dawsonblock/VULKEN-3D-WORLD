@@ -13,7 +13,11 @@ def resolve_capsule_world(cap, world):
     if bottom < 0:
         offset = -bottom
         cap.center[1] += offset
-    return np.array([0.0, offset, 0.0], dtype=np.float32), offset > 0
+    new_center = cap.center.copy()
+    if bottom < 0:
+        offset = -bottom
+        new_center[1] += offset
+    return np.array([0.0, offset, 0.0], dtype=np.float32), offset > 0, new_center
 
 
 class DummyWorld:
