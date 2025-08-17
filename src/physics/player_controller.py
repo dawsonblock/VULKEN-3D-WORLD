@@ -124,7 +124,9 @@ class PlayerController:
                         lo = mid
                     else:
                         hi = mid
-                pos[axis] += step * lo; hit = True; break
+                pos[axis] += step * lo
+                hit = True
+                break
         return pos, hit
 
     def _can_occupy(self, center: np.ndarray) -> bool:
