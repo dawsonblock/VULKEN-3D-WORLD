@@ -1,15 +1,10 @@
 #pragma once
 #include "capsule.hpp"
 #include "aabb.hpp"
+#include "vec3.hpp"
 
-inline Vec3 closestPointOnAABB(const Vec3& p, const Vec3& mn, const Vec3& mx) {
-    return clamp(p, mn, mx);
-}
-
-inline Vec3 closestPointOnSegment(const Vec3& p, const Vec3& a, const Vec3& b) {
-    Vec3 ab = b - a;
-// Epsilon value to avoid division by zero in floating point calculations
 constexpr float DIVISION_EPSILON = 1e-9f;
+
 inline Vec3 closestPointOnAABB(const Vec3& p, const Vec3& mn, const Vec3& mx) {
     return clamp(p, mn, mx);
 }
@@ -22,8 +17,13 @@ inline Vec3 closestPointOnSegment(const Vec3& p, const Vec3& a, const Vec3& b) {
     return a + ab * t;
 }
 
-inline bool capsuleBoxPenetration(const Capsule& cap, const Vec3& mn, const Vec3& mx,
-                                  Vec3& normal, float& penetration) {
+inline bool capsuleBoxPenetration(
+    const Capsule& cap,
+    const Vec3& mn,
+    const Vec3& mx,
+    Vec3& normal,
+    float& penetration
+) {
     Vec3 box_center = (mn + mx) * 0.5f;
     Vec3 q_seg = closestPointOnSegment(box_center, cap.segA(), cap.segB());
     Vec3 q_box = closestPointOnAABB(q_seg, mn, mx);
@@ -46,3 +46,4 @@ inline Vec3 resolveCapsuleWorld(Capsule& cap) {
     }
     return off;
 }
+

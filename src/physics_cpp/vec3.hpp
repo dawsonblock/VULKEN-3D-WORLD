@@ -12,16 +12,15 @@ struct Vec3 {
     Vec3& operator+=(const Vec3& o) { x += o.x; y += o.y; z += o.z; return *this; }
 };
 
-inline float dot(const Vec3& a, const Vec3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+inline float dot(const Vec3& a, const Vec3& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 inline float length(const Vec3& v) { return std::sqrt(dot(v, v)); }
 
 inline Vec3 normalize(const Vec3& v) {
     float len = length(v);
-// Returns the normalized vector, or Vec3::Up if the input is zero-length.
-inline Vec3 normalize(const Vec3& v) {
-    float len = length(v);
-    // Fallback to Up vector if length is zero to avoid division by zero.
-    return (len > 1e-9f) ? v * (1.0f / len) : Vec3::Up;
+    return len > 1e-9f ? v * (1.0f / len) : Vec3(0.0f, 1.0f, 0.0f);
 }
 
 inline Vec3 clamp(const Vec3& v, const Vec3& mn, const Vec3& mx) {
@@ -34,3 +33,4 @@ inline Vec3 clamp(const Vec3& v, const Vec3& mn, const Vec3& mx) {
         clampf(v.z, mn.z, mx.z)
     );
 }
+
