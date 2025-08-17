@@ -1,5 +1,5 @@
 /** @type {import('eslint').Linter.FlatConfig[]} */
-module.exports = [
+export default [
   {
     ignores: ['**/build/**'],
   },
