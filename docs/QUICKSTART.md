@@ -7,7 +7,8 @@ This guide walks you through cloning the repository, running basic smoke tests, 
 Clone the repository and build it with CMake:
 
 ```bash
-git clone <repo-url>
+# Replace <your-repository-url> with the URL of your fork or the main repository on GitHub
+git clone <your-repository-url>
 cd VULKEN-3D-WORLD
 cmake -S . -B build -G Ninja -DENABLE_IMGUI_OVERLAY=ON -DVOXELVK_ENABLE_CUDA=OFF -DVOXELVK_ENABLE_TENSORRT=OFF
 cmake --build build -j
