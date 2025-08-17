@@ -47,7 +47,8 @@ class PlayerControllerCapsule:
         wish = wish/n if n>1e-6 else wish
 
         target = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
-        hv = self.vel.copy(); hv[1]=0.0
+        hv = self.vel.copy()
+        hv[1] = 0.0
         self.vel += (wish*target - hv) * min(1.0, (50.0 if self.on_ground else 10.0)*dt)
 
         self.vel[1] -= self.g * dt
