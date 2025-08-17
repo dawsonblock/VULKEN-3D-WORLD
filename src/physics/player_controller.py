@@ -110,7 +110,8 @@ class PlayerController:
         step = np.sign(delta); remaining = abs(delta); hit = False
         while remaining > 1e-6:
             advance = min(remaining, 0.1)
-            trial = pos.copy(); trial[axis] += step * advance
+            trial = pos.copy()
+            trial[axis] += step * advance
             if self._can_occupy(trial):
                 pos = trial; remaining -= advance
             else:
