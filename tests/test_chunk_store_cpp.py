@@ -8,7 +8,7 @@ from src.world.persistence import ChunkStore as PyChunkStore
 
 def _compile_loader(tmp_path: Path, repo_root: Path) -> Path:
     code = r"""
-#include "src/world/persistence.hpp"
+#include "world/persistence.hpp"
 #include <iostream>
 using namespace world;
 int main(int argc, char** argv){
@@ -34,12 +34,14 @@ def test_cpp_chunk_store_roundtrip(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parent.parent
     vox = np.arange(64, dtype=np.uint8).reshape((4, 4, 4))
 
-    class Chunk:
-        pass
+    from dataclasses import dataclass
 
-    chunk = Chunk()
-    chunk.position = (0, 0)
-    chunk.voxels = vox
+    @dataclass
+    class Chunk:
+        position: tuple[int, int]
+        voxels: np.ndarray
+
+    chunk = Chunk(position=(0, 0), voxels=vox)
 
     store = PyChunkStore(root=tmp_path, codec="zstd", use_rle=True, threads=1)
     store.save_chunk_sync(chunk)
