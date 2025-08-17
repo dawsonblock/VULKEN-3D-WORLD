@@ -49,7 +49,7 @@ class PlayerControllerCapsule:
         target = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
         hv = self.vel.copy()
         hv[1] = 0.0
-        self.vel += (wish*target - hv) * min(1.0, (50.0 if self.on_ground else 10.0)*dt)
+        self.vel += (wish*target - hv) * min(1.0, (GROUND_ACCELERATION if self.on_ground else AIR_ACCELERATION)*dt)
 
         self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
