@@ -1,4 +1,5 @@
 import numpy as np
+
 from src.world.rle import rle_encode, rle_decode
 
 
