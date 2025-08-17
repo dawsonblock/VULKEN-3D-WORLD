@@ -28,10 +28,19 @@ class Capsule:
     @property
 
     def seg_a(self) -> np.ndarray:
+        """Center of the top spherical cap."""
+
+
+    def seg_a(self) -> np.ndarray:
+        main
         return self.center + np.array([0, self.half_height, 0], dtype=np.float32)
 
     @property
-    def seg_b(self) -> np.ndarray:
+    def seg_b(self) -> np.ndarray: 
+      
+      """Center of the bottom spherical cap."""
+        return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
+
         return self.center - np.array([0, self.half_height, 0], dtype=np.float32)
 
 
@@ -62,6 +71,7 @@ class Capsule:
 
         return self.center - np.array([0.0, self.half_height, 0.0], dtype=np.float32)
 
+        main
         main
         main
         main
