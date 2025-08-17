@@ -1,4 +1,3 @@
-
 """Legacy Python physics helpers.
 
 These modules are retained for reference only. C++ equivalents live in
@@ -9,7 +8,6 @@ These modules are retained for reference only. C++ equivalents live in
 from typing import Any
 
 import numpy as np
-
 
 # Multiplier applied to ``max_speed`` when sprint input is active.
 SPRINT_SPEED_MULTIPLIER = 1.6
@@ -34,4 +32,3 @@ def get_horizontal_speed(player: Any) -> float:
 
 
 __all__ = ["SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
-        main
