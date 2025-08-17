@@ -34,7 +34,8 @@ def resolve_capsule_world(cap: Capsule, world: Any) -> tuple[NDArray[np.float32]
     if not collision and world.get_block_at_world_position(cap.center[0], bottom, cap.center[2]):
         collision = True
     if collision:
-        offset = np.array([0.0, -bottom, 0.0], dtype=np.float32)
+        block_y = np.floor(bottom)
+        offset = np.array([0.0, (block_y + 1) - bottom, 0.0], dtype=np.float32)
         cap.center = cap.center + offset
         return offset, True
     return np.zeros(3, dtype=np.float32), False
