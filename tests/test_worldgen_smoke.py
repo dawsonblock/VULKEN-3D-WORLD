@@ -13,6 +13,9 @@ def load_json(path: Path) -> Dict[str, Any]:
 def generate_world(structure: Dict[str, Any], palette: Dict[str, Any]) -> List[int]:
     blocks = structure.get("blocks", [])
     textures = palette.get("textures", {})
+    missing_types = [block["type"] for block in blocks if block["type"] not in textures]
+    if missing_types:
+        raise ValueError(f"Missing block types in palette textures: {missing_types}")
     return [int(textures[block["type"]]) for block in blocks]
 
 
