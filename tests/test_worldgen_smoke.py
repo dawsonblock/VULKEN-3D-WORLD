@@ -16,7 +16,7 @@ def generate_world(structure: Dict[str, Any], palette: Dict[str, Any]) -> List[i
     missing_types = [block["type"] for block in blocks if block["type"] not in textures]
     if missing_types:
         raise ValueError(f"Missing block types in palette textures: {missing_types}")
-    return [int(textures[block["type"]]) for block in blocks]
+    return [textures[block["type"]] for block in blocks]
 
 
 def test_worldgen_smoke() -> None:
