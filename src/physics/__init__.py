@@ -34,4 +34,3 @@ def get_horizontal_speed(player: Any) -> float:
 
 
 __all__ = ["SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
-        main
