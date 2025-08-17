@@ -36,6 +36,7 @@ endif()
 
 # --- BRDF LUT compute integration ---
 if(TARGET VoxelVK_Elite_ALL)
+  set(VOXELVK_ELITE_SOURCES)
   list(APPEND VOXELVK_ELITE_SOURCES src/render/ibl_brdf.cpp)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
   target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
