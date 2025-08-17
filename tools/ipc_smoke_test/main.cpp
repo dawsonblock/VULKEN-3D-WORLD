@@ -30,12 +30,6 @@ int main() {
     int client = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(client, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) { perror("connect"); return 1; }
     int conn = accept(server, nullptr, nullptr);
-    const char* msg = "ping";
-    send(client, msg, std::strlen(msg), 0);
-    char buf[16] = {0};
-    if (client < 0) { std::cerr << "client socket failed\n"; return 1; }
-    if (connect(client, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) { perror("connect"); return 1; }
-    int conn = accept(server, nullptr, nullptr);
     if (conn < 0) { perror("accept"); return 1; }
     const char* msg = "ping";
     ssize_t sent = send(client, msg, std::strlen(msg), 0);

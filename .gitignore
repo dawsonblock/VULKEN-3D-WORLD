@@ -14,3 +14,4 @@ __pycache__/
 node_modules/
 **/__pycache__/
         main
+tests/physics_cpp.so
