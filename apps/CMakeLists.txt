@@ -33,3 +33,22 @@ list(APPEND VOXELVK_ELITE_SOURCES src/render/csm_layout.cpp)
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
 endif()
+
+# --- BRDF LUT compute integration ---
+if(TARGET VoxelVK_Elite_ALL)
+  set(VOXELVK_ELITE_SOURCES)
+  list(APPEND VOXELVK_ELITE_SOURCES src/render/ibl_brdf.cpp)
+  target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
+  target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
+endif()
+
+add_custom_target(mirror_spv_ibl ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/assets/spv/ibl
+  COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_BINARY_DIR}/spv/ibl/brdf_lut.comp.spv
+          ${CMAKE_BINARY_DIR}/assets/spv/ibl/brdf_lut.comp.spv
+  DEPENDS VoxelVK_Shaders)
+
+if(TARGET VoxelVK_Elite_ALL)
+  add_dependencies(VoxelVK_Elite_ALL mirror_spv_ibl)
+endif()
