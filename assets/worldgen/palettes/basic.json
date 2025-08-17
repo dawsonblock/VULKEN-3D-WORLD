@@ -1,0 +1,4 @@
+{
+  "name": "basic",
+  "blocks": ["grass", "dirt", "stone"]
+}

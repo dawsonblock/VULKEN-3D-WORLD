@@ -74,3 +74,7 @@ medium_detail=60
 ```
 
 Adjust these thresholds to control when medium or low detail meshes are chosen.
+
+## World Generation Assets
+
+Palette definitions and structure templates used for world generation are located under `assets/worldgen`. Palettes describe block sets, while templates outline prefab structures like trees and houses.
