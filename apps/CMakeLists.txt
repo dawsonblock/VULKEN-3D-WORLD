@@ -1,9 +1,23 @@
+cmake_minimum_required(VERSION 3.10)
+project(Apps)
+
 find_package(Vulkan REQUIRED)
+find_package(OpenGL REQUIRED)
+# Try to locate GLU component
+find_package(OpenGL COMPONENTS GLU)
+if(NOT TARGET OpenGL::GLU)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(OPENGL_GLU REQUIRED IMPORTED_TARGET glu)
+  add_library(OpenGL::GLU ALIAS PkgConfig::OPENGL_GLU)
+endif()
+find_package(glfw3 REQUIRED)
 
 # --- Build tagging injection ---
 set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + voxel_upgrades_patch + project_compute_graphics_chain + project_dynamic_pbr + project_next_tier_all")
-include(${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake)
-include_directories(${CMAKE_BINARY_DIR}/generated)
+if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake")
+  include(${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake)
+  include_directories(${CMAKE_BINARY_DIR}/generated)
+endif()
 
 
 add_executable(smoke_headless smoke_headless.cpp)
@@ -15,6 +29,12 @@ add_executable(smoke_graphics_headless smoke_graphics_headless.cpp)
 set_target_properties(smoke_graphics_headless PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(smoke_graphics_headless PRIVATE ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(smoke_graphics_headless PRIVATE Vulkan::Vulkan)
+
+# Viewer application demonstrating Vulkan with GLFW
+add_executable(viewer demo_window.cpp)
+set_target_properties(viewer PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
+target_include_directories(viewer PRIVATE ${CMAKE_BINARY_DIR}/generated)
+target_link_libraries(viewer PRIVATE Vulkan::Vulkan glfw OpenGL::GLU)
 
 # --- Build tagging sources ---
 list(APPEND VOXELVK_ELITE_SOURCES
