@@ -3,6 +3,10 @@
 #include "build_info_print.hpp"
 #include <cstring>
 
+#if __has_include(<GLFW/glfw3.h>)
+#include <GLFW/glfw3.h>
+#endif
+
 namespace voxelvk {
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL cb_debug(
@@ -75,6 +79,16 @@ void DebugRuntime_SetEnabled(DebugRuntime& dr, bool on){
 void DebugRuntime_Toggle(DebugRuntime& dr){
     bool v = dr.enabled.load();
     DebugRuntime_SetEnabled(dr, !v);
+}
+
+void DebugRuntime_HandleKey(DebugRuntime& dr, int key, int action){
+#if defined(GLFW_KEY_F9) && defined(GLFW_PRESS)
+    if(action == GLFW_PRESS && key == GLFW_KEY_F9){
+        DebugRuntime_Toggle(dr);
+    }
+#else
+    (void)dr; (void)key; (void)action;
+#endif
 }
 
 } // namespace voxelvk
