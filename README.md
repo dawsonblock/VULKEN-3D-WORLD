@@ -39,16 +39,12 @@ Run the test suite:
 pytest
 ```
 
-```
 
 ## Linting
-To check JavaScript or TypeScript sources, run:
+To check JavaScript or JSON sources, run:
 ```bash
-npx eslint .
-
-
-
-
+npx eslint --config eslint.config.cjs --ext .json package.json
+```
 ## Samples
 
 ### demo_window
