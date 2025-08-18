@@ -11,7 +11,7 @@ from numpy.typing import NDArray
 class Capsule:
     """Simple vertical capsule defined by its center, half-height, and radius."""
 
-    center: NDArray[np.float32]
+    center: NDArray[np.float32, Literal[3]]
     half_height: float
     radius: float
 
