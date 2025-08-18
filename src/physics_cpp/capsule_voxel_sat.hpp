@@ -23,7 +23,7 @@ inline bool capsuleBoxPenetration(const Capsule& cap, const Vec3& mn, const Vec3
     float dist = length(v);
     penetration = cap.radius - dist;
     if (penetration > 0.0f) {
-        normal = dist > 1e-9f ? v * (1.0f / dist) : Vec3(0.0f, 1.0f, 0.0f);
+        normal = normalize(v);
         return true;
     }
     return false;
