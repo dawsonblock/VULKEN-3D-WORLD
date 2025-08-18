@@ -1,3 +1,11 @@
+
+// Placeholder implementation for SAT-based voxelization.
+// TODO: replace with actual voxelization logic.
+
+namespace voxelvk {
+
+void voxelize_sat_dummy() {}
+
 #include <vulkan/vulkan.h>
 #include <cstdint>
 
@@ -36,6 +44,7 @@ void dispatch_voxelize_sat(VkCommandBuffer cmd,
     // The shader should index into the buffer using gl_GlobalInvocationID.x for a single dispatch.
     // vkCmdDispatch(cmd, triangleCount, 1, 1);
 }
+         main
 
 } // namespace voxelvk
 
