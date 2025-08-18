@@ -26,6 +26,9 @@ std::vector<SvoNode> LoadSvo(const std::string& path) {
     }
     uint32_t count = 0;
     in.read(reinterpret_cast<char*>(&count), sizeof(count));
+    if (!in || in.gcount() != sizeof(count)) {
+        throw std::runtime_error("Failed to read SVO node count from file: " + path);
+    }
     if (!in || count == 0 || count > MAX_SVO_NODES) {
         throw std::runtime_error("Invalid SVO node count in file: " + path);
     }
