@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 import ctypes
 import subprocess
 from dataclasses import dataclass
@@ -133,5 +134,3 @@ pytest.skip(
     "capsule ground collision tests require native extensions not built in CI",
     allow_module_level=True,
 )
-        main
-        main

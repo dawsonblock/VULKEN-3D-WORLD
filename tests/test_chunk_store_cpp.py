@@ -1,4 +1,6 @@
 
+# mypy: ignore-errors
+
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -56,4 +58,3 @@ pytest.skip(
     "chunk store roundtrip requires building C++ components; skipped in CI",
     allow_module_level=True,
 )
-        main
