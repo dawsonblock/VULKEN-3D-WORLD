@@ -16,19 +16,25 @@ module.exports = [
       'tools/**',
       'tests/**',
       'apps/**',
-      'scripts/**'
-    ]
+      'scripts/**',
+    ],
   },
   {
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 }
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-unused-vars': 'warn',
+
       'semi': ['error', 'always']
     }
   }
+
+      semi: ['error', 'always'],
+    },
+  },
+        main
 ];
 

@@ -1,18 +1,29 @@
+
 """Utilities to query whether a voxel block type is solid."""
+
+from __future__ import annotations
+         main
 
 from __future__ import annotations
 
 from typing import Dict
 
 
+
+        main
 class BlockType:
     """Enumeration of built-in block types."""
 
     AIR = 0
 
 
+
 # Adapt this to your engine's block registry
 BLOCK_PROPERTIES: Dict[int, Dict[str, bool]] = {}
+
+# Simple registry mapping block type IDs to property dictionaries.
+BLOCK_PROPERTIES: Dict[int, dict] = {}
+        main
 
 
 def is_solid(block_type: int) -> bool:
@@ -26,3 +37,6 @@ def is_solid(block_type: int) -> bool:
 
 __all__ = ["BlockType", "BLOCK_PROPERTIES", "is_solid"]
 
+
+
+        main
