@@ -90,7 +90,13 @@ bool GenerateSDF(VkDevice device,
     VkComputePipelineCreateInfo cpci{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
     VkPipelineShaderStageCreateInfo ss{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
     ss.stage=VK_SHADER_STAGE_COMPUTE_BIT; ss.module=cs; ss.pName="main";
-    cpci.stage=ss; cpci.layout=pl; VkPipeline pipe; if(vkCreateComputePipelines(device,VK_NULL_HANDLE,1,&cpci,nullptr,&pipe)!=VK_SUCCESS){vkDestroyShaderModule(device,cs,nullptr);return false;}
+    cpci.stage = ss;
+    cpci.layout = pl;
+    VkPipeline pipe;
+    if (vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &cpci, nullptr, &pipe) != VK_SUCCESS) {
+        vkDestroyShaderModule(device, cs, nullptr);
+        return false;
+    }
     // Command buffer
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=cmdPool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=1; VkCommandBuffer cmd; vkAllocateCommandBuffers(device,&cbai,&cmd);
     VkCommandBufferBeginInfo cbbi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmd,&cbbi);
