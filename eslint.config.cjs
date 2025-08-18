@@ -6,6 +6,9 @@ const js = require('@eslint/js');
 module.exports = [
   js.configs.recommended,
   {
+
+    ignores: [
+
     ignores: ['**/*'],
   },
 ];
@@ -52,6 +55,7 @@ module.exports = [
         main
         main
     ignores: [
+        main
       '**/build/**',
         main
         main
@@ -110,9 +114,11 @@ module.exports = [
   }
 
 
+
       semi: ['error', 'always'],
     },
   },
+        main
         main
         main
         main
