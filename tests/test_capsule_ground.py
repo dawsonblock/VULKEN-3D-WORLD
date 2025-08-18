@@ -1,4 +1,5 @@
 import ctypes
+import importlib
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -127,11 +128,7 @@ def test_capsule_ground_collision():
     off, ground = resolve_capsule_world(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
 
-import pytest
-
 pytest.skip(
     "capsule ground collision tests require native extensions not built in CI",
     allow_module_level=True,
 )
-        main
-        main
