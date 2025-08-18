@@ -19,7 +19,7 @@ class CapsulePy:
 def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
     """Push the capsule upward if it intersects the ground."""
 
-    off = np.zeros(3, dtype=np.float32)
+    off: np.ndarray = np.zeros(3, dtype=np.float32)
     bottom = cap.center[1] - (cap.half_height + cap.radius)
     ground = False
     if world.get_block_at_world_position(cap.center[0], bottom - 1e-4, cap.center[2]):
@@ -59,6 +59,7 @@ def _load_cpp_lib() -> ctypes.CDLL:
         return ctypes.CDLL(str(LIB_PATH))
     except (subprocess.CalledProcessError, OSError, FileNotFoundError):  # pragma: no cover - skip if compilation fails
         pytest.skip("physics_cpp library unavailable", allow_module_level=True)
+        raise AssertionError("unreachable")
 
 
 lib = _load_cpp_lib()
