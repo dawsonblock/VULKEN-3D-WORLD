@@ -15,7 +15,6 @@ class PlayerControllerCapsule:
     """Basic kinematic character controller represented by a capsule."""
 
     _first_speed_call = True
-
     def __init__(self, world_manager: Any, spawn: np.ndarray) -> None:
         self.world = world_manager
         self.pos = spawn.astype(np.float32)
