@@ -64,7 +64,7 @@ def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
     return np.floor(mn).astype(int), np.floor(mx).astype(int)
 
 
-def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> Tuple[NDArray[np.float32], bool]:
+def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[NDArray[np.float32], bool]:
     """Keep ``cap`` above solid blocks in ``world`` and report displacement and ground state."""
 
     off = np.zeros(3, dtype=np.float32)
