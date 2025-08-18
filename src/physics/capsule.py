@@ -12,7 +12,18 @@ from numpy.typing import NDArray
 class Capsule:
     """Simple vertical capsule defined by its center,
     half-height, and radius."""
+    """
+    Represents a simple vertical capsule defined by its center, half-height, and radius.
 
+    Parameters
+    ----------
+    center : numpy.ndarray of shape (3,)
+        The center of the capsule (midpoint between the two spherical caps), in 3D space.
+    half_height : float
+        Half the height of the cylindrical part of the capsule (distance from center to cap center).
+    radius : float
+        The radius of the spherical caps and the cylinder.
+    """
     center: NDArray[np.float32]
     half_height: float
     radius: float
