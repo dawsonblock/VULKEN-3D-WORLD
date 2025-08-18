@@ -74,6 +74,7 @@ class PlayerController:
             self.vel[1] = self.jump_speed
             self.on_ground = False
 
+        self.on_ground = False
         pos_before = self.pos.copy()
         self._move_and_collide(dt)
         if np.allclose(self.pos, pos_before, atol=1e-5) and (
