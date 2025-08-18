@@ -7,11 +7,17 @@ from __future__ import annotations
 """Utilities to query whether a voxel block type is solid."""
 
 from __future__ import annotations
+
+
+"""Utilities to query whether a voxel block type is solid."""
+
+from __future__ import annotations
          main
 
 from __future__ import annotations
 
 from typing import Dict
+        main
         main
 
 from typing import Dict
@@ -51,5 +57,7 @@ __all__ = ["BlockType", "BLOCK_PROPERTIES", "is_solid"]
 
 
 
+
+        main
         main
         main
