@@ -86,10 +86,3 @@ def test_sprint_speed_limit():
     sprint_speed = get_horizontal_speed(player)
     assert sprint_speed <= player.max_speed * SPRINT_SPEED_MULTIPLIER + 1e-3
     assert sprint_speed > speed
-
-
-pytest.skip(
-    "player controller capsule tests require native physics module; skipped in CI",
-    allow_module_level=True,
-)
-        main
