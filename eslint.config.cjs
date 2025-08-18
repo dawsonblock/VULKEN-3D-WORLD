@@ -1,5 +1,8 @@
 const js = require('@eslint/js');
 
+const globals = require('globals');
+
+
 
 module.exports = [
   js.configs.recommended,
@@ -7,6 +10,7 @@ module.exports = [
     ignores: [
 
 module.exports = [js.configs.recommended];
+        main
 
 module.exports = [
   js.configs.recommended,
@@ -15,6 +19,7 @@ module.exports = [
     ignores: ['node_modules/**', 'tests/**', 'src/**', 'docs/**'],
   },
 
+        main
     ignores: [
       '**/build/**',
         main
@@ -46,6 +51,13 @@ module.exports = [
 ];
 
 
+
+      semi: ['error', 'always'],
+    },
+  },
+];
+
+
       'semi': ['error', 'always']
     }
   }
@@ -57,5 +69,6 @@ module.exports = [
         main
 ];
 
+        main
         main
         main

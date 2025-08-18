@@ -1,9 +1,11 @@
 
+
 """AABB-based player controller for movement inside a voxel world."""
 
 """Simple axis-aligned bounding box player controller used in tests."""
         main
 
+        main
 from __future__ import annotations
 
 from typing import Any, Dict, Tuple
@@ -16,6 +18,15 @@ from .aabb import AABB
 from .voxel_solid import is_solid
 
 SPRINT_SPEED_MULTIPLIER = 1.6
+
+
+SPRINT_SPEED_MULTIPLIER = 1.6
+
+
+class PlayerController:
+    """Axis-aligned bounding box player controller."""
+
+    def __init__(self, world_manager: Any, spawn: np.ndarray | None = None) -> None:
 
 
 
@@ -31,6 +42,7 @@ class PlayerController:
     def __init__(self, world_manager: Any, spawn: NDArray[np.float32] | None = None) -> None:
         """Create a controller at ``spawn`` within ``world_manager``."""
 
+        main
         main
         self.world = world_manager
         if spawn is None:
@@ -71,6 +83,12 @@ class PlayerController:
 
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
+    def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
+        """Advance the controller one step."""
+
+
+        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+
     def update(
         self,
         dt: float,
@@ -79,6 +97,7 @@ class PlayerController:
     ) -> None:
         """Advance the controller one step. This stub performs basic kinematics."""
 
+        main
         main
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
@@ -89,11 +108,17 @@ class PlayerController:
         if wl > 1e-6:
             wish /= wl
 
+
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
+
         target_speed = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
 
         target_speed = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
+        main
         main
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
@@ -109,8 +134,10 @@ class PlayerController:
             self.on_ground = False
 
 
+
         self.on_ground = False
 
+        main
         main
         pos_before = self.pos.copy()
         self._move_and_collide(dt)
@@ -123,8 +150,12 @@ class PlayerController:
                 self.pos = lifted
                 self._move_and_collide(dt)
 
+
+        self.aabb = AABB(center=self.pos, half=self.aabb.half)
+
                 self.aabb = AABB(center=self.pos, half=self.aabb.half)
                 self._move_and_collide(dt)
+        main
 
     def _move_and_collide(self, dt: float) -> None:
         delta = self.vel * dt
