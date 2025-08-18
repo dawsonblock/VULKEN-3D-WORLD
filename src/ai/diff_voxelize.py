@@ -62,6 +62,9 @@ def diff_voxelize(points: np.ndarray, grid_shape: Tuple[int, int, int]) -> tuple
         w.r.t. each input point position.
     """
 
+    points = np.asarray(points)
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError(f"`points` must have shape (N, 3), got {points.shape}")
     pts = np.ascontiguousarray(points, dtype=np.float32)
     n, _ = pts.shape
     w, h, d = grid_shape
