@@ -14,7 +14,7 @@ import sys
 
 def copytree(src: pathlib.Path, dst: pathlib.Path, force: bool) -> None:
     if dst.exists() and force:
-        response = input(f"{dst} exists. Delete it before copying? [y/N]: ").strip().lower()
+        response = input(str(dst) + " exists. Delete it before copying? [y/N]: ").strip().lower()
         if response not in {"y", "yes"}:
             print("Aborting copy; destination not removed.")
             return
