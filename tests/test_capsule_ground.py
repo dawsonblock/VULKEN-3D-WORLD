@@ -7,7 +7,16 @@ pytest.skip(
 )
 
 import importlib
+import importlib
 
+try:
+    capsule_voxel_sat = importlib.import_module("src.physics.capsule_voxel_sat")
+except ImportError:
+    import pytest
+    pytest.skip(
+        "capsule ground collision tests require native extensions not built in CI",
+        allow_module_level=True,
+    )
 from src.physics.capsule import Capsule
 
 
