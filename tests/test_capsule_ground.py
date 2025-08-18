@@ -88,8 +88,6 @@ def test_capsule_ground_collision() -> None:
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__])
 
-import pytest
-
 pytest.skip(
     "capsule ground collision tests require native extensions not built in CI",
     allow_module_level=True,
@@ -101,6 +99,8 @@ pytest.skip(
 
 
 
+
+        main
         main
         main
         main
