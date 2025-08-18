@@ -1,4 +1,11 @@
 
+"""Collision helpers for a capsule against a voxel world using SAT tests."""
+
+from __future__ import annotations
+
+from typing import Optional, Protocol, Tuple, cast
+
+
 """Collision helpers for a capsule against a voxel world."""
 
 
@@ -7,6 +14,7 @@
 from __future__ import annotations
 
 from typing import Any, Optional, Protocol, Tuple, cast
+        main
         main
 
 from __future__ import annotations
@@ -21,11 +29,15 @@ from .voxel_solid import is_solid
 
 
 class WorldProtocol(Protocol):
+
+    """Minimal protocol required from the voxel world used in tests."""
+
     """Minimal protocol expected from the world used in tests."""
 
     def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
         ...
 
+        main
 
 
 def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
@@ -33,16 +45,24 @@ def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
 def closest_point_on_aabb(
     p: NDArray[np.float32], mn: NDArray[np.float32], mx: NDArray[np.float32]
 ) -> NDArray[np.float32]:
+
+    """Return the closest point on the axis-aligned box defined by ``mn`` and ``mx``."""
+
+    return np.minimum(np.maximum(p, mn), mx)
+
     """Clamp point ``p`` to the axis-aligned box defined by ``mn`` and ``mx``."""
     
+        main
 
     return cast(NDArray[np.float32], np.minimum(np.maximum(p, mn), mx))
+
 
 
 
     return np.minimum(np.maximum(p, mn), mx)
 
 
+        main
         main
 def closest_point_on_segment(
     p: NDArray[np.float32], a: NDArray[np.float32], b: NDArray[np.float32]
@@ -61,6 +81,8 @@ def capsule_box_penetration(
 
 
 
+
+        main
         main
     box_center = (mn + mx) * 0.5
     q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
@@ -72,12 +94,17 @@ def capsule_box_penetration(
 
         normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0, 1, 0], dtype=np.float32)
 
+        return True, cast(NDArray[np.float32], normal), float(pen)
+    return False, None, 0.0
+
+
         normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0.0, 1.0, 0.0], dtype=np.float32)
         main
         return True, cast(NDArray[np.float32], normal), float(pen)
     return False, None, 0.0
 
 
+        main
 
 def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     """Return integer min/max voxel coordinates overlapped by ``cap``."""
@@ -85,9 +112,11 @@ def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int_], NDArra
 def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArray[np.int32]]:
         main
     """Return integer min/max voxel coordinates overlapped by ``cap``."""
+
     mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
     mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
     return np.floor(mn).astype(np.int32), np.floor(mx).astype(np.int32)
+        main
         main
 
     mn = cap.center - np.array(
@@ -99,8 +128,14 @@ def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArr
     return np.floor(mn).astype(int), np.floor(mx).astype(int)
 
 
+
+def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[NDArray[np.float32], bool]:
+    """Keep ``cap`` above solid blocks in ``world`` and report displacement and ground state."""
+
+
 def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[np.ndarray, bool]:
     """Very small helper used in tests to keep the capsule above solid blocks."""
+        main
     off = np.zeros(3, dtype=np.float32)
     ground = False
     mn, mx = compute_capsule_voxel_bounds(cap)
@@ -127,6 +162,7 @@ def resolve_capsule_world(
 
 
 __all__ = ["WorldProtocol", "compute_capsule_voxel_bounds", "resolve_capsule_world"]
+
 
 def resolve_capsule_world(
     cap: Capsule, world: WorldProtocol, max_iters: int = 8
@@ -165,6 +201,7 @@ def resolve_capsule_world(
     return total_offset, ground
 
 
+>        main
 __all__ = [
     "WorldProtocol",
     "closest_point_on_aabb",
@@ -176,5 +213,7 @@ __all__ = [
 
 
 
+
+        main
         main
         main
