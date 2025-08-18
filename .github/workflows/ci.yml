@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          npm install
+      - name: Build capsule ground extension
+        run: |
+          g++ -std=c++17 -shared -fPIC src/physics_cpp/physics_c_api.cpp \
+            -Isrc/physics_cpp -o tests/physics_cpp.so
+      - name: Lint
+        run: npx eslint . || true
+      - name: Type check
+        run: |
+          printf '[mypy]\nignore_missing_imports = True\nexclude = src/physics\n' > /tmp/mypy.ini
+          mypy --config-file /tmp/mypy.ini .
+      - name: Test
+        run: pytest tests
+
