@@ -45,6 +45,7 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 2;
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+    dpci.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     dpci.maxSets = 1; dpci.poolSizeCount = 1; dpci.pPoolSizes = &ps;
     vkCreateDescriptorPool(device, &dpci, nullptr, &m_pool);
     return true;
@@ -62,7 +63,7 @@ void VoxelFill::destroy(VkDevice device) {
 void VoxelFill::dispatch(VkCommandBuffer cmd,
                          VkImageView surface_r8ui,
                          VkImageView out_r8ui,
-                         uint32_t SX, uint32_t SY, uint32_t SZ) {
+                         uint32_t SX, uint32_t SY) {
     VkDescriptorSetAllocateInfo dsai{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     dsai.descriptorPool = m_pool; dsai.descriptorSetCount = 1; dsai.pSetLayouts = &m_dset_layout;
     VkDescriptorSet ds; vkAllocateDescriptorSets(m_device, &dsai, &ds);
@@ -83,6 +84,7 @@ void VoxelFill::dispatch(VkCommandBuffer cmd,
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipe_layout, 0, 1, &ds, 0, nullptr);
     uint32_t gx = (SX + 7) / 8, gy = (SY + 7) / 8;
     vkCmdDispatch(cmd, gx, gy, 1);
+    vkFreeDescriptorSets(m_device, m_pool, 1, &ds);
 }
 
 } // namespace voxelvk

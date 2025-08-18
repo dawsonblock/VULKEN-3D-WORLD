@@ -11,7 +11,7 @@ struct VoxelFill {
     void dispatch(VkCommandBuffer cmd,
                   VkImageView surface_r8ui,
                   VkImageView out_r8ui,
-                  uint32_t SX, uint32_t SY, uint32_t SZ);
+                  uint32_t SX, uint32_t SY);
 
 private:
     VkDevice m_device = VK_NULL_HANDLE;
