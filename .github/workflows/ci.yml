@@ -25,7 +25,7 @@ jobs:
           g++ -std=c++17 -shared -fPIC src/physics_cpp/physics_c_api.cpp \
             -Isrc/physics_cpp -o tests/physics_cpp.so
       - name: Lint
-        run: npx eslint . || true
+        run: npx eslint .
       - name: Type check
         run: |
           printf '[mypy]\nignore_missing_imports = True\nexclude = src/physics\n' > /tmp/mypy.ini
