@@ -32,7 +32,6 @@ class PlayerControllerCapsule:
         self,
         world_manager: Any,
         spawn: np.ndarray,
-        *,
         step_height: float = 0.5,
         gravity: float = 28.0,
         max_speed: float = 11.0,
