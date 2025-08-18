@@ -39,7 +39,8 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
 
     VkPipelineLayoutCreateInfo plci{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     plci.setLayoutCount = 1; plci.pSetLayouts = &m_dset_layout;
-    vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout);
+    VkResult pl_result = vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout);
+    if (pl_result != VK_SUCCESS) return false;
 
     auto spirv = load_spirv_file("spv/voxel_fill.comp.spv");
     if (spirv.empty()) return false;
