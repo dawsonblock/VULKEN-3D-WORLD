@@ -22,7 +22,9 @@ void main() {
     ivec3 size = imageSize(uOccupancy);
     if (any(lessThan(p, vec3(0.0))) || any(greaterThanEqual(p, vec3(size)))) return;
 
+
     ivec3 base = ivec3(floor(p));
+    if (any(lessThan(base, ivec3(0))) || any(greaterThan(base, size - ivec3(1)))) return;
     vec3 frac = p - vec3(base);
 
     for (int dx = 0; dx < 2; ++dx) {
