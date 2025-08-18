@@ -1,5 +1,4 @@
 #include <vulkan/vulkan.h>
-#include <cstdint>
 
 namespace voxelvk {
 
