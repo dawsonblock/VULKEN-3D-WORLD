@@ -33,7 +33,7 @@ def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
 class DummyWorld:
     """World with solid blocks below ``y == 0``."""
 
-    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:  # noqa: D401 - simple stub
+    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
         return 1 if y < 0.0 else 0
 
 
