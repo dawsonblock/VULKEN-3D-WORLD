@@ -167,3 +167,8 @@ if(TARGET VoxelVK_Elite_ALL)
     src/world/svo_io.cpp
     src/render/svo_traversal.cpp)
 endif()
+
+# --- Voxel SAT compute dispatch ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp)
+endif()
