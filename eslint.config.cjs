@@ -1,6 +1,8 @@
 const js = require('@eslint/js');
 const globals = require('globals');
 
+        main
+
 module.exports = [
   js.configs.recommended,
   {
@@ -28,5 +30,8 @@ module.exports = [
       'no-unused-vars': 'warn',
       semi: ['error', 'always'],
     },
+
+    ignores: ['node_modules/**', '**/build/**'],
+        main
   },
 ];
