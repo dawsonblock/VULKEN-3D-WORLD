@@ -1,12 +1,16 @@
 
+/* global require, module */
 
 
+
+
+        main
 const js = require('@eslint/js');
-const globals = require('globals');
 
         main
         main
 module.exports = [
+
   js.configs.recommended,
   {
 
@@ -44,17 +48,24 @@ module.exports = [
       'scripts/**'
     ]
   },
+        main
   {
+    ignores: ['node_modules/**'],
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 }
     },
+
+    rules: {},
+  },
+  js.configs.recommended,
+
     rules: {
       'no-unused-vars': 'warn',
       'semi': ['error', 'always']
     }
         main
   }
+        main
         main
 ];
