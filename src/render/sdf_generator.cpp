@@ -14,7 +14,20 @@ static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = buf.size()*4; ci.pCode = buf.data();
     VkShaderModule mod = VK_NULL_HANDLE;
-    if(vkCreateShaderModule(device,&ci,nullptr,&mod)!=VK_SUCCESS) return VK_NULL_HANDLE;
+    if(!f) {
+        fprintf(stderr, "Error: Failed to open shader file '%s'\n", path);
+        return VK_NULL_HANDLE;
+    }
+    fseek(f,0,SEEK_END); long len = ftell(f); fseek(f,0,SEEK_SET);
+    std::vector<uint32_t> buf((size_t)len/4u);
+    fread(buf.data(),1,buf.size()*4,f); fclose(f);
+    VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+    ci.codeSize = buf.size()*4; ci.pCode = buf.data();
+    VkShaderModule mod = VK_NULL_HANDLE;
+    if(vkCreateShaderModule(device,&ci,nullptr,&mod)!=VK_SUCCESS) {
+        fprintf(stderr, "Error: Failed to create shader module from file '%s'\n", path);
+        return VK_NULL_HANDLE;
+    }
     return mod;
 }
 bool GenerateSDF(VkDevice device,
