@@ -64,7 +64,7 @@ class PlayerControllerCapsule:
     def set_input(self, mapping: Dict[str, int]) -> None:
         """Update input state with values from ``mapping``."""
 
-        self.input.update({k: int(bool(v)) for k, v in mapping.items() if k in self.input})
+        self.input.update({k: v for k, v in mapping.items() if k in self.input})
 
     def _capsule(self) -> Capsule:
         """Return a capsule representing the player's current bounds."""
