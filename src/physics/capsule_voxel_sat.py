@@ -17,7 +17,7 @@ class WorldProtocol(Protocol):
     def get_block_at_world_position(self, x: float, y: float, z: float) -> int: ...
 
 
-def compute_capsule_voxel_bounds(cap: Capsule) -> tuple[np.ndarray, np.ndarray]:
+def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
     """Return integer min/max voxel coordinates overlapped by ``cap``."""
     mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
     mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
