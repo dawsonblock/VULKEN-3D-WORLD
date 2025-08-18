@@ -12,7 +12,9 @@ void TraverseSvo(const std::vector<SvoNode>& nodes,
     visit(node, level);
     for (int i = 0; i < 8; ++i) {
         if (node.childMask & (1u << i)) {
-            TraverseSvo(nodes, visit, node.children[i], level + 1);
+            if (node.children[i] < nodes.size()) {
+                TraverseSvo(nodes, visit, node.children[i], level + 1);
+            }
         }
     }
 }
