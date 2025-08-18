@@ -43,5 +43,26 @@ void main() {
                 imageAtomicAdd(uGradZ, vox, gz);
             }
         }
+                sOccupancy[gl_LocalInvocationIndex] += w;
+                float gx = (dx == 1 ? 1.0 : -1.0) * wy * wz;
+                float gy = wx * (dy == 1 ? 1.0 : -1.0) * wz;
+                float gz = wx * wy * (dz == 1 ? 1.0 : -1.0);
+                sGradX[gl_LocalInvocationIndex] += gx;
+                sGradY[gl_LocalInvocationIndex] += gy;
+                sGradZ[gl_LocalInvocationIndex] += gz;
+            }
+        }
+    }
+
+    // Synchronize threads in the workgroup
+    barrier();
+
+    // Each thread writes its accumulated value to the global images
+    ivec3 vox = ivec3(floor(p));
+    if (all(greaterThanEqual(vox, ivec3(0))) && all(lessThan(vox, size))) {
+        imageAtomicAdd(uOccupancy, vox, sOccupancy[gl_LocalInvocationIndex]);
+        imageAtomicAdd(uGradX, vox, sGradX[gl_LocalInvocationIndex]);
+        imageAtomicAdd(uGradY, vox, sGradY[gl_LocalInvocationIndex]);
+        imageAtomicAdd(uGradZ, vox, sGradZ[gl_LocalInvocationIndex]);
     }
 }
