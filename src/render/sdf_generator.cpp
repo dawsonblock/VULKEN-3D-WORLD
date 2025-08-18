@@ -28,7 +28,10 @@ bool GenerateSDF(VkDevice device,
                  VkFormat outFormat,
                  SDFVolume& out){
     (void)seedImage;
-    out.width = extent.width; out.height = extent.height; out.depth = extent.depth; out.format = outFormat;
+    out.width = extent.width;
+    out.height = extent.height;
+    out.depth = extent.depth;
+    out.format = outFormat;
     // Create output image
     VkImageCreateInfo img{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
     img.imageType = VK_IMAGE_TYPE_3D; img.format = outFormat; img.extent = extent;
