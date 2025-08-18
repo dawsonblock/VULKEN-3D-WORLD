@@ -9,7 +9,18 @@ static std::vector<uint32_t> load_spirv_file(const char* path) {
     FILE* f = fopen(path, "rb");
     if (!f) { std::fprintf(stderr, "[voxel_fill] Could not open %s\n", path); return data; }
     fseek(f, 0, SEEK_END); long sz = ftell(f); fseek(f, 0, SEEK_SET);
-    data.resize((size_t)sz / 4); fread(data.data(), 1, (size_t)sz, f); fclose(f);
+    if (sz < 0 || sz % 4 != 0) {
+        std::fprintf(stderr, "[voxel_fill] File size of %s is not divisible by 4 or is negative (%ld bytes)\n", path, sz);
+        fclose(f);
+        return data;
+    }
+    data.resize((size_t)sz / 4);
+    size_t bytes_read = fread(data.data(), 1, (size_t)sz, f);
+    fclose(f);
+    if (bytes_read != (size_t)sz) {
+        std::fprintf(stderr, "[voxel_fill] Failed to read all bytes from %s (read %zu of %ld)\n", path, bytes_read, sz);
+        data.clear();
+    }
     return data;
 }
 
