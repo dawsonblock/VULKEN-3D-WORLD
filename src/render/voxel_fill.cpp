@@ -34,7 +34,8 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     }
     VkDescriptorSetLayoutCreateInfo dsl{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
     dsl.bindingCount = 2; dsl.pBindings = b;
-    vkCreateDescriptorSetLayout(device, &dsl, nullptr, &m_dset_layout);
+    VkResult res = vkCreateDescriptorSetLayout(device, &dsl, nullptr, &m_dset_layout);
+    if (res != VK_SUCCESS) return false;
 
     VkPipelineLayoutCreateInfo plci{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     plci.setLayoutCount = 1; plci.pSetLayouts = &m_dset_layout;
