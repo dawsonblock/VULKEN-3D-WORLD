@@ -26,7 +26,7 @@ class PlayerControllerCapsule:
         self.max_speed = 11.0
         self.jump_speed = 9.5
         self.on_ground = False
-        self.input: Dict[str, int] = {"f":0,"b":0,"l":0,"r":0,"jump":0,"sprint":0}
+        self.input: Dict[str, int] = {"f": 0, "b": 0, "l": 0, "r": 0, "jump": 0, "sprint": 0}
 
     def get_horizontal_speed(self) -> float:
         """Return the magnitude of the horizontal velocity for this instance."""
