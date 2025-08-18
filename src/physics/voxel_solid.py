@@ -16,7 +16,7 @@ BLOCK_PROPERTIES: Dict[int, dict] = {}
 def is_solid(block_type: int) -> bool:
     """Return ``True`` if ``block_type`` represents a solid block."""
     props = BLOCK_PROPERTIES.get(block_type)
-    if props is None:
+    if not props:
         return block_type != BlockType.AIR
     return bool(props.get("solid", block_type != BlockType.AIR))
 
