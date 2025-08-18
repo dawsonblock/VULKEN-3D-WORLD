@@ -47,7 +47,9 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     VkShaderModuleCreateInfo smci{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     smci.codeSize = spirv.size() * 4; smci.pCode = spirv.data();
     VkShaderModule sm; vkCreateShaderModule(device, &smci, nullptr, &sm);
-
+    VkShaderModule sm;
+    VkResult sm_res = vkCreateShaderModule(device, &smci, nullptr, &sm);
+    if (sm_res != VK_SUCCESS) return false;
     VkComputePipelineCreateInfo cpci{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
     cpci.stage = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
     cpci.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
