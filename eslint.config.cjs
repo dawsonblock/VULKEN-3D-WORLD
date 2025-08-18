@@ -16,7 +16,6 @@ module.exports = [
       'tests/**',
       'apps/**',
       'scripts/**',
-      'node_modules/**',
       'src/**'
     ],
     languageOptions: {
