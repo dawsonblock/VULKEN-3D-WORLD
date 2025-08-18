@@ -8,7 +8,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .aabb import AABB
-from .voxel_solid import is_solid  # noqa: F401 - imported for side effects in tests
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
