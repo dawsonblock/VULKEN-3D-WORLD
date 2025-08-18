@@ -14,6 +14,12 @@ const globals = require('globals');
 
 module.exports = [
   js.configs.recommended,
+
+
+const globals = require('globals');
+
+module.exports = [
+  js.configs.recommended,
   {
     ignores: [
 
@@ -37,6 +43,7 @@ module.exports = [
     ignores: ['node_modules/**', 'tests/**', 'src/**', 'docs/**'],
   },
 
+        main
         main
     ignores: [
       '**/build/**',
@@ -91,9 +98,11 @@ module.exports = [
     }
   }
 
+
       semi: ['error', 'always'],
     },
   },
+        main
         main
         main
         main
