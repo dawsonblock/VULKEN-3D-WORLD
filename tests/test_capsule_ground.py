@@ -3,6 +3,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+import ctypes
+import importlib
 import numpy as np
 import pytest
 
@@ -17,16 +19,6 @@ class CapsulePy:
     radius: float
 
 
-def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
-    """Push the capsule upward if it intersects the ground."""
-    off = np.zeros(3, dtype=np.float32)
-    bottom = cap.center[1] - (cap.half_height + cap.radius)
-    ground = False
-    if world.get_block_at_world_position(cap.center[0], bottom - 1e-4, cap.center[2]):
-        delta = -bottom
-        cap.center[1] += delta
-        off[1] = delta
-        ground = True
 def resolve_capsule_world(cap: CapsulePy, world) -> tuple[CapsulePy, np.ndarray, bool]:
     """Push the capsule upward if it intersects the ground. Returns a new CapsulePy instance."""
     off = np.zeros(3, dtype=np.float32)
@@ -127,11 +119,7 @@ def test_capsule_ground_collision():
     off, ground = resolve_capsule_world(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
 
-import pytest
-
 pytest.skip(
     "capsule ground collision tests require native extensions not built in CI",
     allow_module_level=True,
 )
-        main
-        main
