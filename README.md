@@ -39,16 +39,11 @@ Run the test suite:
 pytest
 ```
 
-```
-
 ## Linting
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
-
-
-
-
+```
 ## Samples
 
 ### demo_window
@@ -72,3 +67,8 @@ medium_detail=60
 ```
 
 Adjust these thresholds to control when medium or low detail meshes are chosen.
+
+## World Generation Assets
+Example terrain assets live in the `assets` directory. Material properties, such as albedo and roughness, are defined in
+`assets/config/materials.json`. Replace these placeholders with your own files to experiment with different block types or
+biome palettes during world generation.
