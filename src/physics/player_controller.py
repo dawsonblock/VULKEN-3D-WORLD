@@ -115,7 +115,7 @@ class PlayerController:
     def _sweep_axis(
         self, pos: NDArray[np.float32], axis: int, delta: float
     ) -> Tuple[NDArray[np.float32], bool]:
-        step = float(np.sign(delta))
+        step = np.sign(delta)
         remaining = abs(delta)
         hit = False
         while remaining > 1e-6:
