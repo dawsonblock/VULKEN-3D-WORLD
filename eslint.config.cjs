@@ -1,57 +1,10 @@
 const js = require('@eslint/js');
-
-
-
-module.exports = [
-  js.configs.recommended,
-  {
-    ignores: ['**/*'],
-  },
-];
-
-
-
-const globals = require('globals');
-
-module.exports = [
-  js.configs.recommended,
-
-
-         main
 const globals = require('globals');
 
 module.exports = [
   js.configs.recommended,
   {
     ignores: [
-
-
-const globals = require('globals');
-
-
-
-module.exports = [
-  js.configs.recommended,
-  {
-    ignores: [
-
-module.exports = [js.configs.recommended];
-        main
-
-module.exports = [
-  js.configs.recommended,
-  {
-
-    ignores: ['node_modules/**', 'tests/**', 'src/**', 'docs/**'],
-  },
-
-        main
-        main
-    ignores: [
-      '**/build/**',
-        main
-        main
-        main
       'node_modules/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -78,33 +31,3 @@ module.exports = [
     },
   },
 ];
-
-
-
-
-
-      semi: ['error', 'always'],
-    },
-  },
-];
-
-
-      'semi': ['error', 'always']
-    }
-  }
-
-
-      semi: ['error', 'always'],
-    },
-  },
-        main
-        main
-        main
-        main
-];
-
-        main
-        main
-        main
-        main
-        main

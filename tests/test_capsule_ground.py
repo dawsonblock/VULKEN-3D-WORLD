@@ -1,4 +1,5 @@
 import ctypes
+import importlib
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,8 +10,6 @@ import pytest
 
 @dataclass
 class CapsulePy:
-    """Simple vertical capsule used for Python collision checks."""
-
     center: np.ndarray
     half_height: float
     radius: float
@@ -18,7 +17,6 @@ class CapsulePy:
 
 def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
     """Push the capsule upward if it intersects the ground."""
-
     off = np.zeros(3, dtype=np.float32)
     bottom = cap.center[1] - (cap.half_height + cap.radius)
     ground = False
@@ -77,9 +75,8 @@ lib.resolve_capsule_ground.argtypes = [ctypes.POINTER(Capsule), ctypes.POINTER(V
 lib.resolve_capsule_ground.restype = ctypes.c_int
 
 
-def test_capsule_ground_collision() -> None:
+def test_capsule_ground_collision_python_vs_cpp() -> None:
     """Capsule should be pushed above the ground by both Python and C++ helpers."""
-
     world = DummyWorld()
 
     # Python helper
@@ -96,48 +93,24 @@ def test_capsule_ground_collision() -> None:
     assert off_c.y == pytest.approx(1.0, abs=1e-4)
 
 
-
 spec = importlib.util.find_spec("src.physics.capsule_voxel_sat")
 if spec is None:  # pragma: no cover - skip if module cannot be imported
     pytest.skip("capsule_voxel_sat module unavailable", allow_module_level=True)
-try:
-    capsule_voxel_sat = importlib.import_module("src.physics.capsule_voxel_sat")
-except Exception:  # pragma: no cover - skip if module import fails
-    pytest.skip("capsule_voxel_sat module unavailable", allow_module_level=True)
-resolve_capsule_world = capsule_voxel_sat.resolve_capsule_world
+capsule_voxel_sat = importlib.import_module("src.physics.capsule_voxel_sat")
+resolve_capsule_world_sat = capsule_voxel_sat.resolve_capsule_world
 
 
-class DummyWorld:
+class DummyWorldSat:
     def get_block_at_world_position(self, x, y, z):
         return 1 if int(y) < 0 else 0  # ground at y=0
 
 
-def test_capsule_ground_collision():
-    world = DummyWorld()
-    cap = Capsule(
+def test_capsule_ground_collision_sat() -> None:
+    world = DummyWorldSat()
+    cap = capsule_voxel_sat.Capsule(
         center=np.array([0.0, 0.2, 0.0], dtype=np.float32),
         half_height=0.9,
         radius=0.3,
     )
-    off, ground = resolve_capsule_world(cap, world)
+    off, ground = resolve_capsule_world_sat(cap, world)
     assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
-
-import pytest
-
-pytest.skip(
-    "capsule ground collision tests require native extensions not built in CI",
-    allow_module_level=True,
-)
-
-
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
