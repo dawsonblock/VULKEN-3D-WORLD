@@ -56,7 +56,11 @@ bool GenerateSDF(VkDevice device,
     binds[0].binding=0; binds[0].descriptorType=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; binds[0].descriptorCount=1; binds[0].stageFlags=VK_SHADER_STAGE_COMPUTE_BIT;
     binds[1].binding=1; binds[1].descriptorType=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; binds[1].descriptorCount=1; binds[1].stageFlags=VK_SHADER_STAGE_COMPUTE_BIT;
     VkDescriptorSetLayoutCreateInfo dslci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-    dslci.bindingCount=2; dslci.pBindings=binds; VkDescriptorSetLayout dsl; if(vkCreateDescriptorSetLayout(device,&dslci,nullptr,&dsl)!=VK_SUCCESS) return false;
+    dslci.bindingCount = 2;
+    dslci.pBindings = binds;
+    VkDescriptorSetLayout dsl;
+    if (vkCreateDescriptorSetLayout(device, &dslci, nullptr, &dsl) != VK_SUCCESS)
+        return false;
     VkPushConstantRange pcr{VK_SHADER_STAGE_COMPUTE_BIT,0,sizeof(int)*2};
     VkPipelineLayoutCreateInfo plci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     plci.setLayoutCount=1; plci.pSetLayouts=&dsl; plci.pushConstantRangeCount=1; plci.pPushConstantRanges=&pcr;
