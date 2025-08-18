@@ -86,7 +86,8 @@ class PlayerController:
                 self.pos = lifted
                 self._move_and_collide(dt)
 
-        self.aabb = AABB(center=self.pos, half=self.aabb.half)
+                self.aabb = AABB(center=self.pos, half=self.aabb.half)
+                self._move_and_collide(dt)
 
     def _move_and_collide(self, dt: float) -> None:
         delta = self.vel * dt
