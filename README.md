@@ -8,6 +8,7 @@ This repo contains:
 - GPU blockizer compute shader (`shaders_vk/ai/blockize.comp.glsl`)
 - Self-contained smoke test + CTest
 - GitHub Actions CI (Linux & Windows) that installs Vulkan SDK, builds, tests, and publishes artifacts
+See [Quickstart guide](docs/QUICKSTART.md) for setup and usage.
 
 ## Local build
 ```bash
