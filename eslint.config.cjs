@@ -1,34 +1,10 @@
-
-
-
 const js = require('@eslint/js');
 const globals = require('globals');
 
-        main
-        main
 module.exports = [
   js.configs.recommended,
   {
-
-    ignores: ['**/*'],
-  },
-
     ignores: [
-
-      'node_modules/',
-      'build_ci_sanity/',
-      'cmake/',
-      'docs/',
-      'assets/',
-      'shaders/',
-      'shaders_vk/',
-      'tools/',
-      'tests/',
-      'src/',
-      'apps/',
-      'scripts/'
-    ]
-
       '**/build/**',
       'node_modules/**',
       'build_ci_sanity/**',
@@ -39,7 +15,6 @@ module.exports = [
       'shaders_vk/**',
       'tools/**',
       'tests/**',
-      'src/**',
       'apps/**',
       'scripts/**'
     ]
@@ -54,7 +29,6 @@ module.exports = [
       'no-unused-vars': 'warn',
       'semi': ['error', 'always']
     }
-        main
   }
-        main
 ];
+
