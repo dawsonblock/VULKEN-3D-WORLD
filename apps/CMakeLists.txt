@@ -34,6 +34,11 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
 endif()
 
+# --- Voxel SAT compute dispatch ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp)
+endif()
+
 # --- BRDF LUT compute integration ---
 if(TARGET VoxelVK_Elite_ALL)
   set(VOXELVK_ELITE_SOURCES)
