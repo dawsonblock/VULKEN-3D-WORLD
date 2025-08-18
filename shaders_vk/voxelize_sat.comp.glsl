@@ -1,6 +1,7 @@
 #version 450
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
+
 layout(set = 0, binding = 0, r32ui) uniform uimage3D uOccupancy;
 
 layout(push_constant) uniform PC {
@@ -87,4 +88,15 @@ void main() {
     if(triBoxOverlap(center, half, pc.v0, pc.v1, pc.v2)) {
         imageAtomicOr(uOccupancy, coord, 1u);
     }
+
+layout(push_constant) uniform TrianglePC {
+    vec4 v0;
+    vec4 v1;
+    vec4 v2;
+} pc;
+
+// Placeholder compute shader for voxelization.
+void main() {
+    // Implementation would voxelize the triangle defined by pc.v0, pc.v1 and pc.v2.
+        main
 }

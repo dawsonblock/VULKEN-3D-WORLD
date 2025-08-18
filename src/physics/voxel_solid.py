@@ -2,7 +2,22 @@
 
 from __future__ import annotations
 
+
 from typing import Dict
+
+
+
+"""Utilities to query whether a voxel block type is solid."""
+
+from __future__ import annotations
+         main
+
+from __future__ import annotations
+
+from typing import Dict
+        main
+        main
+        main
 
 
 class BlockType:
@@ -24,3 +39,12 @@ def is_solid(block_type: int) -> bool:
 
 
 __all__ = ["BlockType", "BLOCK_PROPERTIES", "is_solid"]
+
+
+
+
+
+        main
+        main
+        main
+        main
