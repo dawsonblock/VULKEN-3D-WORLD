@@ -16,7 +16,7 @@ module.exports = [
       'tests/**',
       'apps/**',
       'scripts/**',
-      'src/**'
+      'node_modules/**'
     ],
     languageOptions: {
       ecmaVersion: 2021,
