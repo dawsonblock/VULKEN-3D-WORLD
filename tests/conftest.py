@@ -26,6 +26,6 @@ if not LIB_PATH.exists():  # pragma: no cover - exercised in CI
                 str(LIB_PATH),
             ]
         )
-    except Exception:
+    except (subprocess.CalledProcessError, OSError, FileNotFoundError):
         # The tests that rely on this library will skip if it is missing.
         pass
