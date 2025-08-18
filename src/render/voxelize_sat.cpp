@@ -25,7 +25,9 @@ void dispatch_voxelize_sat(VkCommandBuffer cmd,
     for (uint32_t i = 0; i < triangleCount; ++i) {
         vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(TrianglePC), &triangles[i]);
         vkCmdDispatch(cmd, 1, 1, 1);
-    }
+    // Triangle data should be uploaded to a storage buffer and bound via descriptorSet.
+    // The shader should index into the buffer using gl_GlobalInvocationID.x.
+    vkCmdDispatch(cmd, triangleCount, 1, 1);
 }
 
 } // namespace voxelvk
