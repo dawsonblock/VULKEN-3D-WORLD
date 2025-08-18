@@ -34,10 +34,23 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
 endif()
 
+# --- Voxel SAT compute dispatch ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp)
+endif()
+
 # --- BRDF LUT compute integration ---
 if(TARGET VoxelVK_Elite_ALL)
   set(VOXELVK_ELITE_SOURCES)
   list(APPEND VOXELVK_ELITE_SOURCES src/render/ibl_brdf.cpp)
+  target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
+  target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
+endif()
+
+# --- SDF generator staging pipeline ---
+if(TARGET VoxelVK_Elite_ALL)
+  set(VOXELVK_ELITE_SOURCES)
+  list(APPEND VOXELVK_ELITE_SOURCES src/render/sdf_generator.cpp)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
   target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
 endif()
