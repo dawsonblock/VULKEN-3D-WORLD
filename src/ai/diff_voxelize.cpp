@@ -45,7 +45,47 @@ extern "C" void diff_voxelize(const float* points,
                     float gz = wx * wy * (dz ? 1.0f : -1.0f);
                     point_grad[3 * i + 0] += gx;
                     point_grad[3 * i + 1] += gy;
-                    point_grad[3 * i + 2] += gz;
+        // Precompute weights and gradients for 8 combinations
+        float weights[8];
+        float grad_x[8];
+        float grad_y[8];
+        float grad_z[8];
+        int idx8 = 0;
+        for (int dx = 0; dx < 2; ++dx) {
+            float wx = dx ? fx : 1.0f - fx;
+            float gx = (dx ? 1.0f : -1.0f);
+            for (int dy = 0; dy < 2; ++dy) {
+                float wy = dy ? fy : 1.0f - fy;
+                float gy = (dy ? 1.0f : -1.0f);
+                for (int dz = 0; dz < 2; ++dz) {
+                    float wz = dz ? fz : 1.0f - fz;
+                    float gz = (dz ? 1.0f : -1.0f);
+                    weights[idx8] = wx * wy * wz;
+                    grad_x[idx8] = gx * wy * wz;
+                    grad_y[idx8] = wx * gy * wz;
+                    grad_z[idx8] = wx * wy * gz;
+                    ++idx8;
+                }
+            }
+        }
+        // Now loop over the 8 combinations using the precomputed arrays
+        idx8 = 0;
+        for (int dx = 0; dx < 2; ++dx) {
+            for (int dy = 0; dy < 2; ++dy) {
+                for (int dz = 0; dz < 2; ++dz) {
+                    int vx = ix + dx;
+                    int vy = iy + dy;
+                    int vz = iz + dz;
+                    if (vx < 0 || vx >= width || vy < 0 || vy >= height || vz < 0 || vz >= depth)
+                        continue;
+                    std::size_t idx = static_cast<std::size_t>(vx) +
+                                      static_cast<std::size_t>(vy) * width +
+                                      static_cast<std::size_t>(vz) * width * height;
+                    occupancy[idx] += weights[idx8];
+                    point_grad[3 * i + 0] += grad_x[idx8];
+                    point_grad[3 * i + 1] += grad_y[idx8];
+                    point_grad[3 * i + 2] += grad_z[idx8];
+                    ++idx8;
                 }
             }
         }
