@@ -86,7 +86,12 @@ void VoxelFill::dispatch(VkCommandBuffer cmd,
                          uint32_t SX, uint32_t SY) {
     VkDescriptorSetAllocateInfo dsai{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     dsai.descriptorPool = m_pool; dsai.descriptorSetCount = 1; dsai.pSetLayouts = &m_dset_layout;
-    VkDescriptorSet ds; vkAllocateDescriptorSets(m_device, &dsai, &ds);
+    VkDescriptorSet ds;
+    VkResult alloc_result = vkAllocateDescriptorSets(m_device, &dsai, &ds);
+    if (alloc_result != VK_SUCCESS) {
+        std::fprintf(stderr, "[voxel_fill] vkAllocateDescriptorSets failed with error code %d\n", alloc_result);
+        return;
+    }
 
     auto storage_image = [](VkImageView v) {
         VkDescriptorImageInfo ii{}; ii.imageView = v; ii.imageLayout = VK_IMAGE_LAYOUT_GENERAL; return ii; };
