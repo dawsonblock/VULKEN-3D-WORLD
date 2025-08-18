@@ -143,7 +143,10 @@ bool GenerateSDF(VkDevice device,
     vkDestroyPipelineLayout(device,pl,nullptr);
     vkDestroyDescriptorSetLayout(device,dsl,nullptr);
     vkDestroyDescriptorPool(device,pool,nullptr);
-    vkDestroyImageView(device,tmpAView,nullptr); vkDestroyImageView(device,tmpBView,nullptr); vmaDestroyImage(allocator,tmpA,tmpAAlloc); vmaDestroyImage(allocator,tmpB,tmpBAlloc);
+    vkDestroyImageView(device, tmpAView, nullptr);
+    vkDestroyImageView(device, tmpBView, nullptr);
+    vmaDestroyImage(allocator, tmpA, tmpAAlloc);
+    vmaDestroyImage(allocator, tmpB, tmpBAlloc);
     return true;
 }
 void DestroySDFVolume(VkDevice device, VmaAllocator allocator, SDFVolume& vol){
