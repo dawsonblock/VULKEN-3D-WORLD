@@ -1,4 +1,8 @@
+
 """Axis-aligned bounding box helpers for collision tests."""
+
+"""Axis-aligned bounding box utilities."""
+        main
 
 from __future__ import annotations
 
@@ -14,9 +18,9 @@ class AABB:
     Parameters
     ----------
     center:
-        Center point of the box ``(x, y, z)`` in world coordinates.
+        Center point of the box in world coordinates.
     half:
-        Half extents ``(hx, hy, hz)`` from the center.
+        Half extents of the box along each axis.
     """
 
     center: NDArray[np.float32]
@@ -24,20 +28,28 @@ class AABB:
 
     @property
     def min(self) -> NDArray[np.float32]:
-        """Return the minimum corner of the box."""
+        """Minimum corner of the box."""
+
         return self.center - self.half
 
     @property
     def max(self) -> NDArray[np.float32]:
-        """Return the maximum corner of the box."""
+        """Maximum corner of the box."""
+
         return self.center + self.half
 
     def moved(self, delta: NDArray[np.float32]) -> "AABB":
-        """Return a new AABB translated by ``delta``."""
+        """Return a translated copy of this box."""
+
         return AABB(self.center + delta, self.half)
 
     def overlap_aabb(self, other: "AABB") -> bool:
+
         """Return ``True`` if this box intersects ``other``."""
+
+        """Check if this box overlaps another."""
+
+        main
         return not (
             self.max[0] <= other.min[0] or self.min[0] >= other.max[0] or
             self.max[1] <= other.min[1] or self.min[1] >= other.max[1] or
