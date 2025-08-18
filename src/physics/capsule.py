@@ -3,11 +3,17 @@
 
         main
         main
+        main
 """Minimal capsule representation for tests."""
 
 
 import numpy as np
 from dataclasses import dataclass
+
+from dataclasses import dataclass
+import numpy as np
+from numpy.typing import NDArray
+
 
 from dataclasses import dataclass
 import numpy as np
@@ -24,10 +30,13 @@ import numpy as np
         main
 from numpy.typing import NDArray
         main
+        main
 
 
 @dataclass
 class Capsule:
+
+    """Vertical capsule defined by its center, half-height, and radius."""
 
     """Vertical capsule defined by its center, half-height, and radius."""
 
@@ -47,6 +56,7 @@ class Capsule:
 
         main
     """Simple vertical capsule defined by its center, half-height, and radius."""
+        main
         main
         main
 
@@ -72,6 +82,7 @@ __all__ = ["Capsule"]
 
 
 
+        main
         main
         main
         main
