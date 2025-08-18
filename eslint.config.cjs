@@ -1,5 +1,11 @@
 const js = require('@eslint/js');
 
+
+module.exports = [
+  js.configs.recommended,
+  {
+    ignores: [
+
 module.exports = [js.configs.recommended];
 
 module.exports = [
@@ -11,6 +17,7 @@ module.exports = [
 
     ignores: [
       '**/build/**',
+        main
       'node_modules/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -33,6 +40,12 @@ module.exports = [
     rules: {
       'no-unused-vars': 'warn',
 
+      semi: ['error', 'always'],
+    },
+  },
+];
+
+
       'semi': ['error', 'always']
     }
   }
@@ -44,4 +57,5 @@ module.exports = [
         main
 ];
 
+        main
         main
