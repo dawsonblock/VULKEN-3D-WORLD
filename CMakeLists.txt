@@ -159,3 +159,11 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
+
+# --- Sparse voxel octree ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE
+    src/world/svo_builder.cpp
+    src/world/svo_io.cpp
+    src/render/svo_traversal.cpp)
+endif()
