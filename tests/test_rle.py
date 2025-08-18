@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pytest
+np = pytest.importorskip("numpy")
+import numpy.typing as npt
 
 if TYPE_CHECKING:
-    import numpy as np
-else:  # pragma: no cover - skip if numpy is missing
-    np = pytest.importorskip("numpy")
+    import numpy as _np
 
 from src.world.rle import rle_encode, rle_decode
 
 
-def _roundtrip(arr: np.ndarray) -> None:
+def _roundtrip(arr: npt.NDArray[_np.uint8]) -> None:
     vals, counts, shape = rle_encode(arr)
     decoded = rle_decode(vals, counts, shape)
     assert decoded.shape == arr.shape
