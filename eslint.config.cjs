@@ -6,6 +6,15 @@ module.exports = [
   js.configs.recommended,
   {
     ignores: [
+      '**/build/**',
+
+
+const globals = require('globals');
+
+module.exports = [
+  js.configs.recommended,
+  {
+    ignores: [
 
 =
 const globals = require('globals');
@@ -17,6 +26,7 @@ module.exports = [
   
   {   ignores: [
         main
+        main
       'node_modules/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -27,6 +37,10 @@ module.exports = [
       'tools/**',
       'tests/**',
       'apps/**',
+
+      'scripts/**'
+    ],
+
       'scripts/**',
 
       '**/build/**',
@@ -37,13 +51,19 @@ module.exports = [
       '**/build/**'
     ],
         main
+        main
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 },
+      globals: { ...globals.node, ...globals.es2021 }
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      semi: ['error', 'always']
+    }
+  }
+
       semi: ['error', 'always'],
 
     },
@@ -54,6 +74,7 @@ module.exports = [
 
     ignores: ['node_modules/**', '**/build/**'],
   },
+        main
         main
         main
 ];
