@@ -108,7 +108,7 @@ void VoxelFill::dispatch(VkCommandBuffer cmd,
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipe_layout, 0, 1, &ds, 0, nullptr);
     uint32_t gx = (SX + 7) / 8, gy = (SY + 7) / 8;
-    vkCmdDispatch(cmd, gx, gy, 1);
+    vkCmdDispatch(cmd, gx, gy, SZ);
     vkFreeDescriptorSets(m_device, m_pool, 1, &ds);
 }
 
