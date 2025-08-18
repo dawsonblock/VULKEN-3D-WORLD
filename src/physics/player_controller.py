@@ -57,7 +57,8 @@ class PlayerController:
             wish /= wl
         target_speed = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
         accel = self.accel if self.on_ground else self.air_accel
-        hv = self.vel.copy(); hv[1] = 0.0
+        hv = self.vel.copy()
+        hv[1] = 0.0
         self.vel += (wish * target_speed - hv) * min(1.0, accel * dt)
         if self.on_ground and wl < 1e-6:
             self.vel[0] *= max(0.0, 1.0 - self.friction * dt)
