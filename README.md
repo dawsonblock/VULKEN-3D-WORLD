@@ -60,9 +60,6 @@ cmake --build build --target demo_window
 Run it:
 ```bash
 ./build/demo_window
-        main
-        main
-        main
 ```
 
 ## World streaming and LOD
