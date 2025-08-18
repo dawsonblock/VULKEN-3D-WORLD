@@ -52,7 +52,7 @@ class PlayerControllerCapsule:
         hv = self.vel.copy()
         hv[1] = 0.0
         accel = 50.0 if self.on_ground else 10.0
-        self.vel += (wish*target - hv) * min(1.0, accel*dt)
+        self.vel += (wish * target - hv) * min(1.0, accel * dt)
         self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
