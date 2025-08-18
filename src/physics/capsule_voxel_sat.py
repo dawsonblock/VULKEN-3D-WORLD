@@ -135,6 +135,7 @@ def resolve_capsule_world(
 
 
 __all__ = [
+    "Capsule",
     "WorldProtocol",
     "closest_point_on_aabb",
     "closest_point_on_segment",
