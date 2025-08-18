@@ -1,4 +1,8 @@
+
+"""AABB-based player controller for movement inside a voxel world."""
+
 """Simple axis-aligned bounding box player controller used in tests."""
+        main
 
 from __future__ import annotations
 
@@ -11,6 +15,15 @@ from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
 from .voxel_solid import is_solid
 
+SPRINT_SPEED_MULTIPLIER = 1.6
+
+
+
+class PlayerController:
+    """Axis-aligned bounding box player controller."""
+
+    def __init__(self, world_manager: Any, spawn: np.ndarray | None = None) -> None:
+        """Initialize the controller at ``spawn`` within ``world_manager``."""
 
 class PlayerController:
     """Axis-aligned bounding box player controller."""
@@ -18,6 +31,7 @@ class PlayerController:
     def __init__(self, world_manager: Any, spawn: NDArray[np.float32] | None = None) -> None:
         """Create a controller at ``spawn`` within ``world_manager``."""
 
+        main
         self.world = world_manager
         if spawn is None:
             spawn = np.array([0.0, 100.0, 0.0], dtype=np.float32)
@@ -51,6 +65,12 @@ class PlayerController:
 
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
+    def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
+        """Advance the controller one step."""
+
+
+        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+
     def update(
         self,
         dt: float,
@@ -59,6 +79,7 @@ class PlayerController:
     ) -> None:
         """Advance the controller one step. This stub performs basic kinematics."""
 
+        main
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
             + camera_right * (self.input["r"] - self.input["l"])
@@ -68,9 +89,12 @@ class PlayerController:
         if wl > 1e-6:
             wish /= wl
 
+        target_speed = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
+
         target_speed = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
+        main
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
         hv[1] = 0.0
@@ -78,11 +102,16 @@ class PlayerController:
         if self.on_ground and wl < 1e-6:
             self.vel[0] *= max(0.0, 1.0 - self.friction * dt)
             self.vel[2] *= max(0.0, 1.0 - self.friction * dt)
+
         self.vel[1] -= self.gravity * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
             self.on_ground = False
 
+
+        self.on_ground = False
+
+        main
         pos_before = self.pos.copy()
         self._move_and_collide(dt)
         if np.allclose(self.pos, pos_before, atol=1e-5) and (
@@ -92,6 +121,9 @@ class PlayerController:
             lifted[1] += self.step_height
             if self._can_occupy(lifted):
                 self.pos = lifted
+                self._move_and_collide(dt)
+
+                self.aabb = AABB(center=self.pos, half=self.aabb.half)
                 self._move_and_collide(dt)
 
     def _move_and_collide(self, dt: float) -> None:
@@ -147,12 +179,9 @@ class PlayerController:
         for y in range(mn[1], mx[1] + 1):
             for z in range(mn[2], mx[2] + 1):
                 for x in range(mn[0], mx[0] + 1):
-                    bt = self.world.get_block_at_world_position(
-                        float(x), float(y), float(z)
-                    )
-                    if is_solid(bt):
-                        if self._aabb_voxel_overlap(aabb, x, y, z):
-                            return False
+                    bt = self.world.get_block_at_world_position(float(x), float(y), float(z))
+                    if is_solid(bt) and self._aabb_voxel_overlap(aabb, x, y, z):
+                        return False
         return True
 
     @staticmethod
