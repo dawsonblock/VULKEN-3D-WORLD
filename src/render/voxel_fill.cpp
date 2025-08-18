@@ -56,7 +56,11 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     cpci.stage.module = sm; cpci.stage.pName = "main";
     cpci.layout = m_pipe_layout;
     vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
+    VkResult pipelineResult = vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
     vkDestroyShaderModule(device, sm, nullptr);
+    if (pipelineResult != VK_SUCCESS) {
+        return false;
+    }
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 2;
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
