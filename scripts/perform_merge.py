@@ -14,8 +14,19 @@ import sys
 
 def copytree(src: pathlib.Path, dst: pathlib.Path, force: bool) -> None:
     if dst.exists() and force:
+        response = input(f"{dst} exists. Delete it before copying? [y/N]: ").strip().lower()
+        if response not in {"y", "yes"}:
+            print("Aborting copy; destination not removed.")
+            return
+        print(f"Removing existing destination {dst}")
         shutil.rmtree(dst)
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns('.git', 'build', 'CMakeFiles', '__pycache__'))
+    shutil.copytree(
+        src,
+        dst,
+        ignore=shutil.ignore_patterns(
+            ".git", "build", "CMakeFiles", "__pycache__"
+        ),
+    )
 
 def main() -> int:
     parser = argparse.ArgumentParser()
