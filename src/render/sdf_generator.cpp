@@ -134,7 +134,11 @@ bool GenerateSDF(VkDevice device,
     vkCmdDispatch(cmd,(extent.width+3)/4,(extent.height+3)/4,(extent.depth+3)/4);
     vkEndCommandBuffer(cmd);
     VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO}; si.commandBufferCount=1; si.pCommandBuffers=&cmd; vkQueueSubmit(queue,1,&si,VK_NULL_HANDLE); vkQueueWaitIdle(queue);
-    vkDestroyShaderModule(device,cs,nullptr); vkDestroyPipeline(device,pipe,nullptr); vkDestroyPipelineLayout(device,pl,nullptr); vkDestroyDescriptorSetLayout(device,dsl,nullptr); vkDestroyDescriptorPool(device,pool,nullptr);
+    vkDestroyShaderModule(device,cs,nullptr);
+    vkDestroyPipeline(device,pipe,nullptr);
+    vkDestroyPipelineLayout(device,pl,nullptr);
+    vkDestroyDescriptorSetLayout(device,dsl,nullptr);
+    vkDestroyDescriptorPool(device,pool,nullptr);
     vkDestroyImageView(device,tmpAView,nullptr); vkDestroyImageView(device,tmpBView,nullptr); vmaDestroyImage(allocator,tmpA,tmpAAlloc); vmaDestroyImage(allocator,tmpB,tmpBAlloc);
     return true;
 }
