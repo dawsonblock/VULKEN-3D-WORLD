@@ -95,7 +95,18 @@ class PlayerController:
         self.aabb = AABB(center=self.pos, half=self.aabb.half)
 
     def _can_occupy(self, pos: NDArray[np.float32]) -> bool:
-        """Return ``True`` if the controller can occupy ``pos``."""
+        """Return ``True`` if the controller can occupy ``pos`` (i.e., no collision with solid blocks)."""
+        # Compute the AABB at the proposed position
+        aabb = AABB(center=pos, half=self.aabb.half)
+        # Get the min and max corners of the AABB
+        min_corner = np.floor(aabb.center - aabb.half).astype(int)
+        max_corner = np.ceil(aabb.center + aabb.half).astype(int)
+        # Iterate over all voxel coordinates covered by the AABB
+        for x in range(min_corner[0], max_corner[0] + 1):
+            for y in range(min_corner[1], max_corner[1] + 1):
+                for z in range(min_corner[2], max_corner[2] + 1):
+                    if is_solid(self.world, (x, y, z)):
+                        return False
         return True
 
     def _move_and_collide(self, dt: float) -> None:
