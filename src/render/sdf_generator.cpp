@@ -6,7 +6,9 @@ namespace voxelvk {
 static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path){
     FILE* f = fopen(path, "rb");
     if(!f) return VK_NULL_HANDLE;
-    fseek(f,0,SEEK_END); long len = ftell(f); fseek(f,0,SEEK_SET);
+    fseek(f, 0, SEEK_END);
+    long len = ftell(f);
+    fseek(f, 0, SEEK_SET);
     std::vector<uint32_t> buf((size_t)len/4u);
     fread(buf.data(),1,buf.size()*4,f); fclose(f);
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
