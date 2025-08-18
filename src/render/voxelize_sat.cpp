@@ -33,8 +33,13 @@ void VoxelizeMeshSAT(VkCommandBuffer cmd,
         glm::vec3 triMin = glm::min(t.v0, glm::min(t.v1, t.v2));
         glm::vec3 triMax = glm::max(t.v0, glm::max(t.v1, t.v2));
         glm::ivec3 minV = glm::floor((triMin - origin) / voxelSize);
-        glm::ivec3 maxV = glm::floor((triMax - origin) / voxelSize);
+        glm::ivec3 maxV = glm::ceil((triMax - origin) / voxelSize) - glm::ivec3(1);
+        minV = glm::clamp(minV, glm::ivec3(0), gridDim - glm::ivec3(1));
+        maxV = glm::clamp(maxV, glm::ivec3(0), gridDim - glm::ivec3(1));
         glm::ivec3 extent = maxV - minV + glm::ivec3(1);
+        if (extent.x <= 0 || extent.y <= 0 || extent.z <= 0) {
+            continue;
+        }
 
         VoxelizePush pc;
         pc.v0 = t.v0;
