@@ -66,7 +66,8 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     dpci.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     dpci.maxSets = 1; dpci.poolSizeCount = 1; dpci.pPoolSizes = &ps;
-    vkCreateDescriptorPool(device, &dpci, nullptr, &m_pool);
+    VkResult poolResult = vkCreateDescriptorPool(device, &dpci, nullptr, &m_pool);
+    if (poolResult != VK_SUCCESS) return false;
     return true;
 }
 
