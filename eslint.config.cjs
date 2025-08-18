@@ -15,7 +15,6 @@ module.exports = [
       'shaders_vk/**',
       'tools/**',
       'tests/**',
-      'src/**',
       'apps/**',
       'scripts/**',
     ],
@@ -28,7 +27,14 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      'semi': ['error', 'always']
+    }
+  }
+
       semi: ['error', 'always'],
     },
   },
+        main
 ];
+

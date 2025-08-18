@@ -1,10 +1,10 @@
-
-"""Legacy Python physics helpers.
+"""Shared helpers for player movement physics.
 
 These modules are retained for reference only. C++ equivalents live in
-``src/physics_cpp`` and should be preferred for production use."""
+``src/physics_cpp`` and should be preferred for production use.
+"""
 
-# Shared helpers for player movement physics.
+from __future__ import annotations
 
 from typing import Any
 
@@ -21,8 +21,8 @@ def get_horizontal_speed(player: Any) -> float:
     Parameters
     ----------
     player:
-        Object with a ``vel`` attribute representing velocity as a numpy
-        array. Only the X and Z components are considered.
+        Object with a ``vel`` attribute representing velocity as a numpy array.
+        Only the X and Z components are considered.
 
     Returns
     -------
@@ -34,3 +34,4 @@ def get_horizontal_speed(player: Any) -> float:
 
 
 __all__ = ["SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
+

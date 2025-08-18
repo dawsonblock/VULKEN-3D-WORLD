@@ -1,44 +1,31 @@
-"""AABB-based player controller for movement inside a voxel world."""
-
-
-from typing import Any, Dict, Tuple
+"""Simple axis-aligned bounding box player controller used in tests."""
 
 from __future__ import annotations
 
-from typing import Any, Dict
-        main
+from typing import Any, Dict, Tuple
 
 import numpy as np
+from numpy.typing import NDArray
 
+from . import SPRINT_SPEED_MULTIPLIER
 from .aabb import AABB
 from .voxel_solid import is_solid
 
 
 class PlayerController:
-
     """Axis-aligned bounding box player controller."""
 
-    def __init__(
-        self,
-        world_manager: Any,
-        spawn: np.ndarray = np.array([0.0, 100.0, 0.0], dtype=np.float32),
-    ) -> None:
+    def __init__(self, world_manager: Any, spawn: NDArray[np.float32] | None = None) -> None:
+        """Create a controller at ``spawn`` within ``world_manager``."""
 
-    """Simplified AABB-based player controller used for typing tests."""
-
-    def __init__(self, world_manager: Any, spawn: np.ndarray | None = None) -> None:
-        main
         self.world = world_manager
+        if spawn is None:
+            spawn = np.array([0.0, 100.0, 0.0], dtype=np.float32)
         self.pos = spawn.astype(np.float32)
         self.vel = np.zeros(3, dtype=np.float32)
-        
-        self.aabb = AABB(
-            center=self.pos,
-            half=np.array([0.3, 0.9, 0.3], dtype=np.float32),
-        )
 
         self.aabb = AABB(center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32))
-        main
+
         self.gravity = 28.0
         self.max_speed = 11.0
         self.accel = 50.0
@@ -48,8 +35,6 @@ class PlayerController:
         self.step_height = 0.5
         self.on_ground = False
 
-
-        main
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
@@ -62,35 +47,30 @@ class PlayerController:
         }
 
     def set_input(self, keymap: Dict[str, int]) -> None:
+        """Update the input mapping."""
 
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
     def update(
-        self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray
+        self,
+        dt: float,
+        camera_forward: NDArray[np.float32],
+        camera_right: NDArray[np.float32],
     ) -> None:
-        wish = (
-            camera_forward * (self.input["f"] - self.input["b"]) +
-            camera_right * (self.input["r"] - self.input["l"])
-
-        """Update the input mapping."""
-        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
-
-    def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
         """Advance the controller one step. This stub performs basic kinematics."""
+
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
             + camera_right * (self.input["r"] - self.input["l"])
-        main
         )
         wish[1] = 0.0
-        wl = np.linalg.norm(wish)
+        wl = float(np.linalg.norm(wish))
         if wl > 1e-6:
             wish /= wl
 
-        target_speed = self.max_speed * (1.6 if self.input["sprint"] else 1.0)
-
-        target_speed = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
-          main
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
         accel = self.accel if self.on_ground else self.air_accel
         hv = self.vel.copy()
         hv[1] = 0.0
@@ -101,13 +81,12 @@ class PlayerController:
         self.vel[1] -= self.gravity * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
-            self.on_ground = Falself.pos.copy()
+            self.on_ground = False
+
+        pos_before = self.pos.copy()
         self._move_and_collide(dt)
         if np.allclose(self.pos, pos_before, atol=1e-5) and (
-            self.input["f"]
-            or self.input["l"]
-            or self.input["r"]
-            or self.input["b"]
+            self.input["f"] or self.input["l"] or self.input["r"] or self.input["b"]
         ):
             lifted = self.pos.copy()
             lifted[1] += self.step_height
@@ -131,8 +110,11 @@ class PlayerController:
                 self.vel[1] = 0.0
         else:
             self.on_ground = False
+        self.aabb = AABB(center=self.pos, half=self.aabb.half)
 
-    def _sweep_axis(self, pos: np.ndarray, axis: int, delta: float) -> Tuple[np.ndarray, bool]:
+    def _sweep_axis(
+        self, pos: NDArray[np.float32], axis: int, delta: float
+    ) -> Tuple[NDArray[np.float32], bool]:
         step = np.sign(delta)
         remaining = abs(delta)
         hit = False
@@ -158,7 +140,7 @@ class PlayerController:
                 break
         return pos, hit
 
-    def _can_occupy(self, center: np.ndarray) -> bool:
+    def _can_occupy(self, center: NDArray[np.float32]) -> bool:
         aabb = AABB(center=center, half=self.aabb.half)
         mn = np.floor(aabb.min).astype(int)
         mx = np.floor(aabb.max).astype(int)
@@ -182,9 +164,5 @@ class PlayerController:
         return aabb.overlap_aabb(voxel_aabb)
 
 
-        self.pos += self.vel * dt
-        self.aabb = AABB(center=self.pos, half=self.aabb.half)
-
-
 __all__ = ["PlayerController"]
-        main
+
