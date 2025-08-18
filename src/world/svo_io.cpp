@@ -34,7 +34,12 @@ std::vector<SvoNode> LoadSvo(const std::string& path) {
         SvoNode& n = nodes[i];
         in.read(reinterpret_cast<char*>(&n.morton), sizeof(n.morton));
         in.read(reinterpret_cast<char*>(&n.childMask), sizeof(n.childMask));
+        in.read(reinterpret_cast<char*>(&n.morton), sizeof(n.morton));
+        if (!in) throw std::runtime_error("File corrupted or truncated while reading morton value for node " + std::to_string(i) + " in " + path);
+        in.read(reinterpret_cast<char*>(&n.childMask), sizeof(n.childMask));
+        if (!in) throw std::runtime_error("File corrupted or truncated while reading childMask for node " + std::to_string(i) + " in " + path);
         in.read(reinterpret_cast<char*>(n.children.data()), sizeof(uint32_t) * 8);
+        if (!in) throw std::runtime_error("File corrupted or truncated while reading children for node " + std::to_string(i) + " in " + path);
     }
     return nodes;
 }
