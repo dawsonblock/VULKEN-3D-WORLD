@@ -1,4 +1,8 @@
 
+"""Collision helpers for a capsule against a voxel world."""
+
+
+
 """Collision helpers for a capsule against a voxel world using SAT tests."""
 
 from __future__ import annotations
@@ -17,9 +21,10 @@ from typing import Any, Optional, Protocol, Tuple, cast
         main
         main
 
+        main
 from __future__ import annotations
 
-from typing import Protocol, Tuple
+from typing import Optional, Protocol, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -39,12 +44,15 @@ class WorldProtocol(Protocol):
 
         main
 
-
-def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
-
 def closest_point_on_aabb(
     p: NDArray[np.float32], mn: NDArray[np.float32], mx: NDArray[np.float32]
 ) -> NDArray[np.float32]:
+
+    """Clamp point ``p`` to the box defined by ``mn`` and ``mx``."""
+    return np.minimum(np.maximum(p, mn), mx)
+
+
+
 
     """Return the closest point on the axis-aligned box defined by ``mn`` and ``mx``."""
 
@@ -64,20 +72,24 @@ def closest_point_on_aabb(
 
         main
         main
+        main
 def closest_point_on_segment(
     p: NDArray[np.float32], a: NDArray[np.float32], b: NDArray[np.float32]
 ) -> NDArray[np.float32]:
     """Return the closest point on the segment ``ab`` to ``p``."""
-
     ab = b - a
     t = float(np.dot(p - a, ab) / (np.dot(ab, ab) + 1e-9))
-    return cast(NDArray[np.float32], a + np.clip(t, 0.0, 1.0) * ab)
+    return a + np.clip(t, 0.0, 1.0) * ab
 
 
 def capsule_box_penetration(
     cap: Capsule, mn: NDArray[np.float32], mx: NDArray[np.float32]
 ) -> Tuple[bool, Optional[NDArray[np.float32]], float]:
     """Check penetration of ``cap`` against an axis-aligned box."""
+
+    center = (mn + mx) * 0.5
+    q_seg = closest_point_on_segment(center, cap.seg_a, cap.seg_b)
+
 
 
 
@@ -86,11 +98,14 @@ def capsule_box_penetration(
         main
     box_center = (mn + mx) * 0.5
     q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
+        main
     q_box = closest_point_on_aabb(q_seg, mn, mx)
     v = q_seg - q_box
     dist = float(np.linalg.norm(v))
     pen = cap.radius - dist
     if pen > 0.0:
+
+
 
         normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0, 1, 0], dtype=np.float32)
 
@@ -98,9 +113,9 @@ def capsule_box_penetration(
     return False, None, 0.0
 
 
-        normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0.0, 1.0, 0.0], dtype=np.float32)
         main
-        return True, cast(NDArray[np.float32], normal), float(pen)
+        normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0.0, 1.0, 0.0], dtype=np.float32)
+        return True, normal, pen
     return False, None, 0.0
 
 
@@ -109,9 +124,10 @@ def capsule_box_penetration(
 def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
     """Return integer min/max voxel coordinates overlapped by ``cap``."""
 
-def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArray[np.int32]]:
         main
+def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArray[np.int32]]:
     """Return integer min/max voxel coordinates overlapped by ``cap``."""
+
 
     mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
     mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
@@ -119,13 +135,14 @@ def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArr
         main
         main
 
+        main
     mn = cap.center - np.array(
         [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
     )
     mx = cap.center + np.array(
         [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
     )
-    return np.floor(mn).astype(int), np.floor(mx).astype(int)
+    return np.floor(mn).astype(np.int32), np.floor(mx).astype(np.int32)
 
 
 
@@ -154,11 +171,13 @@ def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[np.ndarra
     return off, ground
 
         main
+        main
 
 def resolve_capsule_world(
     cap: Capsule, world: WorldProtocol, max_iters: int = 8
 ) -> Tuple[NDArray[np.float32], bool]:
     """Resolve ``cap`` against the voxel ``world`` and return total offset and ground state."""
+
 
 
 __all__ = ["WorldProtocol", "compute_capsule_voxel_bounds", "resolve_capsule_world"]
@@ -172,18 +191,17 @@ def resolve_capsule_world(
     ground = False
         main
 
+        main
     total_offset = np.zeros(3, dtype=np.float32)
     ground = False
     for _ in range(max_iters):
         bb_min, bb_max = compute_capsule_voxel_bounds(cap)
-
-        max_pen = 0.0
         hit_n: Optional[NDArray[np.float32]] = None
+        max_pen = 0.0
         for y in range(bb_min[1] - 1, bb_max[1] + 2):
             for z in range(bb_min[2] - 1, bb_max[2] + 2):
                 for x in range(bb_min[0] - 1, bb_max[0] + 2):
-                    bt = world.get_block_at_world_position(float(x), float(y), float(z))
-                    if not is_solid(bt):
+                    if not is_solid(world.get_block_at_world_position(float(x), float(y), float(z))):
                         continue
                     mnv = np.array([x, y, z], dtype=np.float32)
                     mxv = mnv + 1.0
@@ -197,7 +215,6 @@ def resolve_capsule_world(
         total_offset += off
         if hit_n is not None and hit_n[1] > 0.7:
             ground = True
-
     return total_offset, ground
 
 
@@ -214,6 +231,8 @@ __all__ = [
 
 
 
+
+        main
         main
         main
         main

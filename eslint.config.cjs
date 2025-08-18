@@ -5,6 +5,19 @@ const globals = require('globals');
 module.exports = [
   js.configs.recommended,
   {
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'script',
+      globals: { ...globals.node, ...globals.es2021 }
+    },
+    ignores: [
+
+
+const globals = require('globals');
+
+module.exports = [
+  js.configs.recommended,
+  {
     ignores: [
       '**/build/**',
 
@@ -27,6 +40,7 @@ module.exports = [
   {   ignores: [
         main
         main
+        main
       'node_modules/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -37,6 +51,16 @@ module.exports = [
       'tools/**',
       'tests/**',
       'apps/**',
+
+      'scripts/**',
+      'build/**'
+    ],
+    rules: {
+      'no-unused-vars': 'warn',
+      'semi': ['error', 'always']
+    }
+  }
+
 
       'scripts/**'
     ],
@@ -74,6 +98,7 @@ module.exports = [
 
     ignores: ['node_modules/**', '**/build/**'],
   },
+        main
         main
         main
         main
