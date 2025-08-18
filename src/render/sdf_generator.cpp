@@ -68,7 +68,12 @@ bool GenerateSDF(VkDevice device,
     VkDescriptorPoolSize dps{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,2};
     VkDescriptorPoolCreateInfo dpci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dpci.maxSets=1; dpci.poolSizeCount=1; dpci.pPoolSizes=&dps;
     VkDescriptorPool pool; if(vkCreateDescriptorPool(device,&dpci,nullptr,&pool)!=VK_SUCCESS) return false;
-    VkDescriptorSetAllocateInfo dsai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO}; dsai.descriptorPool=pool; dsai.descriptorSetCount=1; dsai.pSetLayouts=&dsl; VkDescriptorSet ds; if(vkAllocateDescriptorSets(device,&dsai,&ds)!=VK_SUCCESS) return false;
+    VkDescriptorSetAllocateInfo dsai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
+    dsai.descriptorPool = pool;
+    dsai.descriptorSetCount = 1;
+    dsai.pSetLayouts = &dsl;
+    VkDescriptorSet ds;
+    if (vkAllocateDescriptorSets(device, &dsai, &ds) != VK_SUCCESS) return false;
     auto UpdateDS=[&](VkImageView src, VkImageView dst){
         VkDescriptorImageInfo infos[2]{};
         infos[0].imageView=src; infos[0].imageLayout=VK_IMAGE_LAYOUT_GENERAL;
