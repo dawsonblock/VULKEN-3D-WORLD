@@ -99,7 +99,7 @@ def resolve_capsule_world(
         off = hit_n * max_pen
         cap.center += off
         total_offset += off
-        if hit_n[1] > 0.7:
+        if hit_n is not None and hit_n[1] > 0.7:
             ground = True
 
     return total_offset, ground
