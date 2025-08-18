@@ -25,3 +25,6 @@ class Capsule:
     def seg_b(self) -> NDArray[np.float32]:
         """Center of the bottom spherical cap."""
         return self.center - np.array([0.0, self.half_height, 0.0], dtype=np.float32)
+
+
+__all__ = ["Capsule"]
