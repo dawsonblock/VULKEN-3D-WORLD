@@ -1,76 +1,13 @@
+/* eslint-env node */
 const js = require('@eslint/js');
 
-
-
 module.exports = [
   js.configs.recommended,
   {
-    ignores: ['**/*'],
-  },
-];
-
-
-
-const globals = require('globals');
-
-module.exports = [
-  js.configs.recommended,
-
-
-         main
-const globals = require('globals');
-
-module.exports = [
-  js.configs.recommended,
-  {
-    ignores: [
-
-
-const globals = require('globals');
-
-
-
-module.exports = [
-  js.configs.recommended,
-  {
-    ignores: [
-
-module.exports = [js.configs.recommended];
-        main
-
-module.exports = [
-  js.configs.recommended,
-  {
-
-    ignores: ['node_modules/**', 'tests/**', 'src/**', 'docs/**'],
-  },
-
-        main
-        main
-    ignores: [
-      '**/build/**',
-        main
-        main
-        main
-      'node_modules/**',
-      'build_ci_sanity/**',
-      'cmake/**',
-      'docs/**',
-      'assets/**',
-      'shaders/**',
-      'shaders_vk/**',
-      'tools/**',
-      'tests/**',
-      'apps/**',
-      'scripts/**',
-      '**/build/**',
-    ],
-  },
-  {
+    ignores: ['**/build/**', 'node_modules/**', 'eslint.config.cjs'],
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-unused-vars': 'warn',
@@ -78,33 +15,3 @@ module.exports = [
     },
   },
 ];
-
-
-
-
-
-      semi: ['error', 'always'],
-    },
-  },
-];
-
-
-      'semi': ['error', 'always']
-    }
-  }
-
-
-      semi: ['error', 'always'],
-    },
-  },
-        main
-        main
-        main
-        main
-];
-
-        main
-        main
-        main
-        main
-        main
