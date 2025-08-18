@@ -3,6 +3,7 @@ const js = require('@eslint/js');
 
 
 
+
 module.exports = [
   js.configs.recommended,
   {
@@ -30,14 +31,14 @@ module.exports = [
 
 
 
+        main
 const globals = require('globals');
-
-
 
 module.exports = [
   js.configs.recommended,
   {
     ignores: [
+
 
 module.exports = [js.configs.recommended];
         main
@@ -53,6 +54,7 @@ module.exports = [
         main
     ignores: [
       '**/build/**',
+        main
         main
         main
         main
@@ -74,8 +76,10 @@ module.exports = [
       'scripts/**',
       '**/build/**',
     ],
+
   },
   {
+        main
         main
     languageOptions: {
       ecmaVersion: 2021,
@@ -84,6 +88,12 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      'semi': ['error', 'always'],
+    },
+  },
+];
+
 
       semi: ['error', 'always']
     }
@@ -119,6 +129,7 @@ module.exports = [
         main
 ];
 
+        main
         main
         main
         main

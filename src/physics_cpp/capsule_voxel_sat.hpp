@@ -8,15 +8,7 @@ inline Vec3 closestPointOnAABB(const Vec3& p, const Vec3& mn, const Vec3& mx) {
 
 inline Vec3 closestPointOnSegment(const Vec3& p, const Vec3& a, const Vec3& b) {
     Vec3 ab = b - a;
-// Epsilon value to avoid division by zero in floating point calculations
-constexpr float DIVISION_EPSILON = 1e-9f;
-inline Vec3 closestPointOnAABB(const Vec3& p, const Vec3& mn, const Vec3& mx) {
-    return clamp(p, mn, mx);
-}
-
-inline Vec3 closestPointOnSegment(const Vec3& p, const Vec3& a, const Vec3& b) {
-    Vec3 ab = b - a;
-    float t = dot(p - a, ab) / (dot(ab, ab) + DIVISION_EPSILON);
+    float t = dot(p - a, ab) / (dot(ab, ab) + 1e-9f);
     if (t < 0.0f) t = 0.0f;
     else if (t > 1.0f) t = 1.0f;
     return a + ab * t;
