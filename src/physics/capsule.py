@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from __future__ import annotations
+
+
+
 
 from dataclasses import dataclass
 import numpy as np
@@ -32,6 +36,7 @@ from numpy.typing import NDArray
         main
 from __future__ import annotations
 
+        main
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
@@ -42,9 +47,15 @@ from numpy.typing import NDArray
         main
         main
 
+import numpy as np
+from numpy.typing import NDArray
+
 
 @dataclass
 class Capsule:
+
+    """Vertical capsule defined by its center, half-height, and radius."""
+
 
     """Vertical capsule defined by its center, half-height, and radius."""
 
@@ -67,6 +78,7 @@ class Capsule:
         main
         main
     """Simple vertical capsule defined by its center, half-height, and radius."""
+        main
         main
         main
         main
@@ -97,6 +109,7 @@ __all__ = ["Capsule"]
 
 
 
+        main
         main
         main
         main

@@ -1,5 +1,15 @@
 const js = require('@eslint/js');
 
+
+module.exports = [
+  js.configs.recommended,
+  {
+    ignores: ['**/*'],
+  },
+];
+
+
+
 const globals = require('globals');
 
 module.exports = [
@@ -98,6 +108,7 @@ module.exports = [
         main
 ];
 
+        main
         main
         main
         main
