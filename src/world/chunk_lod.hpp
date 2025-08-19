@@ -12,7 +12,8 @@
 namespace voxelvk {
 
 struct Mesh {
-    // Placeholder for mesh data at a particular LOD level.
+    std::vector<float> vertices; // Vertex positions
+    std::vector<uint32_t> indices; // Triangle indices
 };
 
 struct ChunkLOD {
