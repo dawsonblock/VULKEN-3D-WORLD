@@ -69,6 +69,9 @@ else()
 endif()
 find_package(Threads REQUIRED)
 
+# External dependencies
+include(cmake/Dependencies.cmake)
+
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
 if(ENABLE_VULKAN)
@@ -111,9 +114,10 @@ endif()
 
 if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
+  target_sources(smoke_headless PRIVATE src/vk/vma_allocator.cpp)
   add_dependencies(smoke_headless VoxelVK_Shaders)
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
-  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB} VMA)
   target_compile_definitions(smoke_headless PRIVATE
     $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>

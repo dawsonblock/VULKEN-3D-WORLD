@@ -4,8 +4,7 @@
 #include <stdexcept>
 #include <cstring>
 
-// Expect VMA headers available
-#include "vk_mem_alloc.h"
+#include "vk/vma_allocator.hpp"
 
 namespace voxelvk {
 

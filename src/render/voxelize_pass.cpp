@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdio>
 
-#include "vk_mem_alloc.h"
+#include "vk/vma_allocator.hpp"
 
 namespace voxelvk {
 
