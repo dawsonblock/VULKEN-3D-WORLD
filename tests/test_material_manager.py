@@ -1,5 +1,9 @@
+
 from src.renderer.material_manager import MaterialManager
 
+
+# Number of floats per material returned by create_gpu_resources()
+MATERIAL_COMPONENTS_COUNT = 5
 
 def test_material_manager_loads_and_ids_unique():
     mgr = MaterialManager()
