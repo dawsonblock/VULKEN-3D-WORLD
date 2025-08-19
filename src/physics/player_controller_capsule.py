@@ -1,4 +1,5 @@
 
+
 """Simplified capsule-based player controller for tests."""
 
 
@@ -18,6 +19,10 @@ unit tests without requiring the native physics engine.
         main
         main
 
+
+"""Capsule-based player controller used in tests."""
+
+        main
 from __future__ import annotations
 
 from typing import Any, Dict
@@ -26,37 +31,39 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+
 from . import SPRINT_SPEED_MULTIPLIER
+
+        main
 from .capsule import Capsule
 from .capsule_voxel_sat import resolve_capsule_world
         main
 
-
-# Multiplier applied to ``max_speed`` when sprint input is active.
 SPRINT_SPEED_MULTIPLIER = 1.6
 
-
-
-class PlayerControllerCapsule:
-    """Very small kinematic character controller represented by a capsule."""
 
 def get_horizontal_speed(controller: "PlayerControllerCapsule") -> float:
 
     """Return the horizontal speed of the controller."""
 
+
+        main
+
         main
     return float(np.linalg.norm(controller.vel[[0, 2]]))
 
 
-        main
-
 class PlayerControllerCapsule:
+
 
     """Minimal kinematic character controller represented by a capsule."""
 
     """Basic kinematic character controller represented by a capsule."""
 
         main
+        main
+
+    """Minimal kinematic capsule controller for tests."""
         main
 
     def __init__(
@@ -71,11 +78,14 @@ class PlayerControllerCapsule:
 
 
 
+
     _first_speed_call = True
 
     def __init__(self, world_manager: Any, spawn: NDArray[np.float32]) -> None:
         main
         main
+        main
+
         main
         self.world = world_manager
         self.pos = spawn.astype(np.float32)
@@ -83,10 +93,14 @@ class PlayerControllerCapsule:
         self.radius = 0.3
         self.half_h = 0.9
 
+
+
+        main
         self.step_height = step_height
         self.g = gravity
         self.max_speed = max_speed
         self.jump_speed = jump_speed
+
 
 
         self.step_height = 0.5
@@ -94,8 +108,9 @@ class PlayerControllerCapsule:
         self.max_speed = 11.0
         self.jump_speed = 9.5
         main
-        self.on_ground = False
 
+        main
+        self.on_ground = False
         self.input: Dict[str, int] = {
             "f": 0,
             "b": 0,
@@ -105,13 +120,8 @@ class PlayerControllerCapsule:
             "sprint": 0,
         }
 
-
-    # ------------------------------------------------------------------ helpers
-
-    # ------------------------------------------------------------------
-    # Helpers
-        main
     def set_input(self, mapping: Dict[str, int]) -> None:
+
 
         self.input.update(mapping)
 
@@ -144,74 +154,38 @@ class PlayerControllerCapsule:
         """Update input state with values from ``mapping``."""
 
 
+
+        """Update input state."""
+        main
         self.input.update({k: v for k, v in mapping.items() if k in self.input})
 
     def _capsule(self) -> Capsule:
-
-        return Capsule(self.pos.copy(), self.half_h, self.radius)
-
-    # ---------------------------------------------------------------- movement
-    def update(self, dt: float, forward: NDArray[np.float32], right: NDArray[np.float32]) -> None:
-        """Advance the controller by ``dt`` seconds."""
-
-        """Return a capsule representing the player's current bounds."""
-
-        return Capsule(self.pos.copy(), self.half_h, self.radius)
-
-    def get_horizontal_speed(self) -> float:
-        """Return the magnitude of the horizontal velocity for this instance."""
-
-        return float(np.linalg.norm(self.vel[[0, 2]]))
-
-    # ------------------------------------------------------------------
-    # Simulation
-    def update(self, dt: float, forward: np.ndarray, right: np.ndarray) -> None:
-        """Advance the controller by ``dt`` seconds."""
-
-
-        self.input.update(mapping)
-
-    def _capsule(self) -> Capsule:
-        """Return a capsule representing the player's current bounds."""
-
         return Capsule(self.pos.copy(), self.half_h, self.radius)
 
     def update(self, dt: float, forward: NDArray[np.float32], right: NDArray[np.float32]) -> None:
         """Advance the controller by ``dt`` seconds."""
-
-        main
-        main 
-      wish = forward * (self.input["f"] - self.input["b"]) + right * (
+        wish = forward * (self.input["f"] - self.input["b"]) + right * (
             self.input["r"] - self.input["l"]
         )
         wish[1] = 0.0
         n = float(np.linalg.norm(wish))
         if n > 1e-6:
             wish /= n
-
-        target = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
-
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
-        main
         hv = self.vel.copy()
         hv[1] = 0.0
         accel = 50.0 if self.on_ground else 10.0
         self.vel += (wish * target - hv) * min(1.0, accel * dt)
-
-
-        # gravity and jumping
-        main
         self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
             self.on_ground = False
-
         self.pos += self.vel * dt
-
         cap = self._capsule()
         off, ground = resolve_capsule_world(cap, self.world)
+
         moved = not np.allclose(off, 0.0, atol=1e-6)
         if not moved and (
             self.input["f"] or self.input["b"] or self.input["l"] or self.input["r"]
@@ -232,12 +206,19 @@ class PlayerControllerCapsule:
         off2, ground2 = resolve_capsule_world(self._capsule(), self.world)
         self.pos += off2
         self.on_ground = self.on_ground or ground2
+
+        if np.any(off):
+            self.pos = cap.center + off
+        else:
+            self.pos = cap.center
+        self.on_ground = ground or self.on_ground
+        main
         if self.on_ground and self.vel[1] < 0.0:
             self.vel[1] = 0.0
 
     def get_horizontal_speed(self) -> float:
-        """Return the magnitude of the horizontal velocity for this instance."""
         return float(np.linalg.norm(self.vel[[0, 2]]))
+
 
     def get_horizontal_speed(self) -> float:
         """Return the magnitude of the horizontal velocity for this instance."""
@@ -275,4 +256,12 @@ __all__ = [
 __all__ = ["PlayerControllerCapsule", "get_horizontal_speed"]
 
         main
+        main
+
+
+__all__ = [
+    "PlayerControllerCapsule",
+    "SPRINT_SPEED_MULTIPLIER",
+    "get_horizontal_speed",
+]
         main
