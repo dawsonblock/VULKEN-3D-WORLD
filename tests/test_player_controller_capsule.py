@@ -9,7 +9,7 @@ try:  # The player controller module is currently broken; skip tests if import f
     )
 except Exception:  # pragma: no cover - skip if module cannot be imported
     pytest.skip(
-        "player_controller_capsule module unavailable",
+        "player controller capsule module unavailable",
         allow_module_level=True,
     )
 
@@ -88,37 +88,7 @@ def test_sprint_speed_limit():
     assert sprint_speed > speed
 
 
-
-
 pytest.skip(
     "player controller capsule tests require native physics module; skipped in CI",
     allow_module_level=True,
 )
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
