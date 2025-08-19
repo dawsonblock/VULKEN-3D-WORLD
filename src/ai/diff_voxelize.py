@@ -3,29 +3,28 @@
 from __future__ import annotations
 
 import ctypes
-import subprocess
+import sys
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-LIB_PATH = ROOT / "diff_voxelize.so"
+
+if sys.platform.startswith("win"):
+    _EXT = ".dll"
+elif sys.platform == "darwin":
+    _EXT = ".dylib"
+else:
+    _EXT = ".so"
+
+LIB_PATH = ROOT / f"diff_voxelize{_EXT}"
 
 
 def _load_lib() -> ctypes.CDLL:
     if not LIB_PATH.exists():
-        src = ROOT / "diff_voxelize.cpp"
-        subprocess.check_call(
-            [
-                "g++",
-                "-std=c++17",
-                "-shared",
-                "-fPIC",
-                str(src),
-                "-o",
-                str(LIB_PATH),
-            ]
+        raise OSError(
+            f"Missing native library: {LIB_PATH}. Run `scripts/build_diff_voxelize.py` to build it."
         )
     return ctypes.CDLL(str(LIB_PATH))
 
