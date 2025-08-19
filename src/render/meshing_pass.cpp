@@ -96,7 +96,7 @@ void MeshingPass::dispatch(VkCommandBuffer cmd,
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipe_layout, 0, 1, &ds, 0, nullptr);
-    vkCmdDispatch(cmd, 4, 4, 4);
+    vkCmdDispatch(cmd, DISPATCH_X, DISPATCH_Y, DISPATCH_Z);
     vkFreeDescriptorSets(m_device, m_pool, 1, &ds);
 }
 
