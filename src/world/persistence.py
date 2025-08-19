@@ -4,7 +4,8 @@ import logging
 import numpy as np
 from pathlib import Path
 from typing import Dict, Optional
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import Future
+from ..utils.async_io import AsyncIOPool
 from .rle import rle_encode, rle_decode
 
 try:
@@ -22,7 +23,7 @@ class ChunkStore:
     def __init__(self, root="world_save", codec="zstd", use_rle=True, threads=4):
         self.root = Path(root); self.root.mkdir(parents=True, exist_ok=True)
         self.codec = codec; self.use_rle = use_rle
-        self.pool = ThreadPoolExecutor(max_workers=max(1,threads))
+        self.pool = AsyncIOPool(max_workers=max(1, threads))
         self.futures: Dict[str, Future] = {}
 
     def _region_dir(self, cx, cz):
@@ -104,6 +105,6 @@ class ChunkStore:
                 logging.exception("chunk save failed: %s", exc)
                 errors.append(exc)
         self.futures.clear()
-        self.pool.shutdown(wait=True)
+        self.pool.shutdown()
         if errors:
             raise RuntimeError(f"{len(errors)} chunk saves failed") from errors[0]
