@@ -29,6 +29,7 @@ list(APPEND VOXELVK_ELITE_SOURCES
 
 # --- CSM descriptor layout helper ---
 list(APPEND VOXELVK_ELITE_SOURCES src/render/csm_layout.cpp)
+list(APPEND VOXELVK_ELITE_SOURCES src/render/pbr_lighting_pass.cpp)
 
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
