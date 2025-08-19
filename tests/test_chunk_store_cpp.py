@@ -1,13 +1,40 @@
 
 # mypy: ignore-errors
 
+import os
+import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
+import pytest
+np = pytest.importorskip("numpy")
 
 from src.world.persistence import ChunkStore as PyChunkStore
+
+
+def _have_cpp_toolchain() -> bool:
+    if shutil.which("g++") is None:
+        return False
+    code = "#include <zstd.h>\nint main(){return 0;}"
+    with tempfile.NamedTemporaryFile("w", suffix=".cpp") as src:
+        src.write(code)
+        src.flush()
+        try:
+            subprocess.check_output(
+                ["g++", src.name, "-lzstd", "-o", os.devnull],
+                stderr=subprocess.STDOUT,
+            )
+        except Exception:
+            return False
+    return True
+
+
+pytestmark = pytest.mark.skipif(
+    not _have_cpp_toolchain(),
+    reason="g++ with zstd headers required",
+)
 
 
 def _compile_loader(tmp_path: Path, repo_root: Path) -> Path:
@@ -52,9 +79,3 @@ def test_cpp_chunk_store_roundtrip(tmp_path: Path) -> None:
     output = subprocess.check_output([str(loader), str(tmp_path)], cwd=repo_root)
     assert output == vox.tobytes()
 
-import pytest
-np = pytest.importorskip("numpy")
-pytest.skip(
-    "chunk store roundtrip requires building C++ components; skipped in CI",
-    allow_module_level=True,
-)
