@@ -92,7 +92,7 @@ FetchContent_Declare(
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(zstd)
-add_library(zstd ALIAS libzstd_static)
+add_library(zstd_lib ALIAS libzstd_static)
 
 # lz4 compression
 FetchContent_Declare(
