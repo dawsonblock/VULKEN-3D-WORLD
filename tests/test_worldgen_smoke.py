@@ -22,7 +22,10 @@ def generate_world(structure: Dict[str, Any],
     missing_materials = [b["type"] for b in blocks if b["type"] not in mat_lookup]
     if missing_materials:
         raise ValueError(f"Missing materials for block types: {missing_materials}")
-    return [(textures[b["type"]], mat_lookup[b["type"]]) for b in blocks]
+    missing_materials = [b["type"] for b in blocks if b["type"].lower() not in mat_lookup]
+    if missing_materials:
+        raise ValueError(f"Missing materials for block types: {missing_materials}")
+    return [(textures[b["type"]], mat_lookup[b["type"].lower()]) for b in blocks]
 
 
 def test_worldgen_smoke() -> None:
