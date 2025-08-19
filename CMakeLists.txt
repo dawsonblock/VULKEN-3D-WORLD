@@ -156,22 +156,29 @@ if(TARGET VoxelVK_Elite_ALL)
 endif()
 
 # --- Voxelization pass ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_pass.cpp)
-endif()
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_pass.cpp)
+  endif()
 
 # --- CSM descriptor layout helper ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
-endif()
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
+  endif()
 
 # --- Sparse voxel octree ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/world/svo_builder.cpp
-    src/world/svo_io.cpp
-    src/render/svo_traversal.cpp)
-endif()
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE
+      src/world/svo_builder.cpp
+      src/world/svo_io.cpp
+      src/render/svo_traversal.cpp)
+  endif()
+
+  # --- Voxel fill compute & shader watcher ---
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE
+      src/render/voxel_fill.cpp
+      src/render/shader_watcher.cpp)
+  endif()
 
 
 # --- Voxel SAT compute dispatch ---

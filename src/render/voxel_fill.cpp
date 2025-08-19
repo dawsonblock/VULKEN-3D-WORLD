@@ -1,8 +1,13 @@
 #include "voxel_fill.hpp"
+#include "shader_watcher.hpp"
+
 #include <vector>
 #include <cstdio>
+#include <cstdlib>
 
 namespace voxelvk {
+
+namespace {
 
 static std::vector<uint32_t> load_spirv_file(const char* path) {
     std::vector<uint32_t> data;
@@ -14,18 +19,29 @@ static std::vector<uint32_t> load_spirv_file(const char* path) {
         fclose(f);
         return data;
     }
-    data.resize((size_t)sz / 4);
-    size_t bytes_read = fread(data.data(), 1, (size_t)sz, f);
+    data.resize(static_cast<size_t>(sz) / 4);
+    size_t bytes_read = fread(data.data(), 1, static_cast<size_t>(sz), f);
     fclose(f);
-    if (bytes_read != (size_t)sz) {
+    if (bytes_read != static_cast<size_t>(sz)) {
         std::fprintf(stderr, "[voxel_fill] Failed to read all bytes from %s (read %zu of %ld)\n", path, bytes_read, sz);
         data.clear();
     }
     return data;
 }
 
-bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
-    m_device = device;
+static bool compile_glsl_to_spirv(const char* src, const char* dst) {
+    std::string cmd = "glslc " + std::string(src) + " -o " + dst;
+    int res = std::system(cmd.c_str());
+    if (res != 0) {
+        std::fprintf(stderr, "[voxel_fill] Failed to compile %s\n", src);
+        return false;
+    }
+    return true;
+}
+
+} // namespace
+
+bool VoxelFill::create_pipeline() {
     VkDescriptorSetLayoutBinding b[2] = {};
     for (int i = 0; i < 2; ++i) {
         b[i].binding = i; b[i].descriptorCount = 1;
@@ -34,30 +50,31 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     }
     VkDescriptorSetLayoutCreateInfo dsl{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
     dsl.bindingCount = 2; dsl.pBindings = b;
-    VkResult res = vkCreateDescriptorSetLayout(device, &dsl, nullptr, &m_dset_layout);
+    VkResult res = vkCreateDescriptorSetLayout(m_device, &dsl, nullptr, &m_dset_layout);
     if (res != VK_SUCCESS) return false;
 
     VkPipelineLayoutCreateInfo plci{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     plci.setLayoutCount = 1; plci.pSetLayouts = &m_dset_layout;
-    VkResult pl_result = vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout);
+    VkResult pl_result = vkCreatePipelineLayout(m_device, &plci, nullptr, &m_pipe_layout);
     if (pl_result != VK_SUCCESS) return false;
 
     auto spirv = load_spirv_file("spv/voxel_fill.comp.spv");
     if (spirv.empty()) return false;
+
     VkShaderModuleCreateInfo smci{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
-    smci.codeSize = spirv.size() * 4; smci.pCode = spirv.data();
-    VkShaderModule sm; vkCreateShaderModule(device, &smci, nullptr, &sm);
+    smci.codeSize = spirv.size() * sizeof(uint32_t);
+    smci.pCode = spirv.data();
     VkShaderModule sm;
-    VkResult sm_res = vkCreateShaderModule(device, &smci, nullptr, &sm);
+    VkResult sm_res = vkCreateShaderModule(m_device, &smci, nullptr, &sm);
     if (sm_res != VK_SUCCESS) return false;
+
     VkComputePipelineCreateInfo cpci{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
     cpci.stage = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
     cpci.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
     cpci.stage.module = sm; cpci.stage.pName = "main";
     cpci.layout = m_pipe_layout;
-    vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
-    VkResult pipelineResult = vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
-    vkDestroyShaderModule(device, sm, nullptr);
+    VkResult pipelineResult = vkCreateComputePipelines(m_device, m_cache, 1, &cpci, nullptr, &m_pipeline);
+    vkDestroyShaderModule(m_device, sm, nullptr);
     if (pipelineResult != VK_SUCCESS) {
         return false;
     }
@@ -66,18 +83,49 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     dpci.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     dpci.maxSets = 1; dpci.poolSizeCount = 1; dpci.pPoolSizes = &ps;
-    VkResult poolResult = vkCreateDescriptorPool(device, &dpci, nullptr, &m_pool);
+    VkResult poolResult = vkCreateDescriptorPool(m_device, &dpci, nullptr, &m_pool);
     if (poolResult != VK_SUCCESS) return false;
     return true;
 }
 
-void VoxelFill::destroy(VkDevice device) {
-    if (m_pool) vkDestroyDescriptorPool(device, m_pool, nullptr);
-    if (m_pipeline) vkDestroyPipeline(device, m_pipeline, nullptr);
-    if (m_pipe_layout) vkDestroyPipelineLayout(device, m_pipe_layout, nullptr);
-    if (m_dset_layout) vkDestroyDescriptorSetLayout(device, m_dset_layout, nullptr);
+void VoxelFill::destroy_pipeline() {
+    if (m_pool) vkDestroyDescriptorPool(m_device, m_pool, nullptr);
+    if (m_pipeline) vkDestroyPipeline(m_device, m_pipeline, nullptr);
+    if (m_pipe_layout) vkDestroyPipelineLayout(m_device, m_pipe_layout, nullptr);
+    if (m_dset_layout) vkDestroyDescriptorSetLayout(m_device, m_dset_layout, nullptr);
     m_pool = m_pipeline = m_pipe_layout = m_dset_layout = VK_NULL_HANDLE;
+}
+
+bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
+    m_device = device;
+    m_cache = cache;
+    if (!create_pipeline()) return false;
+
+    m_watcher = std::make_unique<ShaderWatcher>(
+        std::vector<std::string>{"shaders", "shaders_vk"},
+        [this](const std::string& path) {
+            if (path.find("voxel_fill.comp.glsl") != std::string::npos) {
+                compile_glsl_to_spirv(path.c_str(), "spv/voxel_fill.comp.spv");
+                this->reload();
+            }
+        });
+    m_watcher->start();
+    return true;
+}
+
+bool VoxelFill::reload() {
+    destroy_pipeline();
+    return create_pipeline();
+}
+
+void VoxelFill::destroy(VkDevice device) {
+    if (m_watcher) {
+        m_watcher->stop();
+        m_watcher.reset();
+    }
+    destroy_pipeline();
     m_device = VK_NULL_HANDLE;
+    m_cache = VK_NULL_HANDLE;
 }
 
 void VoxelFill::dispatch(VkCommandBuffer cmd,
@@ -108,8 +156,9 @@ void VoxelFill::dispatch(VkCommandBuffer cmd,
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipe_layout, 0, 1, &ds, 0, nullptr);
     uint32_t gx = (SX + 7) / 8, gy = (SY + 7) / 8;
-    vkCmdDispatch(cmd, gx, gy, SZ);
+    vkCmdDispatch(cmd, gx, gy, 1);
     vkFreeDescriptorSets(m_device, m_pool, 1, &ds);
 }
 
 } // namespace voxelvk
+
