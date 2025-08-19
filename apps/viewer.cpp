@@ -51,7 +51,7 @@ struct Camera {
     }
 };
 
-static float glm_rad(float deg){ return deg * 3.1415926535f / 180.f; }
+static float glm_rad(float deg){ return deg * static_cast<float>(M_PI) / 180.f; }
 
 struct HotReloadShader {
     std::filesystem::path path;
