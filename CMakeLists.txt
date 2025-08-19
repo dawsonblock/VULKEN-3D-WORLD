@@ -165,6 +165,11 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
 
+# --- PBR forward lighting pass ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/pbr_pass.cpp)
+endif()
+
 # --- Sparse voxel octree ---
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
@@ -175,7 +180,6 @@ endif()
 
 
 # --- Voxel SAT compute dispatch ---
-if(TARGET VoxelVK_Elite_ALL)
-  # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
-endif()
-        main
+  if(TARGET VoxelVK_Elite_ALL)
+    # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
+  endif()
