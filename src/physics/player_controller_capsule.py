@@ -5,4 +5,4 @@ environment. Importing it raises ``ImportError`` so tests can skip
 gracefully.
 """
 
-raise ImportError("player_controller_capsule module unavailable")
+raise ImportError("Native physics extensions not available")
