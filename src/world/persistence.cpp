@@ -196,6 +196,9 @@ std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
     int S = header[2];
     int nvals = header[3];
     int ncnt = header[4];
+    if (nvals < 0 || ncnt < 0 || nvals != ncnt) {
+        return std::nullopt;
+    }
     const std::uint8_t *ptr = raw.data() + 20;
     std::vector<std::uint8_t> vox;
     if (nvals > 0) {
