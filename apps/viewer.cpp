@@ -28,7 +28,11 @@ struct Camera {
     double lastX{0.0}, lastY{0.0};
 
     void handleCursor(GLFWwindow* window, double xpos, double ypos) {
-        if(firstMouse){ lastX=xpos; lastY=ypos; firstMouse=false; }
+        if (firstMouse) {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
         float xoffset=float(xpos-lastX); float yoffset=float(lastY-ypos);
         lastX=xpos; lastY=ypos;
         yaw += xoffset*sensitivity; pitch += yoffset*sensitivity;
