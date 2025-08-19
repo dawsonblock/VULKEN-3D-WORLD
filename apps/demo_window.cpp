@@ -31,6 +31,7 @@ int main() {
     bool firstMouse = true;
     auto cursor_callback = [](GLFWwindow* win, double xpos, double ypos) {
         Camera* cam = reinterpret_cast<Camera*>(glfwGetWindowUserPointer(win));
+        if (!cam) return;
         static double lastX = 0.0, lastY = 0.0;
         static bool first = true;
         if (first) {
