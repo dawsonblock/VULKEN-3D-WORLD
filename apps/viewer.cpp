@@ -144,7 +144,35 @@ int main(){
     VkPhysicalDevice gpu=phys[0];
     uint32_t qCount=0; vkGetPhysicalDeviceQueueFamilyProperties(gpu,&qCount,nullptr);
     std::vector<VkQueueFamilyProperties> qProps(qCount); vkGetPhysicalDeviceQueueFamilyProperties(gpu,&qCount,qProps.data());
-    uint32_t graphicsQueue=0; for(uint32_t i=0;i<qCount;i++){ VkBool32 present=VK_FALSE; vkGetPhysicalDeviceSurfaceSupportKHR(gpu,i,surface,&present); if((qProps[i].queueFlags&VK_QUEUE_GRAPHICS_BIT)&&present){graphicsQueue=i;break;} }
+    // Select the best physical device (prefer discrete GPU with graphics+present support)
+    VkPhysicalDevice gpu = VK_NULL_HANDLE;
+    uint32_t graphicsQueue = 0;
+    for (auto& device : phys) {
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(device, &props);
+        uint32_t qCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &qCount, nullptr);
+        std::vector<VkQueueFamilyProperties> qProps(qCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &qCount, qProps.data());
+        for (uint32_t i = 0; i < qCount; i++) {
+            VkBool32 present = VK_FALSE;
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &present);
+            if ((qProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && present) {
+                // Prefer discrete GPU, but accept any with required support
+                if (gpu == VK_NULL_HANDLE || props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+                    gpu = device;
+                    graphicsQueue = i;
+                    if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+                        goto found_device;
+                }
+            }
+        }
+    }
+found_device:
+    if (gpu == VK_NULL_HANDLE) {
+        std::cerr << "No suitable GPU found\n";
+        return 3;
+    }
 
     float prio=1.f; VkDeviceQueueCreateInfo dq{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO}; dq.queueFamilyIndex=graphicsQueue; dq.queueCount=1; dq.pQueuePriorities=&prio;
     const char* devExts[]={VK_KHR_SWAPCHAIN_EXTENSION_NAME};
