@@ -89,13 +89,19 @@ if(ENABLE_VULKAN)
 
   if(ENABLE_VULKAN)
     file(GLOB_RECURSE GLSL_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.glsl")
+    file(GLOB_RECURSE MESHING_SHADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders/meshing/*.comp")
     set(SPV_DIR "${CMAKE_BINARY_DIR}/spv")
-    foreach(GLSL_FILE IN LISTS GLSL_SOURCES)
+      foreach(GLSL_FILE IN LISTS GLSL_SOURCES MESHING_SHADERS)
       get_filename_component(FILE_NAME ${GLSL_FILE} NAME_WE)
       get_filename_component(FILE_DIR  ${GLSL_FILE} DIRECTORY)
-      file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders_vk" "${FILE_DIR}")
-      set(OUT_DIR "${SPV_DIR}/${REL_DIR}")
-      file(MAKE_DIRECTORY "${OUT_DIR}")
+        if(GLSL_FILE MATCHES "/shaders/meshing/")
+          file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders/meshing" "${FILE_DIR}")
+          set(OUT_DIR "${SPV_DIR}/meshing/${REL_DIR}")
+        else()
+          file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders_vk" "${FILE_DIR}")
+          set(OUT_DIR "${SPV_DIR}/${REL_DIR}")
+        endif()
+        file(MAKE_DIRECTORY "${OUT_DIR}")
       set(SPV_FILE "${OUT_DIR}/${FILE_NAME}.spv")
       set(DEP_FILE "${SPV_FILE}.d")
       add_custom_command(OUTPUT ${SPV_FILE}
@@ -165,13 +171,18 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
 
-# --- Sparse voxel octree ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/world/svo_builder.cpp
-    src/world/svo_io.cpp
-    src/render/svo_traversal.cpp)
-endif()
+  # --- Sparse voxel octree ---
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE
+      src/world/svo_builder.cpp
+      src/world/svo_io.cpp
+      src/render/svo_traversal.cpp)
+  endif()
+
+  # --- Greedy meshing compute pass ---
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE src/render/meshing_pass.cpp)
+  endif()
 
 
 # --- Voxel SAT compute dispatch ---
