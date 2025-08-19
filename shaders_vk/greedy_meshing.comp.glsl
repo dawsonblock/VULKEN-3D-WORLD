@@ -33,7 +33,7 @@ void main() {
     if (pos.x == 0 || imageLoad(uVoxels, pos - ivec3(1, 0, 0)).r == 0u)
         emitQuad(base, base + vec3(0, d.y, 0), base + vec3(0, d.y, d.z), base + vec3(0, 0, d.z));
     if (pos.x == params.chunkSize.x - 1 || imageLoad(uVoxels, pos + ivec3(1, 0, 0)).r == 0u)
-        emitQuad(base + vec3(d.x, 0, 0), base + vec3(d.x, 0, d.z), base + vec3(d.x, d.y, d.z), base + vec3(d.x, d.y, 0));
+        emitQuad(base + vec3(d.x, 0, 0), base + vec3(d.x, d.y, 0), base + vec3(d.x, d.y, d.z), base + vec3(d.x, 0, d.z));
     if (pos.y == 0 || imageLoad(uVoxels, pos - ivec3(0, 1, 0)).r == 0u)
         emitQuad(base, base + vec3(d.x, 0, 0), base + vec3(d.x, 0, d.z), base + vec3(0, 0, d.z));
     if (pos.y == params.chunkSize.y - 1 || imageLoad(uVoxels, pos + ivec3(0, 1, 0)).r == 0u)
