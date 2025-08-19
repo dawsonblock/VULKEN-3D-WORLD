@@ -14,12 +14,13 @@ cmake -S . -B build -G Ninja -DENABLE_IMGUI_OVERLAY=ON -DVOXELVK_ENABLE_CUDA=OFF
 cmake --build build -j
 ```
 
-Set up the Python environment for utilities and tests:
+Set up the Python environment for utilities and tests, then install both runtime and development dependencies:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ## 2. Run smoke tests
