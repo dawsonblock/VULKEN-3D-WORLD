@@ -139,7 +139,8 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkDynamicState dynStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
     VkPipelineDynamicStateCreateInfo dyn{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
-    dyn.dynamicStateCount = 2; dyn.pDynamicStates = dynStates;
+    dyn.dynamicStateCount = 2;
+    dyn.pDynamicStates = dynStates;
 
     VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pcr.offset = 0; pcr.size = sizeof(glm::mat4) + sizeof(int);
