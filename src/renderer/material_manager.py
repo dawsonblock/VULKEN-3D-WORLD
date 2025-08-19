@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, cast
 
 
 @dataclass
@@ -33,7 +33,10 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
-            albedo = tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0]))
+            albedo = cast(
+                Tuple[float, float, float],
+                tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])),
+            )
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
@@ -43,7 +46,6 @@ class MaterialManager:
     def get_material_id(self, name: str) -> int:
         """Return the numeric ID for a material name."""
 
-        return self._materials_by_name[name].id
         if name not in self._materials_by_name:
             raise ValueError(f"Material {name} not found")
         return self._materials_by_name[name].id
