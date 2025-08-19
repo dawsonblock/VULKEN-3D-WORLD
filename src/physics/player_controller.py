@@ -52,7 +52,10 @@ class PlayerController:
     def update(self, dt: float, camera_forward: NDArray[np.float32], camera_right: NDArray[np.float32]) -> None:
         """Advance the controller one step using very simple kinematics."""
         wish = camera_forward * (self.input["f"] - self.input["b"]) + \
-               camera_right * (self.input["r"] - self.input["l"])
+        wish = (
+            camera_forward * (self.input["f"] - self.input["b"])
+            + camera_right * (self.input["r"] - self.input["l"])
+        )
         wish[1] = 0.0
         self.vel += wish * dt * self.accel
         self.pos += self.vel * dt
