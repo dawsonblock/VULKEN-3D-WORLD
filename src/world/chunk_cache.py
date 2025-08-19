@@ -46,7 +46,10 @@ class ChunkCache:
         dist = sqrt(cx * cx + cy * cy + cz * cz)
         lod = 0
         for i, threshold in enumerate(self.lod_distances, start=1):
-            if dist >= threshold:
+        dist_squared = cx * cx + cy * cy + cz * cz
+        lod = 0
+        for i, threshold in enumerate(self.lod_distances, start=1):
+            if dist_squared >= threshold:
                 lod = i
             else:
                 break
