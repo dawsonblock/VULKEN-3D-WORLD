@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdio>
 #include <cstring>
+#include "resource_registry.hpp"
 
 namespace voxelvk {
 
@@ -43,6 +44,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
     lci.bindingCount = 1; lci.pBindings = &b;
     if(vkCreateDescriptorSetLayout(device,&lci,nullptr,&noiseSetLayout)!=VK_SUCCESS) return false;
+    ResourceRegistry::instance().acquire(noiseSetLayout);
 
     VkPushConstantRange pcr{};
     pcr.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -52,6 +54,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     plci.setLayoutCount = 1; plci.pSetLayouts = &noiseSetLayout;
     plci.pushConstantRangeCount = 1; plci.pPushConstantRanges = &pcr;
     if(vkCreatePipelineLayout(device,&plci,nullptr,&pipelineLayout)!=VK_SUCCESS) return false;
+    ResourceRegistry::instance().acquire(pipelineLayout);
 
     VkShaderModule vs = loadShader(device, "spv/common/fullscreen.vert.spv");
     VkShaderModule fsSky = loadShader(device, "spv/post/atmosphere.frag.spv");
@@ -124,6 +127,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     pci.pDynamicState = &dyn;
     pci.layout = pipelineLayout;
     if(vkCreateGraphicsPipelines(device,nullptr,1,&pci,nullptr,&skyPipeline)!=VK_SUCCESS) return false;
+    ResourceRegistry::instance().acquire(skyPipeline);
 
     // Clouds pipeline with alpha blend
     stages[1].module = fsCloud;
@@ -135,6 +139,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     att.alphaBlendOp = VK_BLEND_OP_ADD;
     if(vkCreateGraphicsPipelines(device,nullptr,1,&pci,nullptr,&cloudPipeline)!=VK_SUCCESS) return false;
+    ResourceRegistry::instance().acquire(cloudPipeline);
 
     vkDestroyShaderModule(device, fsCloud, nullptr);
     vkDestroyShaderModule(device, fsSky, nullptr);
@@ -143,29 +148,28 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
 }
 
 void SkyPass::destroy(){
-    if(cloudPipeline) vkDestroyPipeline(device, cloudPipeline, nullptr);
-    if(skyPipeline) vkDestroyPipeline(device, skyPipeline, nullptr);
-    if(pipelineLayout) vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-    if(noiseSetLayout) vkDestroyDescriptorSetLayout(device, noiseSetLayout, nullptr);
-    if (device != VK_NULL_HANDLE) {
-        if(cloudPipeline != VK_NULL_HANDLE) {
-            vkDestroyPipeline(device, cloudPipeline, nullptr);
-            cloudPipeline = VK_NULL_HANDLE;
-        }
-        if(skyPipeline != VK_NULL_HANDLE) {
-            vkDestroyPipeline(device, skyPipeline, nullptr);
-            skyPipeline = VK_NULL_HANDLE;
-        }
-        if(pipelineLayout != VK_NULL_HANDLE) {
-            vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-            pipelineLayout = VK_NULL_HANDLE;
-        }
-        if(noiseSetLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(device, noiseSetLayout, nullptr);
-            noiseSetLayout = VK_NULL_HANDLE;
-        }
-        device = VK_NULL_HANDLE;
+    ResourceRegistry& registry = ResourceRegistry::instance();
+    if (cloudPipeline) {
+        registry.release(cloudPipeline);
+        vkDestroyPipeline(device, cloudPipeline, nullptr);
+        cloudPipeline = VK_NULL_HANDLE;
     }
+    if (skyPipeline) {
+        registry.release(skyPipeline);
+        vkDestroyPipeline(device, skyPipeline, nullptr);
+        skyPipeline = VK_NULL_HANDLE;
+    }
+    if (pipelineLayout) {
+        registry.release(pipelineLayout);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        pipelineLayout = VK_NULL_HANDLE;
+    }
+    if (noiseSetLayout) {
+        registry.release(noiseSetLayout);
+        vkDestroyDescriptorSetLayout(device, noiseSetLayout, nullptr);
+        noiseSetLayout = VK_NULL_HANDLE;
+    }
+    device = VK_NULL_HANDLE;
 }
 
 void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc){
