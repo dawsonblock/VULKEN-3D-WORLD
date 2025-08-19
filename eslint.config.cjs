@@ -1,6 +1,27 @@
 const js = require('@eslint/js');
 const globals = require('globals');
 
+
+module.exports = [
+  js.configs.recommended,
+  {
+    ignores: [
+      'build/**',
+      'node_modules/',
+      'build_ci_sanity/',
+      'cmake/',
+      'docs/',
+      'assets/',
+      'shaders/',
+      'shaders_vk/',
+      'tools/',
+      'tests/',
+      'src/',
+      'apps/',
+      'scripts/'
+    ],
+
+
 module.exports = [
   js.configs.recommended,
   {
@@ -47,7 +68,7 @@ module.exports = [
   {
     ignores: [
 
-=
+
 const globals = require('globals');
 
         main
@@ -120,6 +141,7 @@ module.exports = [
     ],
         main
         main
+        main
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
@@ -142,6 +164,8 @@ module.exports = [
       'semi': ['error', 'always']
     }
   }
+
+
 ];
 
 
@@ -160,6 +184,7 @@ module.exports = [
 
     ignores: ['node_modules/**', '**/build/**'],
   },
+        main
         main
         main
         main
