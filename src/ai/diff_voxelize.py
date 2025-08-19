@@ -67,7 +67,15 @@ def diff_voxelize(points: np.ndarray, grid_shape: Tuple[int, int, int]) -> tuple
         raise ValueError(f"`points` must have shape (N, 3), got {points.shape}")
     pts = np.ascontiguousarray(points, dtype=np.float32)
     n, _ = pts.shape
-    w, h, d = grid_shape
+
+    try:
+        w, h, d = grid_shape
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError("`grid_shape` must be a sequence of three integers") from exc
+    if any(not isinstance(dim, int) for dim in (w, h, d)):
+        raise ValueError("`grid_shape` must be a sequence of three integers")
+    if any(dim <= 0 for dim in (w, h, d)):
+        raise ValueError("`grid_shape` dimensions must be positive")
     occ = np.zeros((w, h, d), dtype=np.float32)
     grad = np.zeros((n, 3), dtype=np.float32)
     _lib.diff_voxelize(
