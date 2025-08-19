@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include "../src/render/meshing_pass.hpp"
 
 int main() {
     if (!glfwInit()) return 1;
@@ -66,7 +67,14 @@ int main() {
     dci.enabledExtensionCount = 1; dci.ppEnabledExtensionNames = devExts;
     VkDevice device;
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
-    VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
+      VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
+
+      voxelvk::MeshingPass meshPass;
+      meshPass.init(device, VK_NULL_HANDLE);
+      VkBuffer voxelBuf = VK_NULL_HANDLE;
+      VkBuffer vertexBuf = VK_NULL_HANDLE;
+      VkBuffer indexBuf  = VK_NULL_HANDLE;
+      VkBuffer counterBuf = VK_NULL_HANDLE;
 
     // Swapchain
     VkSurfaceCapabilitiesKHR caps; vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu,surface,&caps);
@@ -120,8 +128,9 @@ int main() {
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
     std::vector<VkCommandBuffer> cmds(imgCount); vkAllocateCommandBuffers(device,&cbai,cmds.data());
     for(uint32_t i=0;i<imgCount;i++){
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
-        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
+          VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
+          meshPass.dispatch(cmds[i], voxelBuf, vertexBuf, indexBuf, counterBuf);
+          VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
         VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
         rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
         rbi.clearValueCount = 1; rbi.pClearValues = &clear;
@@ -151,8 +160,9 @@ int main() {
         vkQueueWaitIdle(queue);
     }
 
-    vkDeviceWaitIdle(device);
-    vkDestroySemaphore(device,renderFinished,nullptr);
+      vkDeviceWaitIdle(device);
+      meshPass.destroy(device);
+      vkDestroySemaphore(device,renderFinished,nullptr);
     vkDestroySemaphore(device,imgAvailable,nullptr);
     vkDestroyCommandPool(device,pool,nullptr);
     for(auto fb:fbs) vkDestroyFramebuffer(device,fb,nullptr);
