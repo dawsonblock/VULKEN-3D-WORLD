@@ -16,6 +16,10 @@ set_target_properties(smoke_graphics_headless PROPERTIES CXX_STANDARD 17 CXX_STA
 target_include_directories(smoke_graphics_headless PRIVATE ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(smoke_graphics_headless PRIVATE Vulkan::Vulkan)
 
+if(TARGET VoxelVK_Elite_ALL)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE vma zstd lz4)
+endif()
+
 # --- Build tagging sources ---
 list(APPEND VOXELVK_ELITE_SOURCES
   src/core/build_info_print.cpp
@@ -39,7 +43,6 @@ if(TARGET VoxelVK_Elite_ALL)
   set(VOXELVK_ELITE_SOURCES)
   list(APPEND VOXELVK_ELITE_SOURCES src/render/ibl_brdf.cpp)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
-  target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
 endif()
 
 # --- SDF generator staging pipeline ---
@@ -47,7 +50,6 @@ if(TARGET VoxelVK_Elite_ALL)
   set(VOXELVK_ELITE_SOURCES)
   list(APPEND VOXELVK_ELITE_SOURCES src/render/sdf_generator.cpp)
   target_sources(VoxelVK_Elite_ALL PRIVATE ${VOXELVK_ELITE_SOURCES})
-  target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/external/vma)
 endif()
 
 add_custom_target(mirror_spv_ibl ALL
