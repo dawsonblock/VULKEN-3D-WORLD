@@ -3,7 +3,6 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-import importlib
 import numpy as np
 import pytest
 
