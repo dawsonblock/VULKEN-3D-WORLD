@@ -214,7 +214,10 @@ static std::vector<char> readFile(const char* path){
 
 static VkShaderModule loadShader(VkDevice dev, const char* path){
     auto bytes = readFile(path);
-    if(bytes.empty()) return VK_NULL_HANDLE;
+    if(bytes.empty()) {
+        std::fprintf(stderr, "Error: Failed to load shader file '%s'\n", path);
+        return VK_NULL_HANDLE;
+    }
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = bytes.size();
     ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
