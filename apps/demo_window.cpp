@@ -3,6 +3,11 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <glm/glm.hpp>
+#include "src/render/pbr_lighting_pass.hpp"
+#include "src/render/csm_pass.hpp"
+#include <glm/glm.hpp>
+#include "src/render/pbr_lighting_pass.hpp"
 
 int main() {
     if (!glfwInit()) return 1;
@@ -126,6 +131,17 @@ int main() {
         rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
         rbi.clearValueCount = 1; rbi.pClearValues = &clear;
         vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
+        voxelvk::CSMShadowPass csm;
+        voxelvk::PBRLightingPass pbrPass;
+        pbrPass.init(gpu, device, nullptr, fmt.format, csm.uboSetLayout);
+        auto dummyDraw = [](VkCommandBuffer, int){};
+        csm.record(cmds[i], dummyDraw);
+        voxelvk::PBRPushConstants pc{};
+        pc.model = glm::mat4(1.0f);
+        pc.viewProj = glm::mat4(1.0f);
+        pc.camPos = glm::vec3(0.0f);
+        pc.lightDir = glm::vec3(0.0f, -1.0f, 0.0f);
+        pbrPass.record(cmds[i], csm.uboSet, pc, 0);
         vkCmdEndRenderPass(cmds[i]);
         vkEndCommandBuffer(cmds[i]);
     }
