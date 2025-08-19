@@ -1,17 +1,35 @@
 const js = require('@eslint/js');
 
+const globals = require('globals');
+
+
+
+
+
+          main
 
 const globals = require('globals');
+        main
 
 module.exports = [
   js.configs.recommended,
   {
+
+
+    ignores: [
+
+    ignores: ['**/*'],
+  },
+];
+
+
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
       globals: { ...globals.node, ...globals.es2021 }
     },
     ignores: [
+        main
 
 
         main
@@ -41,8 +59,21 @@ const globals = require('globals');
 
 module.exports = [
   js.configs.recommended,
+
+  {
+
+    ignores: ['node_modules/**', 'tests/**', 'src/**', 'docs/**'],
+  },
+
+        main
+        main
+    ignores: [
+        main
+      '**/build/**',
+
   
   {   ignores: [
+        main
         main
         main
         main
@@ -59,6 +90,9 @@ module.exports = [
       'apps/**',
 
       'scripts/**',
+
+    ],
+
       '**/build/**'
     ]
  
@@ -71,6 +105,7 @@ module.exports = [
       'semi': ['error', 'always']
     }
   }
+        main
 
 
       'scripts/**'
@@ -88,13 +123,21 @@ module.exports = [
     ],
         main
         main
+        main
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 }
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      semi: ['error', 'always'],
+    },
+  },
+];
+
+
 
       semi: ['error', 'always']
     }
@@ -118,3 +161,13 @@ module.exports = [
         main
 ];
 
+
+        main
+        main
+        main
+        main
+        main
+        main
+        main
+
+        main
