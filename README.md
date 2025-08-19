@@ -39,15 +39,19 @@ Run the test suite:
 pytest
 ```
 
-```
+### diff_voxelize native library
+
+The differentiable voxelizer used in `src/ai/diff_voxelize.py` relies on a
+small C++ extension. Build the library using `scripts/build_diff_voxelize.py`
+as described in `docs/diff_voxelize_build.md`. Release artifacts may provide
+prebuilt binaries for convenience.
 
 ## Linting
 To check JavaScript or TypeScript sources, run:
+
 ```bash
 npx eslint .
-
-
-
+```
 
 ## Samples
 
