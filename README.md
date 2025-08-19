@@ -39,15 +39,19 @@ Run the test suite:
 pytest
 ```
 
-```
 
 ## Linting
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
+```
 
-
-
+## Shader compilation
+Shaders in `apps/shaders` are compiled to SPIR-V using `glslc`. After editing a shader, regenerate binaries with:
+```bash
+make -C apps/shaders
+```
+Generated `*.spv` files are ignored by Git and rebuilt locally as needed.
 
 ## Samples
 
