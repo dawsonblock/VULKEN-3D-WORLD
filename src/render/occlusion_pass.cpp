@@ -104,7 +104,17 @@ void recordMainRenderPass(VkCommandBuffer cmd,
     // Mapping is skipped for brevity; caller should handle buffer upload.
     // vkMapMemory(..., &data);
     // memcpy(static_cast<uint8_t*>(data) + bufferOffset, draws.data(), draws.size() * sizeof(VkDrawIndexedIndirectCommand));
-    // vkUnmapMemory(...);
+    // Map buffer memory, copy draw commands, and unmap before issuing indirect draw.
+    void* data = nullptr;
+    VkResult mapResult = vkMapMemory(device, indirectBufferMemory, bufferOffset,
+                                     draws.size() * sizeof(VkDrawIndexedIndirectCommand), 0, &data);
+    if (mapResult == VK_SUCCESS && data) {
+        memcpy(data, draws.data(), draws.size() * sizeof(VkDrawIndexedIndirectCommand));
+        vkUnmapMemory(device, indirectBufferMemory);
+    } else {
+        // Handle error: could not map memory
+        return;
+    }
     vkCmdDrawIndexedIndirect(cmd, indirectBuffer, bufferOffset,
                              static_cast<uint32_t>(draws.size()),
                              sizeof(VkDrawIndexedIndirectCommand));
