@@ -46,7 +46,11 @@ bool createStagingBuffer(VkPhysicalDevice phys,
         return false;
     }
 
-    vkBindBufferMemory(device, *outBuffer, *outMemory, 0);
+    if (vkBindBufferMemory(device, *outBuffer, *outMemory, 0) != VK_SUCCESS) {
+        vkDestroyBuffer(device, *outBuffer, nullptr);
+        vkFreeMemory(device, *outMemory, nullptr);
+        return false;
+    }
     return true;
 }
 
