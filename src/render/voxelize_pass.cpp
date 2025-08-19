@@ -4,6 +4,8 @@
 #include <cstdio>
 
 #include "vk_mem_alloc.h"
+#include "frame_graph.hpp"
+#include "global_layout.hpp"
 
 namespace voxelvk {
 
@@ -164,21 +166,9 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     pcr.offset = 0;
     pcr.size = sizeof(glm::mat4) + sizeof(int);
 
-    VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-    lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
-    lci.pushConstantRangeCount = 1;
-    lci.pPushConstantRanges = &pcr;
-
-    dyn.dynamicStateCount = 2; dyn.pDynamicStates = dynStates;
-
-    VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pcr.offset = 0; pcr.size = sizeof(glm::mat4) + sizeof(int);
-
-    VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-    lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
-    lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
-        main
-    if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS){
+    VkDescriptorSetLayout sets[] = { setLayout };
+    pipelineLayout = createGlobalPipelineLayout(device, sets, 1, &pcr, 1);
+    if(pipelineLayout == VK_NULL_HANDLE){
         vkDestroyShaderModule(device, vs, nullptr);
         vkDestroyShaderModule(device, fs, nullptr);
         return false;
@@ -244,6 +234,13 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
         drawScene(cmd, (int)z);
         vkCmdEndRendering(cmd);
     }
+}
+
+void VoxelizePass::registerToGraph(FrameGraph& graph){
+    FrameGraphPass pass{};
+    pass.name = "voxelize";
+    pass.writes = {"voxelData"};
+    graph.addPass(pass);
 }
 
 static std::vector<char> readFile(const char* path){
