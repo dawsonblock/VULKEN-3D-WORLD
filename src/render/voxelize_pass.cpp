@@ -18,7 +18,6 @@ uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, 
     }
     throw std::runtime_error("No suitable memory type");
 }
-
 bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
     device = dev; allocator = alloc; dim = dimension;
     if(!createImage(phys)) return false;
