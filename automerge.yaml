@@ -1,0 +1,19 @@
+name: Auto Merge PRs
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automerge
+        uses: pascalgn/automerge-action@v0.15.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          mergeMethod: "squash"
+          # You can set your preferred merge method: "merge", "squash", or "rebase"
+          # You can also add conditions or labels if you want more control
