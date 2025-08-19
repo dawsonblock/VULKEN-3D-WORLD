@@ -4,6 +4,12 @@
 #include <iostream>
 #include <cstring>
 
+#if defined(ENABLE_IMGUI_OVERLAY) && ENABLE_IMGUI_OVERLAY
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+#endif
+
 int main() {
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -119,16 +125,56 @@ int main() {
     VkCommandPool pool; vkCreateCommandPool(device,&cp,nullptr,&pool);
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
     std::vector<VkCommandBuffer> cmds(imgCount); vkAllocateCommandBuffers(device,&cbai,cmds.data());
-    for(uint32_t i=0;i<imgCount;i++){
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
-        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
-        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-        rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
-        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
-        vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdEndRenderPass(cmds[i]);
-        vkEndCommandBuffer(cmds[i]);
-    }
+
+    VkDescriptorPool imguiPool = VK_NULL_HANDLE;
+#if defined(ENABLE_IMGUI_OVERLAY) && ENABLE_IMGUI_OVERLAY
+    VkDescriptorPoolSize pool_sizes[] = {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
+    VkDescriptorPoolCreateInfo pool_info{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000 * 11;
+    pool_info.poolSizeCount = 11;
+    pool_info.pPoolSizes = pool_sizes;
+    vkCreateDescriptorPool(device,&pool_info,nullptr,&imguiPool);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForVulkan(window, true);
+    ImGui_ImplVulkan_InitInfo init_info{};
+    init_info.Instance = instance;
+    init_info.PhysicalDevice = gpu;
+    init_info.Device = device;
+    init_info.QueueFamily = graphicsQueue;
+    init_info.Queue = queue;
+    init_info.DescriptorPool = imguiPool;
+    init_info.MinImageCount = sci.minImageCount;
+    init_info.ImageCount = imgCount;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    ImGui_ImplVulkan_Init(&init_info, rp);
+
+    VkCommandBuffer fontCmd = cmds[0];
+    vkResetCommandBuffer(fontCmd, 0);
+    VkCommandBufferBeginInfo fbi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+    vkBeginCommandBuffer(fontCmd, &fbi);
+    ImGui_ImplVulkan_CreateFontsTexture(fontCmd);
+    vkEndCommandBuffer(fontCmd);
+    VkSubmitInfo fsi{VK_STRUCTURE_TYPE_SUBMIT_INFO}; fsi.commandBufferCount=1; fsi.pCommandBuffers=&fontCmd;
+    vkQueueSubmit(queue,1,&fsi,VK_NULL_HANDLE);
+    vkDeviceWaitIdle(device);
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
+#endif
 
     VkSemaphoreCreateInfo sci2{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore imgAvailable, renderFinished;
@@ -137,11 +183,34 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
+#if defined(ENABLE_IMGUI_OVERLAY) && ENABLE_IMGUI_OVERLAY
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Begin("Stats");
+        ImGui::Text("FPS: %.1f", io.Framerate);
+        ImGui::End();
+        ImGui::Render();
+#endif
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
+        VkCommandBuffer cmd = cmds[imgIndex];
+        vkResetCommandBuffer(cmd,0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmd,&bi);
+        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
+        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        rbi.renderPass = rp; rbi.framebuffer = fbs[imgIndex]; rbi.renderArea.extent = sci.imageExtent;
+        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
+        vkCmdBeginRenderPass(cmd,&rbi,VK_SUBPASS_CONTENTS_INLINE);
+#if defined(ENABLE_IMGUI_OVERLAY) && ENABLE_IMGUI_OVERLAY
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+#endif
+        vkCmdEndRenderPass(cmd);
+        vkEndCommandBuffer(cmd);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.waitSemaphoreCount=1; si.pWaitSemaphores=&imgAvailable; si.pWaitDstStageMask=&waitStage;
-        si.commandBufferCount=1; si.pCommandBuffers=&cmds[imgIndex];
+        si.commandBufferCount=1; si.pCommandBuffers=&cmd;
         si.signalSemaphoreCount=1; si.pSignalSemaphores=&renderFinished;
         vkQueueSubmit(queue,1,&si,VK_NULL_HANDLE);
         VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
@@ -154,6 +223,12 @@ int main() {
     vkDeviceWaitIdle(device);
     vkDestroySemaphore(device,renderFinished,nullptr);
     vkDestroySemaphore(device,imgAvailable,nullptr);
+#if defined(ENABLE_IMGUI_OVERLAY) && ENABLE_IMGUI_OVERLAY
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    vkDestroyDescriptorPool(device, imguiPool, nullptr);
+#endif
     vkDestroyCommandPool(device,pool,nullptr);
     for(auto fb:fbs) vkDestroyFramebuffer(device,fb,nullptr);
     vkDestroyRenderPass(device,rp,nullptr);
