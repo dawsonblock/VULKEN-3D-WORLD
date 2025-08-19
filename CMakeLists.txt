@@ -68,6 +68,7 @@ else()
   endif()
 endif()
 find_package(Threads REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
@@ -178,4 +179,7 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
+
+if(TARGET VoxelVK_Elite_ALL)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE spdlog::spdlog_header_only)
+endif()
