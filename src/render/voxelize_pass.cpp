@@ -12,14 +12,26 @@ static VkShaderModule loadShader(VkDevice dev, const char* path);
 uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags){
     VkPhysicalDeviceMemoryProperties memProps{};
     vkGetPhysicalDeviceMemoryProperties(phys, &memProps);
+
+    for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
+
     for(uint32_t i=0;i<memProps.memoryTypeCount;i++){
+        main
         if((typeBits & (1u<<i)) && (memProps.memoryTypes[i].propertyFlags & flags) == flags)
             return i;
     }
     throw std::runtime_error("No suitable memory type");
 }
+
+
+bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
+    device = dev;
+    allocator = alloc;
+    dim = dimension;
+
 bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
     device = dev; allocator = alloc; dim = dimension;
+        main
     if(!createImage(phys)) return false;
     if(!createDescriptors()) return false;
     if(!createPipeline(phys)) return false;
@@ -69,12 +81,23 @@ bool VoxelizePass::createDescriptors(){
     b.descriptorCount = 1;
     b.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+
+    lci.bindingCount = 1;
+    lci.pBindings = &b;
+
     lci.bindingCount = 1; lci.pBindings = &b;
+        main
     if(vkCreateDescriptorSetLayout(device, &lci, nullptr, &setLayout) != VK_SUCCESS) return false;
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 1;
     VkDescriptorPoolCreateInfo pci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
+
+    pci.maxSets = 1;
+    pci.poolSizeCount = 1;
+    pci.pPoolSizes = &ps;
+
     pci.maxSets = 1; pci.poolSizeCount = 1; pci.pPoolSizes = &ps;
+        main
     if(vkCreateDescriptorPool(device, &pci, nullptr, &descPool) != VK_SUCCESS) return false;
 
     VkDescriptorSetAllocateInfo ai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
@@ -133,6 +156,19 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkDynamicState dynStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
     VkPipelineDynamicStateCreateInfo dyn{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
+
+    dyn.dynamicStateCount = 2;
+    dyn.pDynamicStates = dynStates;
+
+    VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pcr.offset = 0;
+    pcr.size = sizeof(glm::mat4) + sizeof(int);
+
+    VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+    lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
+    lci.pushConstantRangeCount = 1;
+    lci.pPushConstantRanges = &pcr;
+
     dyn.dynamicStateCount = 2; dyn.pDynamicStates = dynStates;
 
     VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -141,6 +177,7 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
     lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
+        main
     if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS){
         vkDestroyShaderModule(device, vs, nullptr);
         vkDestroyShaderModule(device, fs, nullptr);
@@ -154,7 +191,12 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkGraphicsPipelineCreateInfo pci{VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
     pci.pNext = &rinfo;
+
+    pci.stageCount = 2;
+    pci.pStages = stages;
+
     pci.stageCount = 2; pci.pStages = stages;
+        main
     pci.pVertexInputState = &vi;
     pci.pInputAssemblyState = &ia;
     pci.pRasterizationState = &rs;
@@ -182,8 +224,13 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
     vkCmdSetScissor(cmd, 0, 1, &sc);
 
     for(uint32_t z=0; z<dim; ++z){
+
+        struct Push { glm::mat4 mvp; int slice; } pc{};
+        pc.mvp = glm::mat4(1.0f);
+
         Push pc{};
         pc.mvp = mvp;
+        main
         pc.slice = (int)z;
         vkCmdPushConstants(cmd, pipelineLayout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -214,10 +261,14 @@ static std::vector<char> readFile(const char* path){
 
 static VkShaderModule loadShader(VkDevice dev, const char* path){
     auto bytes = readFile(path);
+
+    if(bytes.empty()) return VK_NULL_HANDLE;
+
     if(bytes.empty()) {
         std::fprintf(stderr, "Error: Failed to load shader file '%s'\n", path);
         return VK_NULL_HANDLE;
     }
+        main
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = bytes.size();
     ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
