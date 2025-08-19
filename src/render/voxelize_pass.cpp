@@ -148,7 +148,8 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
-    lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
+    lci.pushConstantRangeCount = 1;
+    lci.pPushConstantRanges = &pcr;
     if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS){
         vkDestroyShaderModule(device, vs, nullptr);
         vkDestroyShaderModule(device, fs, nullptr);
