@@ -69,6 +69,21 @@ else()
 endif()
 find_package(Threads REQUIRED)
 
+# ImGui overlay support
+if(ENABLE_IMGUI_OVERLAY AND ENABLE_VULKAN)
+  add_library(imgui STATIC
+    external/imgui/imgui.cpp
+    external/imgui/imgui_draw.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/backends/imgui_impl_vulkan.cpp
+    external/imgui/backends/imgui_impl_glfw.cpp)
+  target_include_directories(imgui PUBLIC
+    ${CMAKE_SOURCE_DIR}/external/imgui
+    ${CMAKE_SOURCE_DIR}/external/imgui/backends)
+  target_link_libraries(imgui PUBLIC Vulkan::Vulkan ${GLFW_LIB})
+endif()
+
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
 if(ENABLE_VULKAN)
@@ -119,6 +134,12 @@ if(ENABLE_VULKAN)
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+
+  add_executable(demo_window apps/demo_window.cpp)
+  target_link_libraries(demo_window PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB} $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:imgui>)
+  target_compile_definitions(demo_window PRIVATE
+    $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
+    $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>)
 endif()
 
 # Tests
@@ -178,4 +199,3 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
