@@ -11,9 +11,10 @@ This repo contains:
 See [Quickstart guide](docs/QUICKSTART.md) for setup and usage.
 
 ## Local build
+Build the engine library `VoxelVK_Elite_ALL`:
 ```bash
 cmake -S . -B build -G Ninja -DENABLE_IMGUI_OVERLAY=ON -DVOXELVK_ENABLE_CUDA=OFF -DVOXELVK_ENABLE_TENSORRT=OFF
-cmake --build build -j
+cmake --build build --target VoxelVK_Elite_ALL -j
 ctest --test-dir build --output-on-failure
 ```
 
@@ -38,9 +39,6 @@ Run the test suite:
 ```bash
 pytest
 ```
-
-```
-
 ## Linting
 To check JavaScript or TypeScript sources, run:
 ```bash
