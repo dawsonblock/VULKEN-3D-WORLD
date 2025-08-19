@@ -5,6 +5,9 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <set>
+#include <sstream>
+#include <cstdio>
 
 #if __has_include(<zstd.h>)
 #define VOXELVK_HAS_ZSTD 1
@@ -35,9 +38,30 @@ std::filesystem::path ChunkStore::_region_dir(int cx, int cz) const {
     return d;
 }
 
-std::filesystem::path ChunkStore::chunk_path(int cx, int cz) const {
-    return _region_dir(cx, cz) / ("c." + std::to_string(cx) + "." + std::to_string(cz) + ".bin");
-}
+  std::filesystem::path ChunkStore::chunk_path(int cx, int cz) const {
+      return _region_dir(cx, cz) / ("c." + std::to_string(cx) + "." + std::to_string(cz) + ".bin");
+  }
+
+  std::filesystem::path ChunkStore::_index_path(int cx, int cz) const {
+      return _region_dir(cx, cz) / "index.txt";
+  }
+
+  void ChunkStore::_update_index(int cx, int cz) {
+      auto idx = _index_path(cx, cz);
+      std::ifstream in(idx);
+      std::string line;
+      while (std::getline(in, line)) {
+          std::istringstream iss(line);
+          int x = 0, z = 0;
+          if (iss >> x >> z) {
+              if (x == cx && z == cz) {
+                  return;
+              }
+          }
+      }
+      std::ofstream out(idx, std::ios::app);
+      out << cx << ' ' << cz << '\n';
+  }
 
 void ChunkStore::rle_encode(const std::vector<std::uint8_t> &arr,
                             std::vector<std::uint8_t> &vals,
@@ -171,11 +195,7 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
     std::ofstream ofs(path, std::ios::binary);
     ofs.write(reinterpret_cast<const char *>(blob.data()), static_cast<std::streamsize>(blob.size()));
     ofs.close();
-
-    // Minimal index.json write
-    auto idx = _region_dir(cx, cz) / "index.json";
-    std::ofstream idxf(idx, std::ios::binary);
-    idxf << "{\"" << cx << "," << cz << "\": {\"saved\": true}}";
+    _update_index(cx, cz);
 }
 
 void ChunkStore::save_async(const Chunk &chunk) {
@@ -206,7 +226,36 @@ std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
     } else {
         vox.assign(ptr, ptr + static_cast<std::size_t>(H) * Y * S);
     }
-    return ChunkData{std::move(vox), Y, S};
+  return ChunkData{std::move(vox), Y, S};
+}
+
+void ChunkStore::compact_region(int rx, int rz) {
+    auto dir = root_ / ("r." + std::to_string(rx) + "." + std::to_string(rz));
+    if (!std::filesystem::exists(dir)) return;
+    std::set<std::pair<int, int>> chunks;
+    for (auto &p : std::filesystem::directory_iterator(dir)) {
+        if (p.path().extension() == ".bin") {
+            int cx = 0, cz = 0;
+            if (std::sscanf(p.path().filename().string().c_str(), "c.%d.%d.bin", &cx, &cz) == 2) {
+                chunks.emplace(cx, cz);
+            }
+        }
+    }
+    std::ofstream idx(dir / "index.txt", std::ios::trunc);
+    for (auto [cx, cz] : chunks) {
+        idx << cx << ' ' << cz << '\n';
+    }
+}
+
+void ChunkStore::compact_all() {
+    for (auto &p : std::filesystem::directory_iterator(root_)) {
+        if (p.is_directory()) {
+            int rx = 0, rz = 0;
+            if (std::sscanf(p.path().filename().string().c_str(), "r.%d.%d", &rx, &rz) == 2) {
+                compact_region(rx, rz);
+            }
+        }
+    }
 }
 
 void ChunkStore::wait_all() {

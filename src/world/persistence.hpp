@@ -37,11 +37,15 @@ public:
     void save_async(const Chunk &chunk);
     std::optional<ChunkData> load_chunk(int cx, int cz);
     void wait_all();
+    void compact_region(int rx, int rz);
+    void compact_all();
 
 private:
     std::filesystem::path _region_dir(int cx, int cz) const;
     std::vector<std::uint8_t> _compress(const std::vector<std::uint8_t> &data) const;
     std::vector<std::uint8_t> _decompress(const std::vector<std::uint8_t> &data) const;
+    std::filesystem::path _index_path(int cx, int cz) const;
+    void _update_index(int cx, int cz);
 
     static void rle_encode(const std::vector<std::uint8_t> &arr,
                            std::vector<std::uint8_t> &vals,
@@ -58,4 +62,3 @@ private:
 };
 
 } // namespace world
-

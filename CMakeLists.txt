@@ -55,6 +55,8 @@ set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + vo
 include(${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
+add_subdirectory(external)
+
 find_package(glfw3 QUIET)
 if(glfw3_FOUND)
   set(GLFW_LIB glfw)
@@ -178,4 +180,7 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
+
+if(TARGET VoxelVK_Elite_ALL)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE ZSTD::ZSTD LZ4::lz4)
+endif()
