@@ -89,6 +89,10 @@ bool PBRPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     ds.depthTestEnable = VK_FALSE;
     ds.depthWriteEnable = VK_FALSE;
     VkPipelineColorBlendAttachmentState att{};
+    // Additive blending (ONE + ONE) is used here instead of typical alpha blending.
+    // This is intentional for [insert reason here, e.g., "accumulating light contributions in a post-processing pass"
+    // or "rendering special effects that require additive color blending"]. If this is not the intended effect,
+    // consider switching to alpha blending or disabling blending for standard PBR rendering.
     att.blendEnable = VK_TRUE;
     att.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
     att.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
