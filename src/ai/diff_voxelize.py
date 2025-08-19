@@ -4,30 +4,47 @@ from __future__ import annotations
 
 import ctypes
 import subprocess
+import sys
+import shutil
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-LIB_PATH = ROOT / "diff_voxelize.so"
+LIB_NAMES = {
+    "linux": "diff_voxelize.so",
+    "linux2": "diff_voxelize.so",
+    "darwin": "diff_voxelize.dylib",
+    "win32": "diff_voxelize.dll",
+}
 
 
 def _load_lib() -> ctypes.CDLL:
-    if not LIB_PATH.exists():
+    system = sys.platform
+    lib_name = LIB_NAMES.get(system)
+    if lib_name is None:
+        raise RuntimeError(f"Unsupported platform: {system}")
+    lib_path = ROOT / lib_name
+    if not lib_path.exists():
         src = ROOT / "diff_voxelize.cpp"
-        subprocess.check_call(
-            [
-                "g++",
-                "-std=c++17",
-                "-shared",
-                "-fPIC",
-                str(src),
-                "-o",
-                str(LIB_PATH),
-            ]
-        )
-    return ctypes.CDLL(str(LIB_PATH))
+        gpp = shutil.which("g++")
+        if gpp is None:
+            raise RuntimeError(
+                "g++ compiler not found. Install g++ or ensure a pre-built diff_voxelize library is available."
+            )
+        cmd = [gpp, "-std=c++17", "-shared"]
+        if system != "win32":
+            cmd.append("-fPIC")
+        cmd += [str(src), "-o", str(lib_path)]
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError("Failed to compile diff_voxelize.cpp") from exc
+    try:
+        return ctypes.CDLL(str(lib_path))
+    except OSError as exc:
+        raise RuntimeError(f"Failed to load library: {lib_path}") from exc
 
 
 _lib = _load_lib()

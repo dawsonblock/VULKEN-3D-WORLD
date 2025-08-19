@@ -15,3 +15,7 @@ node_modules/
 **/__pycache__/
         main
 tests/physics_cpp.so
+# prebuilt diff_voxelize libraries
+src/ai/diff_voxelize.so
+src/ai/diff_voxelize.dylib
+src/ai/diff_voxelize.dll
