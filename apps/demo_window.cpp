@@ -228,7 +228,6 @@ int main() {
         ImGui::Text("Camera: (%.2f, %.2f, %.2f)", camera.pos.x, camera.pos.y, camera.pos.z);
         ImGui::End();
         ImGui::Render();
-        // Rendering with Vulkan backend should happen here
 #endif
 
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
