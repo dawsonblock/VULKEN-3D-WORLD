@@ -246,7 +246,17 @@ found_device:
         camera.update(window,dt);
         shader.update();
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
-        VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO}; si.waitSemaphoreCount=1; si.pWaitSemaphores=&imgAvailable; si.pWaitDstStageMask=&waitStage; si.commandBufferCount=1; si.pCommandBuffers=&cmds[imgIndex]; si.signalSemaphoreCount=1; si.pSignalSemaphores=&renderFinished; vkQueueSubmit(queue,1,&si,VK_NULL_HANDLE);
+        VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        VkSubmitInfo si{};
+        si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        si.waitSemaphoreCount = 1;
+        si.pWaitSemaphores = &imgAvailable;
+        si.pWaitDstStageMask = &waitStage;
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmds[imgIndex];
+        si.signalSemaphoreCount = 1;
+        si.pSignalSemaphores = &renderFinished;
+        vkQueueSubmit(queue, 1, &si, VK_NULL_HANDLE);
         VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR}; pi.waitSemaphoreCount=1; pi.pWaitSemaphores=&renderFinished; pi.swapchainCount=1; pi.pSwapchains=&swapchain; pi.pImageIndices=&imgIndex; vkQueuePresentKHR(queue,&pi);
         vkQueueWaitIdle(queue);
     }
