@@ -30,7 +30,7 @@ bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc,
 void VoxelizePass::destroy(){
     if(pipeline) vkDestroyPipeline(device, pipeline, nullptr);
     if(pipelineLayout) vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-    if(descSet) {}
+    // Descriptor sets are freed when the descriptor pool is destroyed.
     if(descPool) vkDestroyDescriptorPool(device, descPool, nullptr);
     if(setLayout) vkDestroyDescriptorSetLayout(device, setLayout, nullptr);
     if(voxelView) vkDestroyImageView(device, voxelView, nullptr);
