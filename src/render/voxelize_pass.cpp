@@ -182,7 +182,7 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
     vkCmdSetScissor(cmd, 0, 1, &sc);
 
     for(uint32_t z=0; z<dim; ++z){
-        struct Push { glm::mat4 mvp; int slice; } pc{};
+        Push pc{};
         pc.mvp = glm::mat4(1.0f);
         pc.slice = (int)z;
         vkCmdPushConstants(cmd, pipelineLayout,
