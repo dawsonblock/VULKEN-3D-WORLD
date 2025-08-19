@@ -12,7 +12,7 @@ static VkShaderModule loadShader(VkDevice dev, const char* path);
 uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags){
     VkPhysicalDeviceMemoryProperties memProps{};
     vkGetPhysicalDeviceMemoryProperties(phys, &memProps);
-    for(uint32_t i=0;i<memProps.memoryTypeCount;i++){
+    for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
         if((typeBits & (1u<<i)) && (memProps.memoryTypes[i].propertyFlags & flags) == flags)
             return i;
     }
