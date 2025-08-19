@@ -86,7 +86,7 @@ def resolve_capsule_world(
             for z in range(bb_min[2] - 1, bb_max[2] + 2):
                 for x in range(bb_min[0] - 1, bb_max[0] + 2):
                     bt = world.get_block_at_world_position(float(x), float(y), float(z))
-                    if not is_solid(bt):
+                    if not bt:
                         continue
                     mnv = np.array([x, y, z], dtype=np.float32)
                     mxv = mnv + 1.0
