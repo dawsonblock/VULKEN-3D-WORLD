@@ -22,7 +22,7 @@ def extract_planes(view_proj: Sequence[Sequence[float]]) -> List[Plane]:
         m[3] + m[2],
         m[3] - m[2],
     ]
-    return [p / np.linalg.norm(p[:3]) for p in planes]
+    return [p / np.sqrt(np.sum(p[:3]**2)) for p in planes]
 
 
 def box_in_frustum(box_min: Sequence[float], box_max: Sequence[float], planes: Iterable[Plane]) -> bool:
