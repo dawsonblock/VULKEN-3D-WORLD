@@ -72,7 +72,8 @@ bool VoxelizePass::createDescriptors(){
     b.descriptorCount = 1;
     b.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-    lci.bindingCount = 1; lci.pBindings = &b;
+    lci.bindingCount = 1;
+    lci.pBindings = &b;
     if(vkCreateDescriptorSetLayout(device, &lci, nullptr, &setLayout) != VK_SUCCESS) return false;
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 1;
