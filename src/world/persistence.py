@@ -1,22 +1,20 @@
 
 import json
 import logging
+import os
 import numpy as np
 from pathlib import Path
 from typing import Dict, Optional
 from concurrent.futures import Future, ThreadPoolExecutor
 from .rle import rle_encode, rle_decode
 
-try:
-    import zstandard as zstd
-    has_zstd=True
-except Exception:
-    has_zstd=False
-try:
-    import lz4.frame as lz4f
-    has_lz4=True
-except Exception:
-    has_lz4=False
+VOXELVK_HAS_ZSTD = os.getenv("VOXELVK_HAS_ZSTD") == "1"
+if VOXELVK_HAS_ZSTD:
+    import zstandard as zstd  # type: ignore
+
+VOXELVK_HAS_LZ4 = os.getenv("VOXELVK_HAS_LZ4") == "1"
+if VOXELVK_HAS_LZ4:
+    import lz4.frame as lz4f  # type: ignore
 
 class ChunkStore:
     def __init__(self, root="world_save", codec="zstd", use_rle=True, threads=4):
@@ -30,16 +28,16 @@ class ChunkStore:
     def chunk_path(self, cx, cz): return self._region_dir(cx, cz) / f"c.{cx}.{cz}.bin"
 
     def _compress(self, b: bytes) -> bytes:
-        if self.codec=="zstd" and has_zstd:
+        if self.codec=="zstd" and VOXELVK_HAS_ZSTD:
             c = zstd.ZstdCompressor(level=10); return c.compress(b)
-        if self.codec=="lz4" and has_lz4:
+        if self.codec=="lz4" and VOXELVK_HAS_LZ4:
             return lz4f.compress(b, compression_level=9, block_size=lz4f.BLOCKSIZE_MAX1MB, content_checksum=True)
         return b
 
     def _decompress(self, b: bytes) -> bytes:
-        if self.codec=="zstd" and has_zstd:
+        if self.codec=="zstd" and VOXELVK_HAS_ZSTD:
             d = zstd.ZstdDecompressor(); return d.decompress(b)
-        if self.codec=="lz4" and has_lz4:
+        if self.codec=="lz4" and VOXELVK_HAS_LZ4:
             return lz4f.decompress(b)
         return b
 

@@ -6,18 +6,18 @@
 #include <algorithm>
 #include <iostream>
 
-#if __has_include(<zstd.h>)
-#define VOXELVK_HAS_ZSTD 1
-#include <zstd.h>
-#else
+#ifndef VOXELVK_HAS_ZSTD
 #define VOXELVK_HAS_ZSTD 0
 #endif
+#if VOXELVK_HAS_ZSTD
+#include <zstd.h>
+#endif
 
-#if __has_include(<lz4frame.h>)
-#define VOXELVK_HAS_LZ4 1
-#include <lz4frame.h>
-#else
+#ifndef VOXELVK_HAS_LZ4
 #define VOXELVK_HAS_LZ4 0
+#endif
+#if VOXELVK_HAS_LZ4
+#include <lz4frame.h>
 #endif
 
 namespace world {
