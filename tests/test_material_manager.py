@@ -1,5 +1,9 @@
 from src.renderer.material_manager import MaterialManager
 
+# Each material is represented by three albedo components plus metallic and
+# roughness values.
+MATERIAL_COMPONENTS_COUNT = 5
+
 
 def test_material_manager_loads_and_ids_unique():
     mgr = MaterialManager()
