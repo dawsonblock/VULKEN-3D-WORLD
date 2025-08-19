@@ -104,7 +104,7 @@ FetchContent_Declare(
 set(LZ4_BUILD_CLI OFF CACHE BOOL "" FORCE)
 set(LZ4_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(lz4)
-add_library(lz4 ALIAS lz4_static)
+add_library(lz4_lib ALIAS lz4_static)
 
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
