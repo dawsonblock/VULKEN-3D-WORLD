@@ -32,7 +32,7 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
             int cz = center.z + dz;
             int id = cx*CHUNK_HASH_X_MULTIPLIER ^ cz*CHUNK_HASH_Z_MULTIPLIER;
             desired.insert(id);
-            if(loading_.find(id)==loading_.end()){
+            if (loading_.find(id) == loading_.end()) {
                 LoadChunkAsync(cx, cz, id);
             }
         }
