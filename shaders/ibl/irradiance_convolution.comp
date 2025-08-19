@@ -1,0 +1,25 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(binding=0) uniform samplerCube uEnv;
+layout(binding=1, rgba16f) writeonly uniform imageCube uIrradiance;
+
+vec3 faceDir(uint face, ivec2 pixel, int size){
+    vec2 uv = (vec2(pixel) + 0.5) / float(size) * 2.0 - 1.0;
+    if(face == 0u) return normalize(vec3( 1.0,    uv.y, -uv.x));
+    if(face == 1u) return normalize(vec3(-1.0,    uv.y,  uv.x));
+    if(face == 2u) return normalize(vec3( uv.x,  1.0,   -uv.y));
+    if(face == 3u) return normalize(vec3( uv.x, -1.0,    uv.y));
+    if(face == 4u) return normalize(vec3( uv.x,  uv.y,  1.0));
+    return normalize(vec3(-uv.x,  uv.y, -1.0));
+}
+
+void main(){
+    uint face = gl_GlobalInvocationID.z;
+    ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
+    int size = imageSize(uIrradiance).x;
+    if(pix.x >= size || pix.y >= size) return;
+    vec3 dir = faceDir(face, pix, size);
+    vec3 col = textureLod(uEnv, dir, 0.0).rgb;
+    imageStore(uIrradiance, ivec3(pix, int(face)), vec4(col,1.0));
+}

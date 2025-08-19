@@ -7,7 +7,8 @@ layout(std140, binding=3) uniform CSMData {
     float uMapTexelSize;
     float uPCSSMin; float uPCSSMax; float uPCSSSearch;
 };
-uniform sampler2DArray uShadowMap;
+// Shadow map array (cascades) bound via global descriptor layout.
+layout(binding=5) uniform sampler2DArray uShadowMap;
 int chooseCascade(float viewSpaceDepth){
     for(int i=0;i<uCascadeCount;i++){
         if(viewSpaceDepth < uCascadeSplits[i]) return i;
