@@ -1,27 +1,22 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Dict, List, Any
+import sys
+import numpy as np
+
+repo_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(repo_root / "src"))
+
+from world.worldgen import WorldGenerator
 
 
-def load_json(path: Path) -> Dict[str, Any]:
-    with path.open(encoding="utf-8") as f:
-        return json.load(f)
+def test_worldgen_deterministic() -> None:
+    palette_path = repo_root / "assets/worldgen/palettes/basic.json"
+    gen = WorldGenerator(palette_path)
+    chunk1 = gen.generate_chunk(0, 0, size=4, height=8, seed=123)
+    chunk2 = gen.generate_chunk(0, 0, size=4, height=8, seed=123)
+    assert np.array_equal(chunk1["voxels"], chunk2["voxels"])
+    chunk3 = gen.generate_chunk(0, 0, size=4, height=8, seed=42)
+    assert not np.array_equal(chunk1["voxels"], chunk3["voxels"])
+    assert np.all(chunk1["biomes"] == chunk1["biomes"][0, 0])
 
-
-def generate_world(structure: Dict[str, Any], palette: Dict[str, Any]) -> List[int]:
-    blocks = structure.get("blocks", [])
-    textures = palette.get("textures", {})
-    missing_types = [block["type"] for block in blocks if block["type"] not in textures]
-    if missing_types:
-        raise ValueError(f"Missing block types in palette textures: {missing_types}")
-    return [textures[block["type"]] for block in blocks]
-
-
-def test_worldgen_smoke() -> None:
-    repo_root = Path(__file__).resolve().parent.parent
-    palette = load_json(repo_root / "assets/worldgen/palettes/basic.json")
-    structure = load_json(repo_root / "assets/worldgen/templates/test_structure.json")
-    world = generate_world(structure, palette)
-    assert world == [0, 1]
