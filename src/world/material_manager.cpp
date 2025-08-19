@@ -25,6 +25,12 @@ bool MaterialManager::load(const std::string& path) {
         float r, g, b;
         char comma;
         ss >> r >> comma >> g >> comma >> b;
+        // Error checking for stream parsing
+        if (ss.fail() || !ss.eof()) {
+            // Skip this material if parsing failed
+            pos = json.find('"', albedo_end + 1);
+            continue;
+        }
         size_t metallic_pos = json.find("metallic", albedo_end);
         metallic_pos = json.find(':', metallic_pos);
         size_t metallic_end = json.find(',', metallic_pos);
