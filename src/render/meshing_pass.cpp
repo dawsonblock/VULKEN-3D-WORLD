@@ -42,7 +42,7 @@ bool MeshingPass::init(VkDevice device, VkPipelineCache cache) {
     plci.setLayoutCount = 1; plci.pSetLayouts = &m_dset_layout;
     if (vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout) != VK_SUCCESS) return false;
 
-    auto spirv = load_spirv_file("spv/meshing/greedy.spv");
+    auto spirv = load_spirv_file(spirv_path);
     if (spirv.empty()) return false;
     VkShaderModuleCreateInfo smci{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     smci.codeSize = spirv.size() * 4; smci.pCode = spirv.data();
