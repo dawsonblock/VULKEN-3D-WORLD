@@ -1,5 +1,4 @@
 import pytest
-
 np = pytest.importorskip("numpy")
 try:  # Skip tests if the capsule module is unavailable or invalid.
     from src.physics.capsule import Capsule
