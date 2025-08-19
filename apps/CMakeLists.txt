@@ -1,4 +1,5 @@
 find_package(Vulkan REQUIRED)
+find_package(glfw3 3.3 REQUIRED)
 
 # --- Build tagging injection ---
 set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + voxel_upgrades_patch + project_compute_graphics_chain + project_dynamic_pbr + project_next_tier_all")
@@ -15,6 +16,11 @@ add_executable(smoke_graphics_headless smoke_graphics_headless.cpp)
 set_target_properties(smoke_graphics_headless PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(smoke_graphics_headless PRIVATE ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(smoke_graphics_headless PRIVATE Vulkan::Vulkan)
+
+add_executable(pbr_viewer viewer.cpp)
+set_target_properties(pbr_viewer PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
+target_include_directories(pbr_viewer PRIVATE ${CMAKE_BINARY_DIR}/generated)
+target_link_libraries(pbr_viewer PRIVATE Vulkan::Vulkan glfw)
 
 # --- Build tagging sources ---
 list(APPEND VOXELVK_ELITE_SOURCES
