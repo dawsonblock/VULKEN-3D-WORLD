@@ -13,7 +13,6 @@ try:  # Skip tests if the capsule module is unavailable or invalid.
     from src.physics.capsule import Capsule
 except (ImportError, ModuleNotFoundError):  # pragma: no cover - skip if module import fails
     pytest.skip("capsule module unavailable", allow_module_level=True)
-        main
 
 def test_seg_properties():
     cap = Capsule(
