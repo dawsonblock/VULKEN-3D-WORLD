@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <glm/vec3.hpp>
 
 namespace voxelvk {
 
@@ -17,6 +18,7 @@ public:
 
     void LoadConfig(const std::string& cfgPath);
     LODLevel Select(float distance) const;
+    LODLevel Select(const glm::vec3& cameraPos, const glm::vec3& objectPos) const;
     const LODConfig& Config() const { return cfg_; }
 
 private:

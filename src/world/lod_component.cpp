@@ -1,6 +1,7 @@
 #include "lod_component.hpp"
 #include <fstream>
 #include <sstream>
+#include <glm/geometric.hpp>
 
 namespace voxelvk {
 
@@ -31,6 +32,11 @@ LODLevel LODComponent::Select(float distance) const {
     if(distance < cfg_.high_detail) return LODLevel::High;
     if(distance < cfg_.medium_detail) return LODLevel::Medium;
     return LODLevel::Low;
+}
+
+LODLevel LODComponent::Select(const glm::vec3& cameraPos, const glm::vec3& objectPos) const {
+    float distance = glm::distance(cameraPos, objectPos);
+    return Select(distance);
 }
 
 } // namespace voxelvk

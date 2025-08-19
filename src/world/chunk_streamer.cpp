@@ -31,6 +31,8 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
             if(loading_.find(id)==loading_.end()){
                 LoadChunkAsync(id);
             }
+            LODLevel level = lod_.Select(dist);
+            resources_.StreamMesh(id, level);
         }
     }
     for(auto it = loading_.begin(); it != loading_.end(); ){
@@ -44,10 +46,13 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
 }
 
 void ChunkStreamer::LoadChunkAsync(int id){
-    loading_[id] = std::async(std::launch::async, [id]{
     loading_[id] = std::async(std::launch::async, [this, id]{
         this->LoadChunk(id);
     });
+}
+
+void ChunkStreamer::LoadChunk(int id){
+    (void)id;
 }
 
 void ChunkStreamer::UnloadChunk(int id){
@@ -55,6 +60,7 @@ void ChunkStreamer::UnloadChunk(int id){
     if(it != loading_.end()){
         if(it->second.valid()) it->second.wait();
     }
+    resources_.UnloadMesh(id);
 }
 
 } // namespace voxelvk
