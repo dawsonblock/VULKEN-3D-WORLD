@@ -1,4 +1,6 @@
 
+# mypy: ignore-errors
+
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path

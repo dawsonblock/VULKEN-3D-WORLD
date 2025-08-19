@@ -1,5 +1,9 @@
 
+# mypy: ignore-errors
 
+
+
+        main
 import ctypes
 import subprocess
 from dataclasses import dataclass
@@ -141,6 +145,9 @@ pytest.skip(
 
 
 
+
+
+        main
         main
         main
         main
