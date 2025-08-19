@@ -51,15 +51,15 @@ npx eslint .
 
 ## Samples
 
-### demo_window
+### smoke_graphics_headless
 Build the sample:
 ```bash
 cmake -S . -B build
-cmake --build build --target demo_window
+cmake --build build --target smoke_graphics_headless
 ```
 Run it:
 ```bash
-./build/demo_window
+./build/smoke_graphics_headless
 ```
 
 ## World streaming and LOD

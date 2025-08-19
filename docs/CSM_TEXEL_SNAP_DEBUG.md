@@ -16,7 +16,7 @@ u.mapTexelSize = 1.0f / float(shadowMapSize);
 
 ## Debug overlay in lighting shader
 ```glsl
-#include "shadows/csm_debug.glsl"
+#include "shaders_vk/shadows/csm_debug.glsl"
 
 // Blend a small tint to visualize cascades:
 bool ok;

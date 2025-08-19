@@ -1,6 +1,6 @@
 # Quickstart Guide
 
-This guide walks you through cloning the repository, running basic smoke tests, and launching the demo viewer.
+This guide walks you through cloning the repository, running basic smoke tests, and executing a graphics sample.
 
 ## 1. Repository setup
 
@@ -36,13 +36,12 @@ For Python-based checks, run:
 pytest
 ```
 
-## 3. Launch the viewer
+## 3. Run graphics smoke sample
 
-Build and run the demo viewer:
-
+Build and run the headless graphics test:
 ```bash
-cmake --build build --target demo_window
-./build/demo_window
+cmake --build build --target smoke_graphics_headless
+./build/smoke_graphics_headless
 ```
 
-The window should appear rendering the sample scene.
+The run should complete without errors.
