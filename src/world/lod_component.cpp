@@ -1,6 +1,8 @@
 #include "lod_component.hpp"
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 namespace voxelvk {
 
@@ -11,8 +13,9 @@ LODComponent::LODComponent(const std::string& cfgPath) {
 void LODComponent::LoadConfig(const std::string& cfgPath) {
     std::ifstream f(cfgPath);
     if(!f.is_open()) {
-        std::cerr << "Error: Could not open config file '" << cfgPath << "' in LODComponent::LoadConfig.\n";
-        return;
+        std::cerr << "Error: Could not open config file '" << cfgPath
+                  << "' in LODComponent::LoadConfig.\n";
+        throw std::runtime_error("Failed to open LOD config file");
     }
     std::string line;
     while(std::getline(f, line)){

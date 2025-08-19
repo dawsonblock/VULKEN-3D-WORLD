@@ -2,11 +2,17 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <exception>
+#include <iostream>
 
 namespace voxelvk {
 
-ChunkStreamer::ChunkStreamer(const std::string& cfgPath)
+ChunkStreamer::ChunkStreamer(const std::string& cfgPath) try
     : lod_(cfgPath) {}
+catch(const std::exception& e) {
+    std::cerr << "ChunkStreamer initialization failed: " << e.what() << "\n";
+    throw;
+}
 
 ChunkStreamer::~ChunkStreamer() {
     for(auto& kv : loading_){
