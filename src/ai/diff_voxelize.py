@@ -1,32 +1,68 @@
-"""Differentiable voxelization utilities with Python bindings."""
+"""Differentiable voxelization utilities with Python bindings.
+
+The module lazily builds a small C++ extension at import time using ``g++``
+with C++17 support. Two environment variables modify this behavior:
+
+``DIFF_VOXELIZE_LIB``
+    Absolute path to a prebuilt ``diff_voxelize`` shared library. When set,
+    compilation is skipped and the given library is loaded directly.
+
+``DIFF_VOXELIZE_BUILD_DIR``
+    Directory where the shared library should be built. Defaults to the module
+    directory. A ``diff_voxelize.so`` file will be created inside it if it does
+    not already exist.
+
+If neither environment variable is provided and compilation fails (for
+example because ``g++`` is missing), importing this module will raise a
+``RuntimeError`` explaining the failure.
+"""
 
 from __future__ import annotations
 
 import ctypes
 import subprocess
+import os
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-LIB_PATH = ROOT / "diff_voxelize.so"
+_ENV_LIB = os.environ.get("DIFF_VOXELIZE_LIB")
+_ENV_BUILD_DIR = os.environ.get("DIFF_VOXELIZE_BUILD_DIR")
+_BUILD_DIR = Path(_ENV_BUILD_DIR) if _ENV_BUILD_DIR else ROOT
+LIB_PATH = Path(_ENV_LIB) if _ENV_LIB else _BUILD_DIR / "diff_voxelize.so"
 
 
 def _load_lib() -> ctypes.CDLL:
+    """Load the ``diff_voxelize`` shared library, compiling if necessary."""
+    if _ENV_LIB:
+        if not LIB_PATH.exists():
+            raise FileNotFoundError(
+                f"DIFF_VOXELIZE_LIB set to {LIB_PATH} but file does not exist"
+            )
+        return ctypes.CDLL(str(LIB_PATH))
+
     if not LIB_PATH.exists():
         src = ROOT / "diff_voxelize.cpp"
-        subprocess.check_call(
-            [
-                "g++",
-                "-std=c++17",
-                "-shared",
-                "-fPIC",
-                str(src),
-                "-o",
-                str(LIB_PATH),
-            ]
-        )
+        _BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        try:
+            subprocess.check_call(
+                [
+                    "g++",
+                    "-std=c++17",
+                    "-shared",
+                    "-fPIC",
+                    str(src),
+                    "-o",
+                    str(LIB_PATH),
+                ]
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise RuntimeError(
+                "Failed to compile diff_voxelize library. Ensure g++ is installed "
+                "or provide a prebuilt library via DIFF_VOXELIZE_LIB."
+            ) from exc
     return ctypes.CDLL(str(LIB_PATH))
 
 
