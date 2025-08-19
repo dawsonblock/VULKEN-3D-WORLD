@@ -50,6 +50,11 @@ class MaterialManager:
     def get_material(self, material_id: int) -> Material:
         """Fetch material properties by ID."""
 
+        if not (0 <= material_id < len(self._materials_by_id)):
+            raise IndexError(
+                f"Material ID {material_id} is out of bounds. "
+                f"Valid IDs are between 0 and {len(self._materials_by_id) - 1}."
+            )
         return self._materials_by_id[material_id]
 
     def materials(self) -> List[Material]:
