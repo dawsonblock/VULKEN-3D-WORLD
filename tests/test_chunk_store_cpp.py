@@ -53,7 +53,7 @@ def test_cpp_chunk_store_roundtrip(tmp_path: Path) -> None:
     assert output == vox.tobytes()
 
 import pytest
-
+np = pytest.importorskip("numpy")
 pytest.skip(
     "chunk store roundtrip requires building C++ components; skipped in CI",
     allow_module_level=True,
