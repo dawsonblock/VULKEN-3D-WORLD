@@ -20,7 +20,9 @@ uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, 
 }
 
 bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
-    device = dev; allocator = alloc; dim = dimension;
+    device = dev;
+    allocator = alloc;
+    dim = dimension;
     if(!createImage(phys)) return false;
     if(!createDescriptors()) return false;
     if(!createPipeline(phys)) return false;
