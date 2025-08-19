@@ -131,7 +131,8 @@ int main(){
     ici.ppEnabledExtensionNames = extensions.data();
     ici.enabledLayerCount = (uint32_t)layers.size();
     ici.ppEnabledLayerNames = layers.empty()? nullptr : layers.data();
-    VkInstance instance; if(vkCreateInstance(&ici,nullptr,&instance)!=VK_SUCCESS){
+    VkInstance instance;
+    if(vkCreateInstance(&ici,nullptr,&instance)!=VK_SUCCESS){
         std::cerr << "vkCreateInstance failed\n"; return 2; }
 
     DebugLabel dbg; dbg.init(instance);
