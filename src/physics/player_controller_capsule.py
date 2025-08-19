@@ -1,26 +1,5 @@
-
-"""Capsule-based player controller using SAT collision resolution."""
-
-
-"""Capsule-based player controller using SAT collision resolution.
-
-
-Simple capsule-based player controller used in tests.
-"""
-
-"""Placeholder capsule-based player controller.
-
-This module depends on native extensions that are not available in this
-environment. Importing it raises ``ImportError`` so tests can skip
-gracefully.
-"""
-
-raise ImportError("Native physics extensions not available")
-
 """Capsule-based player controller used in tests."""
-        main
 
-        main
 from __future__ import annotations
 
 from typing import Any, Dict
@@ -35,17 +14,9 @@ SPRINT_SPEED_MULTIPLIER = 1.6
 
 
 class PlayerControllerCapsule:
-
     """Basic kinematic character controller represented by a capsule."""
 
     _first_speed_call = True
-
-
-    """Basic kinematic character controller represented by a capsule."""
-
-    """Minimal kinematic capsule controller for tests."""
-        main
-        main
 
     def __init__(
         self,
@@ -77,6 +48,7 @@ class PlayerControllerCapsule:
 
     def set_input(self, mapping: Dict[str, int]) -> None:
         """Update input state."""
+
         self.input.update({k: v for k, v in mapping.items() if k in self.input})
 
     def _capsule(self) -> Capsule:
@@ -84,6 +56,7 @@ class PlayerControllerCapsule:
 
     def update(self, dt: float, forward: NDArray[np.float32], right: NDArray[np.float32]) -> None:
         """Advance the controller by ``dt`` seconds."""
+
         wish = forward * (self.input["f"] - self.input["b"]) + right * (
             self.input["r"] - self.input["l"]
         )
@@ -91,12 +64,6 @@ class PlayerControllerCapsule:
         n = float(np.linalg.norm(wish))
         if n > 1e-6:
             wish /= n
-
-
-
-
-        main
-        main
         target = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
@@ -104,12 +71,6 @@ class PlayerControllerCapsule:
         hv[1] = 0.0
         accel = 50.0 if self.on_ground else 10.0
         self.vel += (wish * target - hv) * min(1.0, accel * dt)
-
-
-
-
-        main
-        main
         self.vel[1] -= self.g * dt
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
@@ -117,18 +78,10 @@ class PlayerControllerCapsule:
         self.pos += self.vel * dt
         cap = self._capsule()
         off, ground = resolve_capsule_world(cap, self.world)
-        if np.any(off):
-            self.pos = cap.center + off
-        else:
-            self.pos = cap.center
+        self.pos = cap.center + off
         self.on_ground = ground or self.on_ground
         if self.on_ground and self.vel[1] < 0.0:
             self.vel[1] = 0.0
-
-
-        off, ground = resolve_capsule_world(self._capsule(), self.world)
-        self.pos += off
-        self.on_ground = ground
 
     def get_horizontal_speed(self) -> float:
         """Return the magnitude of the horizontal velocity for this instance."""
@@ -139,30 +92,12 @@ class PlayerControllerCapsule:
             return min(speed, self.max_speed + 1e-3)
         return speed
 
-        return float(np.linalg.norm(self.vel[[0, 2]]))
-        main
-
 
 def get_horizontal_speed(controller: PlayerControllerCapsule) -> float:
     """Return the magnitude of the horizontal velocity of ``controller``."""
+
     return controller.get_horizontal_speed()
-
-
-
-__all__ = ["PlayerControllerCapsule", "get_horizontal_speed", "SPRINT_SPEED_MULTIPLIER"]
 
 
 __all__ = ["PlayerControllerCapsule", "SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
 
-    def get_horizontal_speed(self) -> float:
-        return float(np.linalg.norm(self.vel[[0, 2]]))
-
-
-__all__ = [
-    "PlayerControllerCapsule",
-    "SPRINT_SPEED_MULTIPLIER",
-    "get_horizontal_speed",
-]
-        main
-        main
-        main
