@@ -38,7 +38,25 @@ bool MaterialManager::load(const std::string& path) {
         size_t roughness_pos = json.find("roughness", metallic_end);
         roughness_pos = json.find(':', roughness_pos);
         size_t mat_end = json.find('}', roughness_pos);
-        float roughness = std::stof(json.substr(roughness_pos + 1, mat_end - roughness_pos - 1));
+        float metallic = 0.0f;
+        try {
+            metallic = std::stof(json.substr(metallic_pos + 1, metallic_end - metallic_pos - 1));
+        } catch (const std::invalid_argument&) {
+            return false;
+        } catch (const std::out_of_range&) {
+            return false;
+        }
+        size_t roughness_pos = json.find("roughness", metallic_end);
+        roughness_pos = json.find(':', roughness_pos);
+        size_t mat_end = json.find('}', roughness_pos);
+        float roughness = 0.0f;
+        try {
+            roughness = std::stof(json.substr(roughness_pos + 1, mat_end - roughness_pos - 1));
+        } catch (const std::invalid_argument&) {
+            return false;
+        } catch (const std::out_of_range&) {
+            return false;
+        }
         int id = static_cast<int>(materials_.size());
         materials_.push_back({glm::vec3(r, g, b), metallic, roughness});
         name_to_id_[name] = id;
