@@ -174,8 +174,12 @@ if(TARGET VoxelVK_Elite_ALL)
 endif()
 
 
+# --- Vulkan allocation helpers ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/vk/alloc_helpers.cpp)
+endif()
+
 # --- Voxel SAT compute dispatch ---
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
