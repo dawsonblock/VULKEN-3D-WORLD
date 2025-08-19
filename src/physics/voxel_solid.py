@@ -1,5 +1,4 @@
 """Utilities to determine whether voxel blocks are solid."""
-"""Utilities to determine whether voxel blocks are solid."""
 
 from __future__ import annotations
 
