@@ -7,7 +7,12 @@ cmake_policy(SET CMP0126 NEW) # cmake -E env behavior
 
 project(VoxelVK_Elite_ALL LANGUAGES CXX)
 
-add_library(VoxelVK_Elite_ALL)
+add_library(VoxelVK_Elite_ALL STATIC
+  # List your source files here, for example:
+  src/main.cpp
+  src/voxel.cpp
+  src/vk_elite.cpp
+)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
