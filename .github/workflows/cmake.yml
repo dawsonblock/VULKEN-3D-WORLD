@@ -36,20 +36,11 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Upload build artifacts
-
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-linux-${{ runner.os }}
           path: build
-
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-${{ runner.os }}
-          path: |
-            build/**
-          if-no-files-found: ignore
-        main
 
   windows:
     runs-on: windows-latest
@@ -74,17 +65,8 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Upload build artifacts
-
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ runner.os }}
           path: build
-
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-${{ runner.os }}
-          path: |
-            build/**
-          if-no-files-found: ignore
-        main
