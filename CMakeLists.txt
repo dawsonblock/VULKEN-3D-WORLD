@@ -170,7 +170,9 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
     src/world/svo_builder.cpp
     src/world/svo_io.cpp
-    src/render/svo_traversal.cpp)
+    src/render/svo_traversal.cpp
+    src/world/mesher_cpu.cpp
+    src/world/mesher_gpu.cpp)
 endif()
 
 
@@ -178,4 +180,3 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
