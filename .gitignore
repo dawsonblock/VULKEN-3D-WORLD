@@ -15,3 +15,7 @@ node_modules/
 **/__pycache__/
         main
 tests/physics_cpp.so
+
+# Ignore AI binaries
+src/ai/*
+!src/ai/README.md
