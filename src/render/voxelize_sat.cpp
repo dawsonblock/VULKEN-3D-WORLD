@@ -3,6 +3,7 @@
 
 namespace voxelvk {
 
+// Push constants for a single triangle used by the voxel SAT pass.
 struct TrianglePC {
     float v0[4];
     float v1[4];
@@ -32,9 +33,6 @@ void dispatch_voxelize_sat(VkCommandBuffer cmd,
         vkCmdDispatch(cmd, 1, 1, 1);
     }
 
-    // Triangle data should be uploaded to a storage buffer and bound via descriptorSet.
-    // The shader should index into the buffer using gl_GlobalInvocationID.x for a single dispatch.
-    // vkCmdDispatch(cmd, triangleCount, 1, 1);
 }
 
 } // namespace voxelvk
