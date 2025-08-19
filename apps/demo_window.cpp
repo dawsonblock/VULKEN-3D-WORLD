@@ -3,12 +3,87 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <chrono>
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-int main() {
+struct Camera {
+    glm::vec3 pos{0.0f, 0.0f, 5.0f};
+    float yaw = -90.0f; // looking towards -Z
+    float pitch = 0.0f;
+} camera;
+
+static bool firstMouse = true;
+static double lastX = 0.0, lastY = 0.0;
+
+static void mouse_callback(GLFWwindow* /*win*/, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = static_cast<float>(xpos - lastX);
+    float yoffset = static_cast<float>(lastY - ypos); // reversed y
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    camera.yaw += xoffset;
+    camera.pitch += yoffset;
+    if (camera.pitch > 89.0f) camera.pitch = 89.0f;
+    if (camera.pitch < -89.0f) camera.pitch = -89.0f;
+}
+
+static glm::mat4 compute_view() {
+    glm::vec3 front;
+    front.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+    front.y = sin(glm::radians(camera.pitch));
+    front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+    return glm::lookAt(camera.pos, camera.pos + glm::normalize(front), {0.0f, 1.0f, 0.0f});
+}
+
+static glm::mat4 compute_proj(float aspect) {
+    return glm::perspective(glm::radians(70.0f), aspect, 0.1f, 100.0f);
+}
+
+
+
+int main(int argc, char** argv) {
+    bool fullscreen = false;
+    VkPresentModeKHR requestedPresent = VK_PRESENT_MODE_FIFO_KHR;
+    for (int i = 1; i < argc; ++i) {
+        if (std::strcmp(argv[i], "--fullscreen") == 0) {
+            fullscreen = true;
+        } else if (std::strncmp(argv[i], "--present=", 10) == 0) {
+            const char* mode = argv[i] + 10;
+            if (std::strcmp(mode, "immediate") == 0)
+                requestedPresent = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            else if (std::strcmp(mode, "mailbox") == 0)
+                requestedPresent = VK_PRESENT_MODE_MAILBOX_KHR;
+            else
+                requestedPresent = VK_PRESENT_MODE_FIFO_KHR;
+        }
+    }
+
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "demo_window", nullptr, nullptr);
+    GLFWmonitor* monitor = nullptr;
+    int width = 800, height = 600;
+    if (fullscreen) {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        width = mode->width;
+        height = mode->height;
+    }
+    GLFWwindow* window = glfwCreateWindow(width, height, "demo_window", monitor, nullptr);
     if (!window) { glfwTerminate(); return 1; }
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Instance
     std::vector<const char*> layers;
@@ -73,6 +148,11 @@ int main() {
     uint32_t fmtCount=0; vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,nullptr);
     std::vector<VkSurfaceFormatKHR> formats(fmtCount); vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,formats.data());
     VkSurfaceFormatKHR fmt = formats[0];
+    uint32_t pmCount = 0; vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &pmCount, nullptr);
+    std::vector<VkPresentModeKHR> pmodes(pmCount); vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &pmCount, pmodes.data());
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    for (auto m : pmodes) if (m == requestedPresent) presentMode = requestedPresent;
+
     VkSwapchainCreateInfoKHR sci{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
     sci.surface = surface;
     sci.minImageCount = caps.minImageCount+1;
@@ -84,7 +164,7 @@ int main() {
     sci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     sci.preTransform = caps.currentTransform;
     sci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    sci.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    sci.presentMode = presentMode;
     sci.clipped = VK_TRUE;
     VkSwapchainKHR swapchain;
     if(vkCreateSwapchainKHR(device,&sci,nullptr,&swapchain)!=VK_SUCCESS){ std::cerr<<"swapchain failed\n"; return 7; }
@@ -135,8 +215,29 @@ int main() {
     vkCreateSemaphore(device,&sci2,nullptr,&imgAvailable);
     vkCreateSemaphore(device,&sci2,nullptr,&renderFinished);
 
+    auto lastTime = std::chrono::high_resolution_clock::now();
     while(!glfwWindowShouldClose(window)){
+        auto now = std::chrono::high_resolution_clock::now();
+        float dt = std::chrono::duration<float>(now - lastTime).count();
+        lastTime = now;
+
         glfwPollEvents();
+        glm::vec3 front;
+        front.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        front.y = sin(glm::radians(camera.pitch));
+        front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        front = glm::normalize(front);
+        glm::vec3 right = glm::normalize(glm::cross(front, {0.0f,1.0f,0.0f}));
+        float speed = 5.0f * dt;
+        if(glfwGetKey(window,GLFW_KEY_W)==GLFW_PRESS) camera.pos += speed*front;
+        if(glfwGetKey(window,GLFW_KEY_S)==GLFW_PRESS) camera.pos -= speed*front;
+        if(glfwGetKey(window,GLFW_KEY_A)==GLFW_PRESS) camera.pos -= speed*right;
+        if(glfwGetKey(window,GLFW_KEY_D)==GLFW_PRESS) camera.pos += speed*right;
+
+        glm::mat4 view = compute_view();
+        glm::mat4 proj = compute_proj(width/(float)height);
+        (void)view; (void)proj; // feed into frame graph in a full implementation
+
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
