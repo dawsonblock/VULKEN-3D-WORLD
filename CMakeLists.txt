@@ -12,6 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# External dependencies
+include(cmake/Dependencies.cmake)
+
 option(ENABLE_VALIDATION_LAYERS "Enable Vulkan validation layers" ON)
 option(ENABLE_VK_DEBUG_MARKERS  "Enable VK_EXT_debug_utils markers" ON)
 option(ENABLE_IMGUI_OVERLAY     "Enable ImGui debug HUD overlay" ON)
@@ -68,6 +71,22 @@ else()
   endif()
 endif()
 find_package(Threads REQUIRED)
+
+# Chunk persistence library
+add_library(world_persistence src/world/persistence.cpp)
+target_include_directories(world_persistence PUBLIC ${CMAKE_SOURCE_DIR}/src)
+
+set(ZSTD_TARGET zstd)
+if(TARGET libzstd_static)
+  set(ZSTD_TARGET libzstd_static)
+endif()
+
+set(LZ4_TARGET lz4)
+if(TARGET lz4_static)
+  set(LZ4_TARGET lz4_static)
+endif()
+
+target_link_libraries(world_persistence PUBLIC ${ZSTD_TARGET} ${LZ4_TARGET} Threads::Threads)
 
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
@@ -178,4 +197,4 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
+        

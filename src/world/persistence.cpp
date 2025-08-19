@@ -5,6 +5,8 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
+#include <sstream>
 
 #if __has_include(<zstd.h>)
 #define VOXELVK_HAS_ZSTD 1
@@ -33,6 +35,54 @@ std::filesystem::path ChunkStore::_region_dir(int cx, int cz) const {
     std::filesystem::path d = root_ / ("r." + std::to_string(cx / 32) + "." + std::to_string(cz / 32));
     std::filesystem::create_directories(d);
     return d;
+}
+
+std::filesystem::path ChunkStore::_manifest_path(int cx, int cz) const {
+    return _region_dir(cx, cz) / "region_manifest.json";
+}
+
+static std::unordered_map<std::string, std::size_t>
+_load_manifest(const std::filesystem::path &p) {
+    std::unordered_map<std::string, std::size_t> table;
+    if (!std::filesystem::exists(p)) return table;
+    std::ifstream ifs(p);
+    if (!ifs) return table;
+    std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    std::size_t pos = 0;
+    while ((pos = content.find('"', pos)) != std::string::npos) {
+        std::size_t end = content.find('"', pos + 1);
+        if (end == std::string::npos) break;
+        std::string key = content.substr(pos + 1, end - pos - 1);
+        std::size_t size_pos = content.find("\"size\"", end);
+        if (size_pos == std::string::npos) break;
+        size_pos = content.find(':', size_pos);
+        if (size_pos == std::string::npos) break;
+        std::size_t comma = content.find_first_of(",}", size_pos);
+        std::size_t value = static_cast<std::size_t>(std::stoll(content.substr(size_pos + 1, comma - size_pos - 1)));
+        table[key] = value;
+        pos = comma;
+    }
+    return table;
+}
+
+static void _write_manifest(const std::filesystem::path &p,
+                            const std::unordered_map<std::string, std::size_t> &table) {
+    std::ofstream ofs(p, std::ios::binary);
+    ofs << '{';
+    bool first = true;
+    for (const auto &kv : table) {
+        if (!first) ofs << ',';
+        ofs << '"' << kv.first << "\": {\"size\": " << kv.second << '}';
+        first = false;
+    }
+    ofs << '}';
+}
+
+void ChunkStore::_update_manifest(int cx, int cz, std::size_t size) {
+    auto path = _manifest_path(cx, cz);
+    auto table = _load_manifest(path);
+    table[std::to_string(cx) + "," + std::to_string(cz)] = size;
+    _write_manifest(path, table);
 }
 
 std::filesystem::path ChunkStore::chunk_path(int cx, int cz) const {
@@ -86,9 +136,11 @@ std::vector<std::uint8_t> ChunkStore::_compress(const std::vector<std::uint8_t> 
     }
 #if VOXELVK_HAS_LZ4
     if (codec_ == "lz4") {
-        size_t max_size = LZ4F_compressFrameBound(data.size(), nullptr);
+        LZ4F_preferences_t prefs{};
+        prefs.frameInfo.contentSize = data.size();
+        size_t max_size = LZ4F_compressFrameBound(data.size(), &prefs);
         std::vector<std::uint8_t> out(max_size);
-        size_t csize = LZ4F_compressFrame(out.data(), max_size, data.data(), data.size(), nullptr);
+        size_t csize = LZ4F_compressFrame(out.data(), max_size, data.data(), data.size(), &prefs);
         if (LZ4F_isError(csize)) {
             throw std::runtime_error("lz4 compress failed");
         }
@@ -123,17 +175,22 @@ std::vector<std::uint8_t> ChunkStore::_decompress(const std::vector<std::uint8_t
         LZ4F_getFrameInfo(dctx, &info, src, &consumed);
         src += consumed;
         src_size -= consumed;
-        if (info.contentSize == 0) {
-            LZ4F_freeDecompressionContext(dctx);
-            throw std::runtime_error("lz4 unknown content size");
+        std::vector<std::uint8_t> out;
+        out.resize(info.contentSize ? info.contentSize : data.size() * 4);
+        size_t pos = 0;
+        while (true) {
+            size_t dst_size = out.size() - pos;
+            size_t ret = LZ4F_decompress(dctx, out.data() + pos, &dst_size, src, &src_size, nullptr);
+            if (LZ4F_isError(ret)) {
+                LZ4F_freeDecompressionContext(dctx);
+                throw std::runtime_error("lz4 decompress failed");
+            }
+            pos += dst_size;
+            if (ret == 0) break;
+            if (pos == out.size()) out.resize(out.size() * 2);
         }
-        std::vector<std::uint8_t> out(info.contentSize);
-        size_t dst_size = out.size();
-        size_t result = LZ4F_decompress(dctx, out.data(), &dst_size, src, &src_size, nullptr);
         LZ4F_freeDecompressionContext(dctx);
-        if (LZ4F_isError(result)) {
-            throw std::runtime_error("lz4 decompress failed");
-        }
+        out.resize(pos);
         return out;
     }
 #endif
@@ -171,11 +228,7 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
     std::ofstream ofs(path, std::ios::binary);
     ofs.write(reinterpret_cast<const char *>(blob.data()), static_cast<std::streamsize>(blob.size()));
     ofs.close();
-
-    // Minimal index.json write
-    auto idx = _region_dir(cx, cz) / "index.json";
-    std::ofstream idxf(idx, std::ios::binary);
-    idxf << "{\"" << cx << "," << cz << "\": {\"saved\": true}}";
+    _update_manifest(cx, cz, blob.size());
 }
 
 void ChunkStore::save_async(const Chunk &chunk) {
@@ -220,6 +273,29 @@ void ChunkStore::wait_all() {
         }
     }
     futures_.clear();
+}
+
+void ChunkStore::compact_region(int rx, int rz) {
+    auto dir = root_ / ("r." + std::to_string(rx) + "." + std::to_string(rz));
+    auto manifest = dir / "region_manifest.json";
+    auto table = _load_manifest(manifest);
+    bool changed = false;
+    for (auto it = table.begin(); it != table.end();) {
+        auto key = it->first;
+        auto pos = key.find(',');
+        int cx = std::stoi(key.substr(0, pos));
+        int cz = std::stoi(key.substr(pos + 1));
+        auto chunk_file = dir / ("c." + std::to_string(cx) + "." + std::to_string(cz) + ".bin");
+        if (!std::filesystem::exists(chunk_file)) {
+            it = table.erase(it);
+            changed = true;
+        } else {
+            ++it;
+        }
+    }
+    if (changed) {
+        _write_manifest(manifest, table);
+    }
 }
 
 } // namespace world
