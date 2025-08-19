@@ -22,7 +22,7 @@ class NoiseChunkGenerator:
     def _rng_for(self, cx: int, cy: int, cz: int) -> np.random.Generator:
         """Return a seeded RNG unique to the chunk coordinates."""
 
-        s = (cx * 73856093) ^ (cy * 19349663) ^ (cz * 83492791) ^ self.seed
+        s = (cx * CHUNK_HASH_MULT_X) ^ (cy * CHUNK_HASH_MULT_Y) ^ (cz * CHUNK_HASH_MULT_Z) ^ self.seed
         return np.random.default_rng(s & 0xFFFFFFFF)
 
     def generate(self, cx: int, cy: int, cz: int) -> Chunk:
