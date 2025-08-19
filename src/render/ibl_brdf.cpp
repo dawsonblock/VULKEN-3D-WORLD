@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstring>
 
+#include "vk/vma_allocator.hpp"
+
 namespace voxelvk {
 
 static uint32_t FindMemoryType(VkPhysicalDevice phys, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
