@@ -4,13 +4,22 @@ from __future__ import annotations
 
 import ctypes
 import subprocess
+import sys
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-LIB_PATH = ROOT / "diff_voxelize.so"
+
+if sys.platform.startswith("linux"):
+    LIB_PATH = ROOT / "diff_voxelize.so"
+elif sys.platform == "darwin":
+    LIB_PATH = ROOT / "diff_voxelize.dylib"
+elif sys.platform == "win32":
+    LIB_PATH = ROOT / "diff_voxelize.dll"
+else:  # pragma: no cover - platform-specific
+    raise RuntimeError(f"Unsupported platform: {sys.platform}")
 
 
 def _load_lib() -> ctypes.CDLL:
