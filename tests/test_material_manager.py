@@ -12,5 +12,6 @@ def test_material_manager_gpu_resources_shape():
     mgr = MaterialManager()
     resources = mgr.create_gpu_resources()
     assert len(resources) == len(mgr.materials())
-    assert all(len(r) == MATERIAL_COMPONENTS_COUNT for r in resources)
+    # Each resource tuple packs RGB, metallic, and roughness values
+    assert all(len(r) == 5 for r in resources)
 
