@@ -1,4 +1,5 @@
 #include "voxel_fill.hpp"
+#include "resource_manager.hpp"
 #include <vector>
 #include <cstdio>
 
@@ -34,29 +35,27 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     }
     VkDescriptorSetLayoutCreateInfo dsl{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
     dsl.bindingCount = 2; dsl.pBindings = b;
-    VkResult res = vkCreateDescriptorSetLayout(device, &dsl, nullptr, &m_dset_layout);
+    VkResult res = gResourceManager.createDescriptorSetLayout(&dsl, &m_dset_layout);
     if (res != VK_SUCCESS) return false;
 
     VkPipelineLayoutCreateInfo plci{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     plci.setLayoutCount = 1; plci.pSetLayouts = &m_dset_layout;
-    VkResult pl_result = vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout);
+    VkResult pl_result = gResourceManager.createPipelineLayout(&plci, &m_pipe_layout);
     if (pl_result != VK_SUCCESS) return false;
 
     auto spirv = load_spirv_file("spv/voxel_fill.comp.spv");
     if (spirv.empty()) return false;
     VkShaderModuleCreateInfo smci{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     smci.codeSize = spirv.size() * 4; smci.pCode = spirv.data();
-    VkShaderModule sm; vkCreateShaderModule(device, &smci, nullptr, &sm);
     VkShaderModule sm;
-    VkResult sm_res = vkCreateShaderModule(device, &smci, nullptr, &sm);
+    VkResult sm_res = gResourceManager.createShaderModule(&smci, &sm);
     if (sm_res != VK_SUCCESS) return false;
     VkComputePipelineCreateInfo cpci{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
     cpci.stage = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
     cpci.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
     cpci.stage.module = sm; cpci.stage.pName = "main";
     cpci.layout = m_pipe_layout;
-    vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
-    VkResult pipelineResult = vkCreateComputePipelines(device, cache, 1, &cpci, nullptr, &m_pipeline);
+    VkResult pipelineResult = gResourceManager.createComputePipeline(&cpci, &m_pipeline);
     vkDestroyShaderModule(device, sm, nullptr);
     if (pipelineResult != VK_SUCCESS) {
         return false;
@@ -66,7 +65,7 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     dpci.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     dpci.maxSets = 1; dpci.poolSizeCount = 1; dpci.pPoolSizes = &ps;
-    VkResult poolResult = vkCreateDescriptorPool(device, &dpci, nullptr, &m_pool);
+    VkResult poolResult = gResourceManager.createDescriptorPool(&dpci, &m_pool);
     if (poolResult != VK_SUCCESS) return false;
     return true;
 }

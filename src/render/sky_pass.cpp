@@ -1,4 +1,5 @@
 #include "sky_pass.hpp"
+#include "resource_manager.hpp"
 #include <vector>
 #include <cstdio>
 #include <cstring>
@@ -21,14 +22,14 @@ static std::vector<char> readFile(const char* path){
     return data;
 }
 
-static VkShaderModule loadShader(VkDevice dev, const char* path){
+static VkShaderModule loadShader(VkDevice /*dev*/, const char* path){
     auto bytes = readFile(path);
     if(bytes.empty()) return VK_NULL_HANDLE;
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = bytes.size();
     ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
     VkShaderModule m;
-    if(vkCreateShaderModule(dev,&ci,nullptr,&m)!=VK_SUCCESS) return VK_NULL_HANDLE;
+    if(gResourceManager.createShaderModule(&ci,&m)!=VK_SUCCESS) return VK_NULL_HANDLE;
     return m;
 }
 
@@ -42,7 +43,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     b.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
     lci.bindingCount = 1; lci.pBindings = &b;
-    if(vkCreateDescriptorSetLayout(device,&lci,nullptr,&noiseSetLayout)!=VK_SUCCESS) return false;
+    if(gResourceManager.createDescriptorSetLayout(&lci,&noiseSetLayout)!=VK_SUCCESS) return false;
 
     VkPushConstantRange pcr{};
     pcr.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -51,7 +52,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     VkPipelineLayoutCreateInfo plci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     plci.setLayoutCount = 1; plci.pSetLayouts = &noiseSetLayout;
     plci.pushConstantRangeCount = 1; plci.pPushConstantRanges = &pcr;
-    if(vkCreatePipelineLayout(device,&plci,nullptr,&pipelineLayout)!=VK_SUCCESS) return false;
+    if(gResourceManager.createPipelineLayout(&plci,&pipelineLayout)!=VK_SUCCESS) return false;
 
     VkShaderModule vs = loadShader(device, "spv/common/fullscreen.vert.spv");
     VkShaderModule fsSky = loadShader(device, "spv/post/atmosphere.frag.spv");
@@ -123,7 +124,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     pci.pColorBlendState = &cb;
     pci.pDynamicState = &dyn;
     pci.layout = pipelineLayout;
-    if(vkCreateGraphicsPipelines(device,nullptr,1,&pci,nullptr,&skyPipeline)!=VK_SUCCESS) return false;
+    if(gResourceManager.createGraphicsPipeline(&pci,&skyPipeline)!=VK_SUCCESS) return false;
 
     // Clouds pipeline with alpha blend
     stages[1].module = fsCloud;
@@ -134,7 +135,7 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
     att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     att.alphaBlendOp = VK_BLEND_OP_ADD;
-    if(vkCreateGraphicsPipelines(device,nullptr,1,&pci,nullptr,&cloudPipeline)!=VK_SUCCESS) return false;
+    if(gResourceManager.createGraphicsPipeline(&pci,&cloudPipeline)!=VK_SUCCESS) return false;
 
     vkDestroyShaderModule(device, fsCloud, nullptr);
     vkDestroyShaderModule(device, fsSky, nullptr);
