@@ -100,7 +100,6 @@ void recordMainRenderPass(VkCommandBuffer cmd,
     if (draws.empty()) return;
     // Assume indirectBuffer is host visible and already mapped by caller
     // so we simply copy commands into it before issuing draw.
-    void* data = nullptr;
     // Mapping is skipped for brevity; caller should handle buffer upload.
     // vkMapMemory(..., &data);
     // memcpy(static_cast<uint8_t*>(data) + bufferOffset, draws.data(), draws.size() * sizeof(VkDrawIndexedIndirectCommand));
