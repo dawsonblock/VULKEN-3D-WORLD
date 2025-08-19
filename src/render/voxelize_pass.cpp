@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdio>
 
-#include "vk_mem_alloc.h"
+#include "allocators.hpp"
 
 namespace voxelvk {
 
@@ -45,7 +45,7 @@ void VoxelizePass::destroy(){
     if(descPool) vkDestroyDescriptorPool(device, descPool, nullptr);
     if(setLayout) vkDestroyDescriptorSetLayout(device, setLayout, nullptr);
     if(voxelView) vkDestroyImageView(device, voxelView, nullptr);
-    if(voxelImage) vmaDestroyImage(allocator, voxelImage, voxelAlloc);
+    destroyImage(allocator, voxelImage, voxelAlloc);
 }
 
 bool VoxelizePass::createImage(VkPhysicalDevice phys){
@@ -59,9 +59,7 @@ bool VoxelizePass::createImage(VkPhysicalDevice phys){
     ci.tiling = VK_IMAGE_TILING_OPTIMAL;
     ci.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    VmaAllocationCreateInfo aci{};
-    aci.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-    if(vmaCreateImage(allocator, &ci, &aci, &voxelImage, &voxelAlloc, nullptr) != VK_SUCCESS)
+    if(!allocateImage(allocator, ci, voxelImage, voxelAlloc))
         return false;
 
     VkImageViewCreateInfo vci{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};

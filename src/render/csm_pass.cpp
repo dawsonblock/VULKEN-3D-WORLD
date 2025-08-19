@@ -4,8 +4,7 @@
 #include <stdexcept>
 #include <cstring>
 
-// Expect VMA headers available
-#include "vk_mem_alloc.h"
+#include "allocators.hpp"
 
 namespace voxelvk {
 
@@ -37,7 +36,7 @@ void CSMShadowPass::destroy(){
     if(uboSet) {} // freed with pool
     if(descPool) vkDestroyDescriptorPool(device, descPool, nullptr);
     if(uboSetLayout) vkDestroyDescriptorSetLayout(device, uboSetLayout, nullptr);
-    if(ubo){ vmaDestroyBuffer(allocator, ubo, uboAlloc); ubo=nullptr; }
+    destroyStagingBuffer(allocator, ubo);
     if(depthSampler) vkDestroySampler(device, depthSampler, nullptr);
     for(auto v: layerViews) vkDestroyImageView(device, v, nullptr);
     if(depthArrayView) vkDestroyImageView(device, depthArrayView, nullptr);
@@ -55,9 +54,7 @@ bool CSMShadowPass::createDepthArray(VkPhysicalDevice phys){
     ci.tiling = VK_IMAGE_TILING_OPTIMAL;
     ci.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     ci.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    VmaAllocationCreateInfo aci{};
-    aci.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-    if(vmaCreateImage(allocator, &ci, &aci, &depthImage, &depthAlloc, nullptr) != VK_SUCCESS)
+    if(!allocateImage(allocator, ci, depthImage, depthAlloc))
         return false;
 
     // Array view for sampling in lighting pass
@@ -94,14 +91,7 @@ bool CSMShadowPass::createSampler(){
 }
 
 bool CSMShadowPass::createUBO(){
-    VkBufferCreateInfo bi{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
-    bi.size = sizeof(CSMGpuUBO);
-    bi.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    VmaAllocationCreateInfo aci{};
-    aci.usage = VMA_MEMORY_USAGE_AUTO;
-    aci.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
-                VMA_ALLOCATION_CREATE_MAPPED_BIT;
-    if(vmaCreateBuffer(allocator, &bi, &aci, &ubo, &uboAlloc, nullptr) != VK_SUCCESS)
+    if(!createStagingBuffer(allocator, sizeof(CSMGpuUBO), ubo))
         return false;
 
     // descriptor
@@ -123,7 +113,7 @@ bool CSMShadowPass::createUBO(){
     ai.descriptorPool = descPool; ai.descriptorSetCount = 1; ai.pSetLayouts = &uboSetLayout;
     if(vkAllocateDescriptorSets(device, &ai, &uboSet) != VK_SUCCESS) return false;
 
-    VkDescriptorBufferInfo dbi{ubo, 0, sizeof(CSMGpuUBO)};
+    VkDescriptorBufferInfo dbi{ubo.buffer, 0, sizeof(CSMGpuUBO)};
     VkWriteDescriptorSet w{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
     w.dstSet = uboSet; w.dstBinding = 3; w.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     w.descriptorCount = 1; w.pBufferInfo = &dbi;
@@ -212,11 +202,7 @@ bool CSMShadowPass::createPipeline(VkPhysicalDevice /*phys*/){
 }
 
 void CSMShadowPass::updateUBO(const CSMGpuUBO& data){
-    // host-visible vma buffer
-    void* p = nullptr;
-    vmaMapMemory(allocator, uboAlloc, &p);
-    std::memcpy(p, &data, sizeof(data));
-    vmaUnmapMemory(allocator, uboAlloc);
+    std::memcpy(ubo.mapped, &data, sizeof(data));
 }
 
 void CSMShadowPass::bindDepthDescriptor(VkDescriptorSet set, uint32_t binding) const{
