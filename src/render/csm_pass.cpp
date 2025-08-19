@@ -1,6 +1,7 @@
 
 #include "csm_pass.hpp"
 #include "csm_descriptor.hpp"
+#include "sync_utils.hpp"
 #include <stdexcept>
 #include <cstring>
 
@@ -224,8 +225,16 @@ void CSMShadowPass::bindDepthDescriptor(VkDescriptorSet set, uint32_t binding) c
 }
 
 void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawScene){
-    // transition to depth attachment
-    // (Assume your engine has a barrier helper; else leave to caller.)
+    // Ensure depth image is ready for attachment usage
+    barrierImage(cmd,
+                 depthImage,
+                 VK_IMAGE_LAYOUT_UNDEFINED,
+                 VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                 VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+                 0,
+                 VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                 VK_IMAGE_ASPECT_DEPTH_BIT);
     VkViewport vp{0,0,(float)mapSize,(float)mapSize,0.0f,1.0f};
     VkRect2D sc{{0,0},{mapSize,mapSize}};
 
@@ -259,6 +268,17 @@ void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawSce
 
         vkCmdEndRendering(cmd);
     }
+
+    // Make depth writes visible for subsequent shader reads
+    barrierImage(cmd,
+                 depthImage,
+                 VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                 VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                 VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                 VK_ACCESS_SHADER_READ_BIT,
+                 VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 // --- simple file loader for SPV (engine likely has its own) ---

@@ -25,8 +25,8 @@ struct SkyPass {
     bool init(VkPhysicalDevice phys, VkDevice dev, VkFormat colorFormat);
     void destroy();
 
-    // Record commands to draw sky then clouds (uses noiseSet for clouds).
-    void record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc);
+    // Record commands to draw sky then clouds to the given target image.
+    void record(VkCommandBuffer cmd, VkImage target, VkDescriptorSet noiseSet, const SkyPushConstants& pc);
 };
 
 } // namespace voxelvk

@@ -152,7 +152,9 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
     src/render/csm_cpu.cpp
-    src/render/csm_pass.cpp)
+    src/render/csm_pass.cpp
+    src/render/sky_pass.cpp
+    src/render/sync_utils.cpp)
 endif()
 
 # --- Voxelization pass ---

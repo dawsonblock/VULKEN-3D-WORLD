@@ -1,4 +1,5 @@
 #include "voxelize_pass.hpp"
+#include "sync_utils.hpp"
 #include <stdexcept>
 #include <vector>
 #include <cstdio>
@@ -215,6 +216,17 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 }
 
 void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScene){
+    // Prepare storage image for writes
+    barrierImage(cmd,
+                 voxelImage,
+                 VK_IMAGE_LAYOUT_UNDEFINED,
+                 VK_IMAGE_LAYOUT_GENERAL,
+                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                 0,
+                 VK_ACCESS_SHADER_WRITE_BIT,
+                 VK_IMAGE_ASPECT_COLOR_BIT);
+
     VkViewport vp{0,0,(float)dim,(float)dim,0.0f,1.0f};
     VkRect2D sc{{0,0},{dim,dim}};
 
@@ -244,6 +256,17 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
         drawScene(cmd, (int)z);
         vkCmdEndRendering(cmd);
     }
+
+    // Make voxel image writes available for sampling
+    barrierImage(cmd,
+                 voxelImage,
+                 VK_IMAGE_LAYOUT_GENERAL,
+                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                 VK_ACCESS_SHADER_WRITE_BIT,
+                 VK_ACCESS_SHADER_READ_BIT,
+                 VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 static std::vector<char> readFile(const char* path){
