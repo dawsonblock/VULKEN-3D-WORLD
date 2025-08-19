@@ -38,7 +38,7 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
         }
     }
     for(auto it = loading_.begin(); it != loading_.end(); ){
-        if(desired.count(it->first)==0){
+        if (desired.count(it->first) == 0) {
             if(it->second.valid()) it->second.wait();
             it = loading_.erase(it);
         }else{
