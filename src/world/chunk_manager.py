@@ -18,7 +18,7 @@ class ChunkManager:
     the active radius or exceed ``max_chunks``.
     """
 
-    def __init__(self, generator, radius: int = 1, max_chunks: int = 64):
+    def __init__(self, generator: ChunkGeneratorProtocol, radius: int = 1, max_chunks: int = 64):
         self.generator = generator
         self.radius = radius
         self.max_chunks = max_chunks
