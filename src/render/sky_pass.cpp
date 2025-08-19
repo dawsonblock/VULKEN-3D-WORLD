@@ -1,4 +1,5 @@
 #include "sky_pass.hpp"
+#include "sync_utils.hpp"
 #include <vector>
 #include <cstdio>
 #include <cstring>
@@ -168,7 +169,18 @@ void SkyPass::destroy(){
     }
 }
 
-void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc){
+void SkyPass::record(VkCommandBuffer cmd, VkImage target, VkDescriptorSet noiseSet, const SkyPushConstants& pc){
+    // Transition target image for color attachment output
+    barrierImage(cmd,
+                 target,
+                 VK_IMAGE_LAYOUT_UNDEFINED,
+                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                 0,
+                 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                 VK_IMAGE_ASPECT_COLOR_BIT);
+
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, skyPipeline);
     vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SkyPushConstants), &pc);
     vkCmdDraw(cmd, 3, 1, 0, 0);
@@ -176,6 +188,17 @@ void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPus
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &noiseSet, 0, nullptr);
     vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SkyPushConstants), &pc);
     vkCmdDraw(cmd, 3, 1, 0, 0);
+
+    // Make color writes visible for subsequent shader reads
+    barrierImage(cmd,
+                 target,
+                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                 VK_ACCESS_SHADER_READ_BIT,
+                 VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 } // namespace voxelvk
