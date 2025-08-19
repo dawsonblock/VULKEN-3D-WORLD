@@ -43,7 +43,7 @@ class PlayerController:
         self.pos = spawn.astype(np.float32)
         self.vel = np.zeros(3, dtype=np.float32)
         self.aabb = AABB(center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32))
-        self.input = {"f":0,"b":0,"l":0,"r":0,"up":0,"down":0,"jump":0,"sprint":0}
+        self.input = {"f": 0, "b": 0, "l": 0, "r": 0, "up": 0, "down": 0, "jump": 0, "sprint": 0}
 
     def set_input(self, keymap: Dict[str, int]) -> None:
         """Update input mapping from ``keymap``."""
