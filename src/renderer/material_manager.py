@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, cast
 
 
 @dataclass
@@ -33,7 +33,8 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
-            albedo = tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0]))
+            albedo_list = [float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])]
+            albedo = cast(Tuple[float, float, float], tuple(albedo_list[:3]))
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)

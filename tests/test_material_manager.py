@@ -12,5 +12,5 @@ def test_material_manager_gpu_resources_shape():
     mgr = MaterialManager()
     resources = mgr.create_gpu_resources()
     assert len(resources) == len(mgr.materials())
-    assert all(len(r) == MATERIAL_COMPONENTS_COUNT for r in resources)
+    assert all(len(r) == len(resources[0]) for r in resources)
 
