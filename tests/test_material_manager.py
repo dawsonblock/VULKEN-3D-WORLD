@@ -1,6 +1,10 @@
 from src.renderer.material_manager import MaterialManager
 
 
+# Each material is represented by five components: RGB albedo, metallic, and roughness.
+MATERIAL_COMPONENTS_COUNT = 5
+
+
 def test_material_manager_loads_and_ids_unique():
     mgr = MaterialManager()
     grass = mgr.get_material_id("GRASS")
