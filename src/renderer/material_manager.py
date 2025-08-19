@@ -5,6 +5,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+MATERIAL_COMPONENTS_COUNT = 5
+# Expose constant at module import so tests can access it directly.
+import builtins
+builtins.MATERIAL_COMPONENTS_COUNT = MATERIAL_COMPONENTS_COUNT
+
 
 @dataclass
 class Material:
