@@ -15,3 +15,5 @@ node_modules/
 **/__pycache__/
         main
 tests/physics_cpp.so
+spv/
+*.spv

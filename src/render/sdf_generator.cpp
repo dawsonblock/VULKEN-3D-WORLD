@@ -2,6 +2,9 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
 namespace voxelvk {
 static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path){
     FILE* f = fopen(path, "rb");
@@ -97,8 +100,7 @@ bool GenerateSDF(VkDevice device,
         vkUpdateDescriptorSets(device,2,writes,0,nullptr);
     };
     // Shader module
-    VkShaderModule cs = LoadShaderModuleFromFile(device,"spv/sdf_jump_flood.comp.spv");
-    if(cs==VK_NULL_HANDLE) cs = LoadShaderModuleFromFile(device,"shaders/sdf_jump_flood.comp.glsl.spv");
+    VkShaderModule cs = LoadShaderModuleFromFile(device, VOXELVK_SHADER_DIR "/sdf_jump_flood.comp.spv");
     if(cs==VK_NULL_HANDLE) return false;
     VkComputePipelineCreateInfo cpci{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
     VkPipelineShaderStageCreateInfo ss{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};

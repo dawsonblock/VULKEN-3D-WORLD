@@ -5,6 +5,10 @@
 
 #include "vk_mem_alloc.h"
 
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
+
 namespace voxelvk {
 
 static VkShaderModule loadShader(VkDevice dev, const char* path);
@@ -113,8 +117,8 @@ bool VoxelizePass::createDescriptors(){
 }
 
 bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
-    VkShaderModule vs = loadShader(device, "spv/voxelize/voxelize.vert.spv");
-    VkShaderModule fs = loadShader(device, "spv/voxelize/voxelize.frag.spv");
+    VkShaderModule vs = loadShader(device, VOXELVK_SHADER_DIR "/voxelize/voxelize.vert.spv");
+    VkShaderModule fs = loadShader(device, VOXELVK_SHADER_DIR "/voxelize/voxelize.frag.spv");
     if(!vs || !fs) return false;
 
     VkPipelineShaderStageCreateInfo stages[2]{};
