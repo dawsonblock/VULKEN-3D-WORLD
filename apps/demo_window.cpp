@@ -34,7 +34,10 @@ int main() {
         static double lastX = 0.0, lastY = 0.0;
         static bool first = true;
         if (first) {
-            lastX = xpos; lastY = ypos; first = false;
+    auto cursor_callback = [&](GLFWwindow* win, double xpos, double ypos) {
+        Camera* cam = reinterpret_cast<Camera*>(glfwGetWindowUserPointer(win));
+        if (firstMouse) {
+            lastX = xpos; lastY = ypos; firstMouse = false;
         }
         double xoffset = xpos - lastX;
         double yoffset = lastY - ypos;
