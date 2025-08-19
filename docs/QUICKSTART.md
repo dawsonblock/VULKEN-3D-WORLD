@@ -22,6 +22,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+The chunk store roundtrip test (`tests/test_chunk_store_cpp.py`) also requires a C++
+compiler and zstd development headers. On Debian/Ubuntu systems you can install
+these with:
+
+```bash
+sudo apt-get install g++ libzstd-dev
+```
+
 ## 2. Run smoke tests
 
 After building, execute the bundled smoke tests:
