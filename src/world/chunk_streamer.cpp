@@ -66,6 +66,7 @@ std::shared_ptr<world::ChunkData> ChunkStreamer::GenerateChunk(int cx, int cz){
 }
 
 void ChunkStreamer::MeshChunk(const world::ChunkData& chunk){
+    // 'chunk' parameter will be used in future implementations of the meshing pipeline.
     (void)chunk;
     // placeholder for meshing pipeline
 }
