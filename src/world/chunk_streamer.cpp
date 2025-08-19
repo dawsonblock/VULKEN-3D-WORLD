@@ -2,8 +2,12 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 namespace voxelvk {
+
+static constexpr int CHUNK_HASH_X_MULTIPLIER = 73856093;
+static constexpr int CHUNK_HASH_Z_MULTIPLIER = 19349663;
 
 ChunkStreamer::ChunkStreamer(const std::string& cfgPath)
     : lod_(cfgPath) {}
@@ -44,10 +48,20 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
 }
 
 void ChunkStreamer::LoadChunkAsync(int id){
-    loading_[id] = std::async(std::launch::async, [id]{
     loading_[id] = std::async(std::launch::async, [this, id]{
-        this->LoadChunk(id);
+        try {
+            LoadChunk(id);
+        } catch(const std::exception& e) {
+            std::cerr << "Failed to load chunk " << id << ": " << e.what() << '\n';
+        } catch(...) {
+            std::cerr << "Failed to load chunk " << id << " due to unknown error\n";
+        }
     });
+}
+
+void ChunkStreamer::LoadChunk(int id){
+    // Placeholder implementation for chunk loading
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 void ChunkStreamer::UnloadChunk(int id){

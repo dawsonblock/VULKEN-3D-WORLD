@@ -19,6 +19,7 @@ public:
 
 private:
     void LoadChunkAsync(int id);
+    void LoadChunk(int id);
     void UnloadChunk(int id);
 
     int radius_ = 2;
