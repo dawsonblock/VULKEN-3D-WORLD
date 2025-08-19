@@ -6,6 +6,7 @@
 #include <glm/common.hpp>
 
 #include "lod_component.hpp"
+#include "resource_manager.hpp"
 
 namespace voxelvk {
 
@@ -19,10 +20,12 @@ public:
 
 private:
     void LoadChunkAsync(int id);
+    void LoadChunk(int id);
     void UnloadChunk(int id);
 
     int radius_ = 2;
     LODComponent lod_;
+    ResourceManager resources_;
     std::unordered_map<int, std::future<void>> loading_;
 };
 
