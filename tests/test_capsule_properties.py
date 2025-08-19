@@ -5,7 +5,6 @@ pytest.skip(
     allow_module_level=True,
 )
 
-np = pytest.importorskip("numpy")
 from src.physics.capsule import Capsule
 
 def test_seg_properties():
