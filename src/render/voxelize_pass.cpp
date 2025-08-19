@@ -1,4 +1,5 @@
 #include "voxelize_pass.hpp"
+#include "resource_manager.hpp"
 #include <stdexcept>
 #include <vector>
 #include <cstdio>
@@ -7,7 +8,7 @@
 
 namespace voxelvk {
 
-static VkShaderModule loadShader(VkDevice dev, const char* path);
+static VkShaderModule loadShader(VkDevice /*dev*/, const char* path);
 
 uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags){
     VkPhysicalDeviceMemoryProperties memProps{};
@@ -71,7 +72,7 @@ bool VoxelizePass::createImage(VkPhysicalDevice phys){
     vci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     vci.subresourceRange.levelCount = 1;
     vci.subresourceRange.layerCount = 1;
-    return vkCreateImageView(device, &vci, nullptr, &voxelView) == VK_SUCCESS;
+    return gResourceManager.createImageView(&vci, &voxelView) == VK_SUCCESS;
 }
 
 bool VoxelizePass::createDescriptors(){
@@ -87,7 +88,7 @@ bool VoxelizePass::createDescriptors(){
 
     lci.bindingCount = 1; lci.pBindings = &b;
         main
-    if(vkCreateDescriptorSetLayout(device, &lci, nullptr, &setLayout) != VK_SUCCESS) return false;
+    if(gResourceManager.createDescriptorSetLayout(&lci, &setLayout) != VK_SUCCESS) return false;
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 1;
     VkDescriptorPoolCreateInfo pci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
@@ -98,7 +99,7 @@ bool VoxelizePass::createDescriptors(){
 
     pci.maxSets = 1; pci.poolSizeCount = 1; pci.pPoolSizes = &ps;
         main
-    if(vkCreateDescriptorPool(device, &pci, nullptr, &descPool) != VK_SUCCESS) return false;
+    if(gResourceManager.createDescriptorPool(&pci, &descPool) != VK_SUCCESS) return false;
 
     VkDescriptorSetAllocateInfo ai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
     ai.descriptorPool = descPool; ai.descriptorSetCount = 1; ai.pSetLayouts = &setLayout;
@@ -178,7 +179,7 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
     lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
         main
-    if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS){
+    if(gResourceManager.createPipelineLayout(&lci, &pipelineLayout) != VK_SUCCESS){
         vkDestroyShaderModule(device, vs, nullptr);
         vkDestroyShaderModule(device, fs, nullptr);
         return false;
@@ -208,7 +209,7 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     pci.renderPass = VK_NULL_HANDLE;
     pci.subpass = 0;
 
-    bool ok = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pci, nullptr, &pipeline) == VK_SUCCESS;
+    bool ok = gResourceManager.createGraphicsPipeline(&pci, &pipeline) == VK_SUCCESS;
     vkDestroyShaderModule(device, vs, nullptr);
     vkDestroyShaderModule(device, fs, nullptr);
     return ok;
@@ -259,7 +260,7 @@ static std::vector<char> readFile(const char* path){
     return data;
 }
 
-static VkShaderModule loadShader(VkDevice dev, const char* path){
+static VkShaderModule loadShader(VkDevice /*dev*/, const char* path){
     auto bytes = readFile(path);
 
     if(bytes.empty()) return VK_NULL_HANDLE;
@@ -273,7 +274,7 @@ static VkShaderModule loadShader(VkDevice dev, const char* path){
     ci.codeSize = bytes.size();
     ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
     VkShaderModule m;
-    if(vkCreateShaderModule(dev, &ci, nullptr, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
+    if(gResourceManager.createShaderModule(&ci, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
     return m;
 }
 

@@ -3,12 +3,19 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include "../src/render/resource_manager.hpp"
+
+static bool framebufferResized = false;
 
 int main() {
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window = glfwCreateWindow(800, 600, "demo_window", nullptr, nullptr);
     if (!window) { glfwTerminate(); return 1; }
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int, int){
+        framebufferResized = true;
+        voxelvk::gResourceManager.onSwapchainResize();
+    });
 
     // Instance
     std::vector<const char*> layers;
@@ -66,6 +73,7 @@ int main() {
     dci.enabledExtensionCount = 1; dci.ppEnabledExtensionNames = devExts;
     VkDevice device;
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
+    voxelvk::gResourceManager.init(device, nullptr, 2);
     VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
 
     // Swapchain
@@ -137,6 +145,10 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
+        if(framebufferResized){
+            framebufferResized = false;
+            // In a real engine we would recreate swapchain resources here
+        }
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
@@ -159,6 +171,7 @@ int main() {
     vkDestroyRenderPass(device,rp,nullptr);
     for(auto v:views) vkDestroyImageView(device,v,nullptr);
     vkDestroySwapchainKHR(device,swapchain,nullptr);
+    voxelvk::gResourceManager.shutdown();
     vkDestroyDevice(device,nullptr);
     vkDestroySurfaceKHR(instance,surface,nullptr);
     vkDestroyInstance(instance,nullptr);

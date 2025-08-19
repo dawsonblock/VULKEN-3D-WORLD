@@ -1,5 +1,6 @@
 
 #include "csm_layout.hpp"
+#include "resource_manager.hpp"
 #include <vector>
 
 namespace voxelvk {
@@ -11,7 +12,7 @@ bool create_csm_set(VkDevice device, uint32_t binding, CSMSet& out)
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
     lci.bindingCount = 1;
     lci.pBindings = &b;
-    if (vkCreateDescriptorSetLayout(device, &lci, nullptr, &out.layout) != VK_SUCCESS) return false;
+    if (gResourceManager.createDescriptorSetLayout(&lci, &out.layout) != VK_SUCCESS) return false;
 
     // pool
     VkDescriptorPoolSize ps{};
@@ -22,7 +23,7 @@ bool create_csm_set(VkDevice device, uint32_t binding, CSMSet& out)
     pci.maxSets = 1;
     pci.poolSizeCount = 1;
     pci.pPoolSizes = &ps;
-    if (vkCreateDescriptorPool(device, &pci, nullptr, &out.pool) != VK_SUCCESS) return false;
+    if (gResourceManager.createDescriptorPool(&pci, &out.pool) != VK_SUCCESS) return false;
 
     // allocate
     VkDescriptorSetAllocateInfo ai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};

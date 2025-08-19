@@ -1,5 +1,6 @@
 
 #include "ibl_brdf.hpp"
+#include "resource_manager.hpp"
 #include <vector>
 #include <cassert>
 #include <cstring>
@@ -17,7 +18,7 @@ static uint32_t FindMemoryType(VkPhysicalDevice phys, uint32_t typeFilter, VkMem
     return ~0u;
 }
 
-static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path) {
+static VkShaderModule LoadShaderModuleFromFile(VkDevice /*device*/, const char* path) {
     FILE* f = fopen(path, "rb");
     if (!f) return VK_NULL_HANDLE;
     fseek(f, 0, SEEK_END);
@@ -30,7 +31,7 @@ static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path
     ci.codeSize = buf.size()*4;
     ci.pCode = buf.data();
     VkShaderModule mod = VK_NULL_HANDLE;
-    if (vkCreateShaderModule(device, &ci, nullptr, &mod) != VK_SUCCESS) return VK_NULL_HANDLE;
+    if (gResourceManager.createShaderModule(&ci, &mod) != VK_SUCCESS) return VK_NULL_HANDLE;
     return mod;
 }
 
@@ -71,7 +72,7 @@ bool CreateBRDFLUT(VkDevice device,
     iv.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     iv.subresourceRange.levelCount = 1;
     iv.subresourceRange.layerCount = 1;
-    if (vkCreateImageView(device, &iv, nullptr, &out.view) != VK_SUCCESS) {
+    if (gResourceManager.createImageView(&iv, &out.view) != VK_SUCCESS) {
         return false;
     }
 
@@ -83,7 +84,7 @@ bool CreateBRDFLUT(VkDevice device,
     sci.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     sci.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     sci.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    if (vkCreateSampler(device, &sci, nullptr, &out.sampler) != VK_SUCCESS) {
+    if (gResourceManager.createSampler(&sci, &out.sampler) != VK_SUCCESS) {
         return false;
     }
 
@@ -98,21 +99,21 @@ bool CreateBRDFLUT(VkDevice device,
     dslci.bindingCount = 1;
     dslci.pBindings = &b;
     VkDescriptorSetLayout dsl = VK_NULL_HANDLE;
-    if (vkCreateDescriptorSetLayout(device, &dslci, nullptr, &dsl) != VK_SUCCESS) return false;
+    if (gResourceManager.createDescriptorSetLayout(&dslci, &dsl) != VK_SUCCESS) return false;
 
     // Pipeline layout
     VkPipelineLayoutCreateInfo plci{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
     plci.setLayoutCount = 1;
     plci.pSetLayouts = &dsl;
     VkPipelineLayout pl = VK_NULL_HANDLE;
-    if (vkCreatePipelineLayout(device, &plci, nullptr, &pl) != VK_SUCCESS) return false;
+    if (gResourceManager.createPipelineLayout(&plci, &pl) != VK_SUCCESS) return false;
 
     // Descriptor pool / set
     VkDescriptorPoolSize poolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 };
     VkDescriptorPoolCreateInfo dpci{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
     dpci.maxSets = 1; dpci.poolSizeCount = 1; dpci.pPoolSizes = &poolSize;
     VkDescriptorPool pool = VK_NULL_HANDLE;
-    if (vkCreateDescriptorPool(device, &dpci, nullptr, &pool) != VK_SUCCESS) return false;
+    if (gResourceManager.createDescriptorPool(&dpci, &pool) != VK_SUCCESS) return false;
 
     VkDescriptorSetAllocateInfo dsai{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     dsai.descriptorPool = pool; dsai.descriptorSetCount = 1; dsai.pSetLayouts = &dsl;
@@ -146,7 +147,7 @@ bool CreateBRDFLUT(VkDevice device,
     cpci.stage = s;
     cpci.layout = pl;
     VkPipeline pipe = VK_NULL_HANDLE;
-    if (vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &cpci, nullptr, &pipe) != VK_SUCCESS) {
+    if (gResourceManager.createComputePipeline(&cpci, &pipe) != VK_SUCCESS) {
         vkDestroyShaderModule(device, cs, nullptr);
         return false;
     }

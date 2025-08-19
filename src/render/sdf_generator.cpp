@@ -1,9 +1,10 @@
 #include "sdf_generator.hpp"
+#include "resource_manager.hpp"
 #include <vector>
 #include <algorithm>
 #include <cstring>
 namespace voxelvk {
-static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path){
+static VkShaderModule LoadShaderModuleFromFile(VkDevice /*device*/, const char* path){
     FILE* f = fopen(path, "rb");
     if(!f) return VK_NULL_HANDLE;
     fseek(f, 0, SEEK_END);
@@ -24,7 +25,7 @@ static VkShaderModule LoadShaderModuleFromFile(VkDevice device, const char* path
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = buf.size()*4; ci.pCode = buf.data();
     VkShaderModule mod = VK_NULL_HANDLE;
-    if(vkCreateShaderModule(device,&ci,nullptr,&mod)!=VK_SUCCESS) {
+    if(gResourceManager.createShaderModule(&ci,&mod)!=VK_SUCCESS) {
         fprintf(stderr, "Error: Failed to create shader module from file '%s'\n", path);
         return VK_NULL_HANDLE;
     }
@@ -55,15 +56,15 @@ bool GenerateSDF(VkDevice device,
     VkImageViewCreateInfo ivci{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     ivci.image=out.image; ivci.viewType=VK_IMAGE_VIEW_TYPE_3D; ivci.format=out.format;
     ivci.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT; ivci.subresourceRange.levelCount=1; ivci.subresourceRange.layerCount=1;
-    if(vkCreateImageView(device,&ivci,nullptr,&out.view)!=VK_SUCCESS) return false;
+    if(gResourceManager.createImageView(&ivci,&out.view)!=VK_SUCCESS) return false;
     // Temp ping/pong images (RGBA16F)
     VkImageCreateInfo tmpImg = img; tmpImg.format = VK_FORMAT_R16G16B16A16_SFLOAT;
     VkImage tmpA, tmpB; VmaAllocation tmpAAlloc, tmpBAlloc; VkImageView tmpAView, tmpBView;
     if(vmaCreateImage(allocator,&tmpImg,&aci,&tmpA,&tmpAAlloc,nullptr)!=VK_SUCCESS) return false;
     if(vmaCreateImage(allocator,&tmpImg,&aci,&tmpB,&tmpBAlloc,nullptr)!=VK_SUCCESS) return false;
     ivci.image=tmpA; ivci.viewType=VK_IMAGE_VIEW_TYPE_3D; ivci.format=VK_FORMAT_R16G16B16A16_SFLOAT;
-    if(vkCreateImageView(device,&ivci,nullptr,&tmpAView)!=VK_SUCCESS) return false;
-    ivci.image=tmpB; if(vkCreateImageView(device,&ivci,nullptr,&tmpBView)!=VK_SUCCESS) return false;
+    if(gResourceManager.createImageView(&ivci,&tmpAView)!=VK_SUCCESS) return false;
+    ivci.image=tmpB; if(gResourceManager.createImageView(&ivci,&tmpBView)!=VK_SUCCESS) return false;
     // Descriptor set layout
     VkDescriptorSetLayoutBinding binds[2]{};
     binds[0].binding=0; binds[0].descriptorType=VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; binds[0].descriptorCount=1; binds[0].stageFlags=VK_SHADER_STAGE_COMPUTE_BIT;
@@ -72,15 +73,15 @@ bool GenerateSDF(VkDevice device,
     dslci.bindingCount = 2;
     dslci.pBindings = binds;
     VkDescriptorSetLayout dsl;
-    if (vkCreateDescriptorSetLayout(device, &dslci, nullptr, &dsl) != VK_SUCCESS)
+    if (gResourceManager.createDescriptorSetLayout(&dslci, &dsl) != VK_SUCCESS)
         return false;
     VkPushConstantRange pcr{VK_SHADER_STAGE_COMPUTE_BIT,0,sizeof(int)*2};
     VkPipelineLayoutCreateInfo plci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     plci.setLayoutCount=1; plci.pSetLayouts=&dsl; plci.pushConstantRangeCount=1; plci.pPushConstantRanges=&pcr;
-    VkPipelineLayout pl; if(vkCreatePipelineLayout(device,&plci,nullptr,&pl)!=VK_SUCCESS) return false;
+    VkPipelineLayout pl; if(gResourceManager.createPipelineLayout(&plci,&pl)!=VK_SUCCESS) return false;
     VkDescriptorPoolSize dps{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,2};
     VkDescriptorPoolCreateInfo dpci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO}; dpci.maxSets=1; dpci.poolSizeCount=1; dpci.pPoolSizes=&dps;
-    VkDescriptorPool pool; if(vkCreateDescriptorPool(device,&dpci,nullptr,&pool)!=VK_SUCCESS) return false;
+    VkDescriptorPool pool; if(gResourceManager.createDescriptorPool(&dpci,&pool)!=VK_SUCCESS) return false;
     VkDescriptorSetAllocateInfo dsai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
     dsai.descriptorPool = pool;
     dsai.descriptorSetCount = 1;
@@ -106,7 +107,7 @@ bool GenerateSDF(VkDevice device,
     cpci.stage = ss;
     cpci.layout = pl;
     VkPipeline pipe;
-    if (vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &cpci, nullptr, &pipe) != VK_SUCCESS) {
+    if (gResourceManager.createComputePipeline(&cpci, &pipe) != VK_SUCCESS) {
         vkDestroyShaderModule(device, cs, nullptr);
         return false;
     }

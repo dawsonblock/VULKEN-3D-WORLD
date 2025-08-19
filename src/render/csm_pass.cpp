@@ -1,6 +1,7 @@
 
 #include "csm_pass.hpp"
 #include "csm_descriptor.hpp"
+#include "resource_manager.hpp"
 #include <stdexcept>
 #include <cstring>
 
@@ -9,7 +10,7 @@
 
 namespace voxelvk {
 
-static VkShaderModule loadShader(VkDevice dev, const char* path);
+static VkShaderModule loadShader(VkDevice /*dev*/, const char* path);
 
 uint32_t CSMShadowPass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags){
     VkPhysicalDeviceMemoryProperties memProps{};
@@ -68,7 +69,7 @@ bool CSMShadowPass::createDepthArray(VkPhysicalDevice phys){
     vci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     vci.subresourceRange.levelCount = 1;
     vci.subresourceRange.layerCount = cascades;
-    if(vkCreateImageView(device, &vci, nullptr, &depthArrayView) != VK_SUCCESS) return false;
+    if(gResourceManager.createImageView(&vci, &depthArrayView) != VK_SUCCESS) return false;
 
     // Per-layer views for rendering
     layerViews.resize(cascades);
@@ -77,7 +78,7 @@ bool CSMShadowPass::createDepthArray(VkPhysicalDevice phys){
         lv.viewType = VK_IMAGE_VIEW_TYPE_2D;
         lv.subresourceRange.baseArrayLayer = i;
         lv.subresourceRange.layerCount = 1;
-        if(vkCreateImageView(device, &lv, nullptr, &layerViews[i]) != VK_SUCCESS) return false;
+        if(gResourceManager.createImageView(&lv, &layerViews[i]) != VK_SUCCESS) return false;
     }
     return true;
 }
@@ -90,7 +91,7 @@ bool CSMShadowPass::createSampler(){
     si.addressModeU = si.addressModeV = si.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     si.compareEnable = VK_FALSE; // we sample as regular depth; PCSS manages compare
     si.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-    return vkCreateSampler(device, &si, nullptr, &depthSampler) == VK_SUCCESS;
+    return gResourceManager.createSampler(&si, &depthSampler) == VK_SUCCESS;
 }
 
 bool CSMShadowPass::createUBO(){
@@ -112,12 +113,12 @@ bool CSMShadowPass::createUBO(){
     b.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
     lci.bindingCount = 1; lci.pBindings = &b;
-    if(vkCreateDescriptorSetLayout(device, &lci, nullptr, &uboSetLayout) != VK_SUCCESS) return false;
+    if(gResourceManager.createDescriptorSetLayout(&lci, &uboSetLayout) != VK_SUCCESS) return false;
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; ps.descriptorCount = 1;
     VkDescriptorPoolCreateInfo pci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
     pci.maxSets = 1; pci.poolSizeCount = 1; pci.pPoolSizes = &ps;
-    if(vkCreateDescriptorPool(device, &pci, nullptr, &descPool) != VK_SUCCESS) return false;
+    if(gResourceManager.createDescriptorPool(&pci, &descPool) != VK_SUCCESS) return false;
 
     VkDescriptorSetAllocateInfo ai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
     ai.descriptorPool = descPool; ai.descriptorSetCount = 1; ai.pSetLayouts = &uboSetLayout;
@@ -183,7 +184,7 @@ bool CSMShadowPass::createPipeline(VkPhysicalDevice /*phys*/){
     VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     lci.setLayoutCount = 1; lci.pSetLayouts = &uboSetLayout;
     lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
-    if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS) return false;
+    if(gResourceManager.createPipelineLayout(&lci, &pipelineLayout) != VK_SUCCESS) return false;
 
     VkDynamicState dynStatesArr[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_DEPTH_BIAS };
     VkPipelineDynamicStateCreateInfo dyn{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
@@ -204,7 +205,7 @@ bool CSMShadowPass::createPipeline(VkPhysicalDevice /*phys*/){
     pci.renderPass = VK_NULL_HANDLE;
     pci.subpass = 0;
 
-    if(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pci, nullptr, &pipeline) != VK_SUCCESS) return false;
+    if(gResourceManager.createGraphicsPipeline(&pci, &pipeline) != VK_SUCCESS) return false;
 
     vkDestroyShaderModule(device, vs, nullptr);
     vkDestroyShaderModule(device, fs, nullptr);
@@ -275,14 +276,14 @@ static std::vector<char> readFile(const char* path){
     std::fclose(f);
     return data;
 }
-static VkShaderModule loadShader(VkDevice dev, const char* path){
+static VkShaderModule loadShader(VkDevice /*dev*/, const char* path){
     auto bytes = readFile(path);
     if(bytes.empty()) return VK_NULL_HANDLE;
     VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     ci.codeSize = bytes.size();
     ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
-    VkShaderModule m; 
-    if(vkCreateShaderModule(dev, &ci, nullptr, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
+    VkShaderModule m;
+    if(gResourceManager.createShaderModule(&ci, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
     return m;
 }
 
