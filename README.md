@@ -39,7 +39,14 @@ Run the test suite:
 pytest
 ```
 
-```
+### Diff voxelization prerequisites
+
+The AI module includes a small C++ extension (`src/ai/diff_voxelize`).
+Pre-built binaries for Linux, macOS, and Windows can be placed in the
+`src/ai` directory if available. If the appropriate binary is missing for
+your platform, `g++` will be used to compile the module on the fly.
+Ensure a C++17 capable `g++` compiler is installed if you need to build
+the extension from source.
 
 ## Linting
 To check JavaScript or TypeScript sources, run:
