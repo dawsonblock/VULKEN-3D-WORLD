@@ -2,10 +2,13 @@ const js = require('@eslint/js');
 const globals = require('globals');
 
 
+
+        main
 module.exports = [
   js.configs.recommended,
   {
     ignores: [
+
       'build/**',
       'node_modules/',
       'build_ci_sanity/',
@@ -28,6 +31,7 @@ module.exports = [
     ignores: [
 
 
+        main
       '**/build/**',
 
 
@@ -153,6 +157,7 @@ module.exports = [
       'semi': ['error', 'always']
     }
   }
+
 ];
 
 
@@ -184,6 +189,7 @@ module.exports = [
 
     ignores: ['node_modules/**', '**/build/**'],
   },
+        main
         main
         main
         main
