@@ -1,17 +1,21 @@
-import pytest
-import numpy as np
+import os
 
-try:  # The player controller module is currently broken; skip tests if import fails.
-    from src.physics.player_controller_capsule import (
-        PlayerControllerCapsule,
-        SPRINT_SPEED_MULTIPLIER,
-        get_horizontal_speed,
-    )
-except Exception:  # pragma: no cover - skip if module cannot be imported
+import numpy as np
+import pytest
+
+if not os.environ.get("NATIVE_PHYSICS"):
     pytest.skip(
-        "player_controller_capsule module unavailable",
+        "player controller capsule tests require native physics module; skipped in CI",
         allow_module_level=True,
     )
+
+player_controller_capsule = pytest.importorskip(
+    "src.physics.player_controller_capsule",
+    reason="player_controller_capsule module unavailable",
+)
+PlayerControllerCapsule = player_controller_capsule.PlayerControllerCapsule
+SPRINT_SPEED_MULTIPLIER = player_controller_capsule.SPRINT_SPEED_MULTIPLIER
+get_horizontal_speed = player_controller_capsule.get_horizontal_speed
 
 
 class FlatWorld:
@@ -86,39 +90,3 @@ def test_sprint_speed_limit():
     sprint_speed = get_horizontal_speed(player)
     assert sprint_speed <= player.max_speed * SPRINT_SPEED_MULTIPLIER + 1e-3
     assert sprint_speed > speed
-
-
-
-
-pytest.skip(
-    "player controller capsule tests require native physics module; skipped in CI",
-    allow_module_level=True,
-)
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
