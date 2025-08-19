@@ -6,6 +6,9 @@
 #include <functional>
 #include <cstdint>
 
+#include "frame_graph.hpp"
+#include "global_layout.hpp"
+
 // Forward-declare VMA
 struct VmaAllocator_T;
 using VmaAllocator = VmaAllocator_T*;
@@ -69,6 +72,9 @@ struct CSMShadowPass {
     VkImageView getDepthArrayView() const { return depthArrayView; }
     VkSampler   getDepthSampler()   const { return depthSampler; }
     void bindDepthDescriptor(VkDescriptorSet set, uint32_t binding) const;
+
+    // Register this pass with a frame graph instance.
+    void registerToGraph(FrameGraph& graph);
 
 private:
     bool createDepthArray(VkPhysicalDevice phys);
