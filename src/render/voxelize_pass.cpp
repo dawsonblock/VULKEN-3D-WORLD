@@ -1,4 +1,5 @@
 #include "voxelize_pass.hpp"
+#include "frame_graph.hpp"
 #include <stdexcept>
 #include <vector>
 #include <cstdio>
@@ -244,6 +245,12 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
         drawScene(cmd, (int)z);
         vkCmdEndRendering(cmd);
     }
+}
+
+void VoxelizePass::add_to_graph(FrameGraph &fg, const RecordVoxelDrawFn &drawScene) {
+    fg.add_pass("terrain", {}, [this, drawScene](VkCommandBuffer cmd) {
+        this->record(cmd, drawScene);
+    });
 }
 
 static std::vector<char> readFile(const char* path){

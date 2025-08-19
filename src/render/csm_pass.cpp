@@ -261,6 +261,12 @@ void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawSce
     }
 }
 
+void CSMShadowPass::add_to_graph(FrameGraph &fg, const RecordDepthDrawFn &drawScene) {
+    fg.add_pass("shadows", {"terrain"}, [this, drawScene](VkCommandBuffer cmd) {
+        this->record(cmd, drawScene);
+    });
+}
+
 // --- simple file loader for SPV (engine likely has its own) ---
 #include <cstdio>
 static std::vector<char> readFile(const char* path){

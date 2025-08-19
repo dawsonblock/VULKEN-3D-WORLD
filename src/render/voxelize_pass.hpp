@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <functional>
 #include <cstdint>
+#include "frame_graph.hpp"
 
 struct VmaAllocator_T;
 using VmaAllocator = VmaAllocator_T*;
@@ -34,6 +35,10 @@ struct VoxelizePass {
     void destroy();
 
     void record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScene);
+
+    // Register this pass as a terrain stage in the frame graph. The provided
+    // draw callback is used when the graph executes.
+    void add_to_graph(FrameGraph &fg, const RecordVoxelDrawFn &drawScene);
 
     VkImageView getVoxelView() const { return voxelView; }
 

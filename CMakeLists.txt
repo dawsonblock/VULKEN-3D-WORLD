@@ -110,7 +110,7 @@ if(ENABLE_VULKAN)
 endif()
 
 if(ENABLE_VULKAN)
-  add_executable(smoke_headless apps/smoke_headless.cpp)
+  add_executable(smoke_headless apps/smoke_headless.cpp src/render/frame_graph.cpp)
   add_dependencies(smoke_headless VoxelVK_Shaders)
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
   target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
@@ -177,5 +177,10 @@ endif()
 # --- Voxel SAT compute dispatch ---
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
+endif()
+
+# --- Frame graph ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/frame_graph.cpp)
 endif()
         main
