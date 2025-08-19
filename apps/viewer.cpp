@@ -258,7 +258,6 @@ found_device:
         si.pSignalSemaphores = &renderFinished;
         vkQueueSubmit(queue, 1, &si, VK_NULL_HANDLE);
         VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR}; pi.waitSemaphoreCount=1; pi.pWaitSemaphores=&renderFinished; pi.swapchainCount=1; pi.pSwapchains=&swapchain; pi.pImageIndices=&imgIndex; vkQueuePresentKHR(queue,&pi);
-        vkQueueWaitIdle(queue);
     }
 
     vkDeviceWaitIdle(device);
