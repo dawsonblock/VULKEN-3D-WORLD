@@ -26,7 +26,7 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
     glm::vec3 f = glm::floor(playerPos);
     glm::ivec3 center(f);
     std::unordered_set<int> desired;
-    for(int dx=-radius_; dx<=radius_; ++dx){
+    for (int dx = -radius_; dx <= radius_; ++dx) {
         for(int dz=-radius_; dz<=radius_; ++dz){
             int cx = center.x + dx;
             int cz = center.z + dz;
