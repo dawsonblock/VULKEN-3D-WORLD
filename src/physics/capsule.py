@@ -1,295 +1,69 @@
-
-
-
-
 from __future__ import annotations
 
 from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
- 
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
- 
-
-        main
-        main
-        main
-"""Minimal capsule representation for tests."""
-
-
-
-from __future__ import annotations
-
-
-
-from __future__ import annotations
-
-
-
-
-from dataclasses import dataclass
-
+import ctypes
+from typing import Protocol, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
 
 @dataclass
 class Capsule:
-    """Vertical capsule defined by a center point, half-height, and radius."""
+    """Vertical capsule defined by its center, half-height and radius."""
 
- 
-
-
-
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-        main
-
-        main
-
-        main
-        main
-        main
-        main
-        main
-        main
-"""Minimal capsule representation for tests."""
-        main
-
-
-@dataclass
-class Capsule:
-    """Vertical capsule defined by its center, half height and radius.
-
-
-    The capsule is aligned along the Y axis.  ``center`` represents the middle
-    of the cylindrical part, ``half_height`` is the half length of this
-    cylinder and ``radius`` is the radius of the spherical caps and the
-    cylinder.
-    """
-
-
-
-import numpy as np
-        main
-        main
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
-
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
-        main
-        main
-from __future__ import annotations
-
-
-
-        main
-        main
-        main
-        main
-        main
-from dataclasses import dataclass
-import numpy as np
-from numpy.typing import NDArray
-
-
-import numpy as np
-from numpy.typing import NDArray
-
-
-@dataclass
-class Capsule:
-
-    """Vertical capsule defined by center, half-height, and radius."""
-
-import numpy as np
-        main
-from numpy.typing import NDArray
-        main
-        main
-
-import numpy as np
-from numpy.typing import NDArray
-
-import numpy as np
-from numpy.typing import NDArray
-
-import numpy as np
-from numpy.typing import NDArray
-
-import numpy as np
-from numpy.typing import NDArray
-        main
-
-import numpy as np
-from numpy.typing import NDArray
-
-
-@dataclass
-class Capsule:
-
-
-
-    """Simple vertical capsule defined by its center, half-height, and radius.
-
-
-    """Vertical capsule defined by its center, half-height, and radius."""
-
-
-
-    """Vertical capsule defined by its center, half-height, and radius."""
-
-
-
-    """Simple vertical capsule defined by its center,
-    half-height, and radius."""
-    """
-    Represents a simple vertical capsule defined by its center, half-height, and radius.
-
-
-    """Vertical capsule defined by its center, half-height, and radius."""
-
-
-    """Vertical capsule defined by its center, half-height, and radius."""
-
-    """Vertical capsule defined by its center, half-height, and radius."""
-
-  
-  
-         main
-    """Vertical capsule represented by a center point and radius.
-         main
-         main
-
-    Parameters
-    ----------
-    center : numpy.ndarray of shape (3,)
-        The center of the capsule (midpoint between the two spherical caps), in 3D space.
-    half_height : float
-        Half the height of the cylindrical part of the capsule (distance from center to cap center).
-    radius : float
-        The radius of the spherical caps and the cylinder.
-    """
-
-
- 
-
-
-        main
-        main
-        main
-        main
-    """Simple vertical capsule defined by its center, half-height, and radius."""
-        main
-        main
-        main
-        main
-        main
-
-
-
-    center: NDArray[np.float32, Literal[3]]
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
     center: NDArray[np.float32]
     half_height: float
     radius: float
 
-    @property
-    def seg_a(self) -> NDArray[np.float32]:
+
+class CapsulePy(ctypes.Structure):
+    """ctypes mirror of :class:`Capsule` used for C bindings."""
+
+    _fields_ = [
+        ("center", ctypes.c_float * 3),
+        ("half_height", ctypes.c_float),
+        ("radius", ctypes.c_float),
+    ]
 
 
-        """Center of the top spherical cap."""
+class WorldProtocol(Protocol):
+    """Minimal protocol for a voxel world.
+
+    Only the ``y`` coordinate is used in the simplified resolver below.
+    ``get_block_at_world_position`` should return a non-zero value for
+    solid blocks.
+    """
+
+    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
+        ...
 
 
-        main
-        """Center of the top spherical cap."""
+def resolve_capsule_world(
+    cap: Capsule, world: WorldProtocol | None = None
+) -> Tuple[NDArray[np.float32], bool]:
+    """Resolve ``cap`` against a flat ground at ``y = 0``.
 
-        """Center of the top spherical 
- 
+    Parameters
+    ----------
+    cap:
+        Capsule to resolve. The ``center`` is modified in place when a
+        correction occurs.
+    world:
+        Currently unused but kept for API compatibility.
 
+    Returns
+    -------
+    offset, grounded:
+        ``offset`` is the displacement applied to the capsule and
+        ``grounded`` indicates whether it touched the ground.
+    """
 
-
-         main
-         main
-         main
-         main
-         main
-        return self.center + np.array([0.0, self.half_height, 0.0], dtype=np.float32)
-
-         main
-        return self.center + np.array(
-            [0.0, self.half_height, 0.0], dtype=np.float32
-        )
-
-    @property
-    def seg_b(self) -> NDArray[np.float32]:
-        """Center of the bottom spherical cap."""
-        return self.center - np.array(
-            [0.0, self.half_height, 0.0], dtype=np.float32
-        )
-
-
-__all__ = ["Capsule"]
+    bottom = cap.center[1] - (cap.half_height + cap.radius)
+    if bottom < 0.0:
+        delta = -bottom
+        cap.center[1] += delta
+        return np.array([0.0, delta, 0.0], dtype=np.float32), True
+    return np.zeros(3, dtype=np.float32), False
 
 
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
+__all__ = ["Capsule", "CapsulePy", "WorldProtocol", "resolve_capsule_world"]
