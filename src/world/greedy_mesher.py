@@ -45,7 +45,10 @@ def greedy_mesh(voxels: np.ndarray) -> MeshBuffers:
         Vertices and indices describing the mesh.
     """
 
-    assert voxels.ndim == 3, "Voxel data must be 3-D"
+    assert voxels.ndim == 3, (
+        f"Voxel data must be a 3-D array with shape (width, height, depth). "
+        f"Received array with shape {voxels.shape}."
+    )
     dims = voxels.shape
 
     vertices: List[float] = []
