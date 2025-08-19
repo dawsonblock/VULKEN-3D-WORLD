@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include "vk/debug_utils.hpp"
+
 namespace voxelvk {
 
 static std::vector<char> readFile(const char* path){
@@ -169,6 +171,8 @@ void SkyPass::destroy(){
 }
 
 void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc){
+    vkutil::begin_label(cmd, "SkyPass");
+
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, skyPipeline);
     vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SkyPushConstants), &pc);
     vkCmdDraw(cmd, 3, 1, 0, 0);
@@ -176,6 +180,8 @@ void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPus
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &noiseSet, 0, nullptr);
     vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SkyPushConstants), &pc);
     vkCmdDraw(cmd, 3, 1, 0, 0);
+
+    vkutil::end_label(cmd);
 }
 
 } // namespace voxelvk

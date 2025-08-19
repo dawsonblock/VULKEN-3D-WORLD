@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <cstring>
 
+#include "vk/debug_utils.hpp"
+
 // Expect VMA headers available
 #include "vk_mem_alloc.h"
 
@@ -229,6 +231,8 @@ void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawSce
     VkViewport vp{0,0,(float)mapSize,(float)mapSize,0.0f,1.0f};
     VkRect2D sc{{0,0},{mapSize,mapSize}};
 
+    vkutil::begin_label(cmd, "CSMShadowPass");
+
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &uboSet, 0, nullptr);
     vkCmdSetViewport(cmd, 0, 1, &vp);
@@ -259,6 +263,8 @@ void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawSce
 
         vkCmdEndRendering(cmd);
     }
+
+    vkutil::end_label(cmd);
 }
 
 // --- simple file loader for SPV (engine likely has its own) ---
