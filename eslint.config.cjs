@@ -5,12 +5,15 @@ const globals = require('globals');
 
 
 
+
         main
-        main
+
 module.exports = [
   js.configs.recommended,
   {
     ignores: [
+
+
 
 
       'build/**',
@@ -66,6 +69,7 @@ module.exports = [
     ignores: [
 
     ignores: [
+        main
         main
       '**/build/**',
 
@@ -164,6 +168,13 @@ module.exports = [
     rules: {
       'no-unused-vars': 'warn',
 
+      semi: ['error', 'always']
+    }
+  }
+];
+
+
+
       semi: ['error', 'always'],
     },
   },
@@ -216,6 +227,7 @@ module.exports = [
         main
 ];
 
+        main
         main
         main
         main
