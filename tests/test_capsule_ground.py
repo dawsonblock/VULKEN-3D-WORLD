@@ -15,7 +15,7 @@ class Capsule:
 def resolve_capsule_world(
     cap: Capsule, world
 ) -> tuple[Capsule, np.ndarray, bool]:
-    """Push the capsule upward if it intersects the ground."""
+    """Return a new Capsule instance pushed upward if it intersects the ground, along with the offset and ground contact flag."""
     off = np.zeros(3, dtype=np.float32)
     bottom = cap.center[1] - (cap.half_height + cap.radius)
     ground = False
