@@ -20,10 +20,20 @@ except Exception:
 
 class ChunkStore:
     def __init__(self, root="world_save", codec="zstd", use_rle=True, threads=4):
-        self.root = Path(root); self.root.mkdir(parents=True, exist_ok=True)
-        self.codec = codec; self.use_rle = use_rle
-        self.pool = ThreadPoolExecutor(max_workers=max(1,threads))
+        self.root = Path(root)
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.codec = codec
+        self.use_rle = use_rle
+        self.pool = ThreadPoolExecutor(max_workers=max(1, threads))
         self.futures: Dict[str, Future] = {}
+        self.manifest_path = self.root / "manifest.json"
+        if self.manifest_path.exists():
+            try:
+                self.manifest = json.loads(self.manifest_path.read_text())
+            except Exception:
+                self.manifest = {}
+        else:
+            self.manifest = {}
 
     def _region_dir(self, cx, cz):
         d = self.root / f"r.{cx//32}.{cz//32}"; d.mkdir(exist_ok=True); return d
@@ -56,7 +66,8 @@ class ChunkStore:
                 header = np.array([vox.shape[0], vox.shape[1], vox.shape[2], 0, 0], dtype=np.int32).tobytes()
                 data = header + vox.tobytes()
             blob = self._compress(data)
-            self.chunk_path(cx, cz).write_bytes(blob)
+            path = self.chunk_path(cx, cz)
+            path.write_bytes(blob)
             idx = self._region_dir(cx, cz) / "index.json"
             table = {}
             if idx.exists():
@@ -66,6 +77,12 @@ class ChunkStore:
                     table = {}
             table[f"{cx},{cz}"] = {"saved": True}
             idx.write_text(json.dumps(table))
+            region = f"r.{cx//32}.{cz//32}"
+            entry = self.manifest.get(region, {"codec": self.codec, "chunks": {}})
+            entry["codec"] = self.codec
+            entry["chunks"][f"{cx},{cz}"] = {"offset": 0}
+            self.manifest[region] = entry
+            self.manifest_path.write_text(json.dumps(self.manifest))
         except Exception as exc:
             raise RuntimeError(f"failed to save chunk at {chunk.position}") from exc
 
@@ -107,3 +124,51 @@ class ChunkStore:
         self.pool.shutdown(wait=True)
         if errors:
             raise RuntimeError(f"{len(errors)} chunk saves failed") from errors[0]
+
+    def delete_chunk(self, cx: int, cz: int) -> None:
+        """Remove chunk data and update manifest/index."""
+        region = f"r.{cx//32}.{cz//32}"
+        reg_dir = self.root / region
+        path = reg_dir / f"c.{cx}.{cz}.bin"
+        if path.exists():
+            path.unlink()
+        entry = self.manifest.get(region)
+        if entry and "chunks" in entry:
+            entry["chunks"].pop(f"{cx},{cz}", None)
+            if not entry["chunks"]:
+                self.manifest.pop(region, None)
+                reg_dir = self.root / region
+                if reg_dir.exists():
+                    for f in reg_dir.glob("*"):
+                        f.unlink()
+                    reg_dir.rmdir()
+            self.manifest_path.write_text(json.dumps(self.manifest))
+        idx = reg_dir / "index.json"
+        if idx.exists():
+            try:
+                table = json.loads(idx.read_text())
+            except Exception:
+                table = {}
+            table.pop(f"{cx},{cz}", None)
+            if table:
+                idx.write_text(json.dumps(table))
+            else:
+                idx.unlink()
+
+    def compact(self) -> None:
+        """Delete stray chunk files not referenced in the manifest."""
+        for region, entry in list(self.manifest.items()):
+            reg_dir = self.root / region
+            live = set(entry.get("chunks", {}).keys())
+            if reg_dir.exists():
+                for chunk_file in reg_dir.glob("c.*.*.bin"):
+                    coords = chunk_file.stem[2:].split(".")
+                    key = f"{coords[0]},{coords[1]}"
+                    if key not in live:
+                        chunk_file.unlink()
+            if not live and reg_dir.exists():
+                for f in reg_dir.glob("*"):
+                    f.unlink()
+                reg_dir.rmdir()
+                self.manifest.pop(region)
+        self.manifest_path.write_text(json.dumps(self.manifest))
