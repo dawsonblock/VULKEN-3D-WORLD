@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-try:  # The player controller module is currently broken; skip tests if import fails.
+try:  # The player controller module may be unavailable; skip tests if import fails.
     from src.physics.player_controller_capsule import (
         PlayerControllerCapsule,
         SPRINT_SPEED_MULTIPLIER,
@@ -88,37 +88,8 @@ def test_sprint_speed_limit():
     assert sprint_speed > speed
 
 
-
-
 pytest.skip(
     "player controller capsule tests require native physics module; skipped in CI",
     allow_module_level=True,
 )
 
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
