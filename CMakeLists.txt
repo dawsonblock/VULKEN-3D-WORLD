@@ -170,6 +170,7 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
     src/world/svo_builder.cpp
     src/world/svo_io.cpp
+    src/world/worldgen_noise.cpp
     src/render/svo_traversal.cpp)
 endif()
 
@@ -178,4 +179,3 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
