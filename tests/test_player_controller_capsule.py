@@ -1,26 +1,19 @@
-import pytest
 import numpy as np
 
-try:  # The player controller module is currently broken; skip tests if import fails.
-    from src.physics.player_controller_capsule import (
-        PlayerControllerCapsule,
-        SPRINT_SPEED_MULTIPLIER,
-        get_horizontal_speed,
-    )
-except Exception:  # pragma: no cover - skip if module cannot be imported
-    pytest.skip(
-        "player_controller_capsule module unavailable",
-        allow_module_level=True,
-    )
+from src.physics.player_controller_capsule import (
+    PlayerControllerCapsule,
+    SPRINT_SPEED_MULTIPLIER,
+    get_horizontal_speed,
+)
 
 
 class FlatWorld:
-    def get_block_at_world_position(self, x, y, z):
+    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
         return 1 if y < 0 else 0
 
 
 class StepWorld:
-    def get_block_at_world_position(self, x, y, z):
+    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
         if y < 0:
             return 1
         if 0 <= y < 1 and 1 <= x < 2:
@@ -28,7 +21,7 @@ class StepWorld:
         return 0
 
 
-def test_jump_and_land():
+def test_jump_and_land() -> None:
     world = FlatWorld()
     player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
     forward = np.array([0.0, 0.0, 1.0], dtype=np.float32)
@@ -53,7 +46,7 @@ def test_jump_and_land():
     assert player.vel[1] == 0.0
 
 
-def test_step_climb():
+def test_step_climb() -> None:
     world = StepWorld()
     player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
     forward = np.array([1.0, 0.0, 0.0], dtype=np.float32)
@@ -67,7 +60,7 @@ def test_step_climb():
     assert player.on_ground
 
 
-def test_sprint_speed_limit():
+def test_sprint_speed_limit() -> None:
     world = FlatWorld()
     player = PlayerControllerCapsule(world, np.array([0.0, 1.2, 0.0], dtype=np.float32))
     forward = np.array([1.0, 0.0, 0.0], dtype=np.float32)
@@ -87,38 +80,3 @@ def test_sprint_speed_limit():
     assert sprint_speed <= player.max_speed * SPRINT_SPEED_MULTIPLIER + 1e-3
     assert sprint_speed > speed
 
-
-
-
-pytest.skip(
-    "player controller capsule tests require native physics module; skipped in CI",
-    allow_module_level=True,
-)
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
