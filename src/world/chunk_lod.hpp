@@ -24,6 +24,7 @@ class ChunkLODCache {
 public:
     // Request mesh for a chunk and LOD level. Starts async load if needed.
     std::shared_ptr<Mesh> Request(int chunkId, LODLevel level) {
+        std::lock_guard<std::mutex> lock(mutex_);
         auto& chunk = chunks_[chunkId];
         const size_t idx = static_cast<size_t>(level);
         if (!chunk.meshes[idx] && !chunk.loading[idx].valid()) {
