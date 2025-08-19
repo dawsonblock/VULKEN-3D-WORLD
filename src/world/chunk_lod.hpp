@@ -42,6 +42,7 @@ public:
 
     // Update loading tasks and rebuild render lists.
     void Update() {
+        std::lock_guard<std::mutex> lock(mutex_);
         for (auto& [id, chunk] : chunks_) {
             for (size_t i = 0; i < chunk.loading.size(); ++i) {
                 if (chunk.loading[i].valid() &&
