@@ -3,11 +3,15 @@ const globals = require('globals');
 
 
 
+
+
+        main
         main
 module.exports = [
   js.configs.recommended,
   {
     ignores: [
+
 
       'build/**',
       'node_modules/',
@@ -62,6 +66,7 @@ module.exports = [
     ignores: [
 
     ignores: [
+        main
       '**/build/**',
 
 
@@ -98,6 +103,10 @@ module.exports = [
       'tools/**',
       'tests/**',
       'apps/**',
+
+      'scripts/**',
+    ],
+
 
       'scripts/**'
     ],
@@ -138,6 +147,7 @@ module.exports = [
         main
         main
         main
+        main
   },
   {
 
@@ -149,10 +159,17 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 }
+      globals: { ...globals.node, ...globals.es2021 },
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      semi: ['error', 'always'],
+    },
+  },
+];
+
+
 
       'semi': ['error', 'always']
     }
@@ -199,5 +216,6 @@ module.exports = [
         main
 ];
 
+        main
         main
         main

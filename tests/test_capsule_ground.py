@@ -28,6 +28,10 @@ class CapsulePy:
 
 
 
+def resolve_capsule_world(cap: CapsulePy, world) -> tuple[CapsulePy, np.ndarray, bool]:
+    """Push the capsule upward if it intersects the ground. Returns a new CapsulePy instance."""
+
+
 def resolve_capsule_world(
     cap: Capsule, world
 ) -> tuple[Capsule, np.ndarray, bool]:
@@ -47,6 +51,7 @@ def resolve_capsule_world(
     return new_cap, off, ground
 
 def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
+        main
     off = np.zeros(3, dtype=np.float32)
     bottom = cap.center[1] - (cap.half_height + cap.radius)
     ground = False
@@ -125,8 +130,25 @@ def test_capsule_ground_collision() -> None:
     assert off_c.y == pytest.approx(1.0, abs=1e-4)
 
 
+
+class DummyWorld:
+    def get_block_at_world_position(self, x, y, z):
+        return 1 if int(y) < 0 else 0  # ground at y=0
+
+
+def test_capsule_ground_collision():
+    world = DummyWorld()
+    cap = Capsule(
+        center=np.array([0.0, 0.2, 0.0], dtype=np.float32),
+        half_height=0.9,
+        radius=0.3,
+    )
+    off, ground = resolve_capsule_world(cap, world)
+    assert ground and cap.center[1] >= 0.0, (off, cap.center, ground)
+
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__])
+        main
         main
 
 pytest.skip(
@@ -147,6 +169,10 @@ pytest.skip(
 
 
 
+
+
+
+        main
         main
         main
         main

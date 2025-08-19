@@ -1,8 +1,10 @@
 
 
 
+
 from __future__ import annotations
 
+        main
         main
 """Utilities to query whether a voxel block type is solid."""
 
@@ -14,6 +16,7 @@ from __future__ import annotations
 
 
 from typing import Dict
+
 
 
 class BlockType:
@@ -36,15 +39,28 @@ from typing import Dict
         main
 
 
+        main
 class BlockType:
     """Enumeration of built-in block types used in tests."""
 
-        main
     AIR = 0
 
 
 
 # Registry describing block properties. Games can populate this as needed.
+
+
+def is_solid(block_type: int) -> bool:
+    """Return ``True`` if ``block_type`` represents a solid block."""
+    try:
+        props = BLOCK_PROPERTIES.get(block_type, {})
+        return bool(props.get("solid", block_type != BlockType.AIR))
+    except Exception:
+        return block_type != BlockType.AIR
+
+
+__all__ = ["BlockType", "BLOCK_PROPERTIES", "is_solid"]
+
 
 
 # Simple registry mapping block type IDs to property dictionaries.
@@ -78,4 +94,5 @@ __all__ = ["BlockType", "BLOCK_PROPERTIES", "is_solid"]
         
         
         
+        main
         main

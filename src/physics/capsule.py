@@ -1,5 +1,6 @@
 
 
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -17,6 +18,7 @@ from numpy.typing import NDArray
  
 
         main
+        main
 """Minimal capsule representation for tests."""
 
 
@@ -25,6 +27,9 @@ from __future__ import annotations
 
 
 from __future__ import annotations
+
+
+
 
 from dataclasses import dataclass
 
@@ -71,7 +76,10 @@ class Capsule:
 
 
 import numpy as np
+        main
 from dataclasses import dataclass
+import numpy as np
+from numpy.typing import NDArray
 
 from dataclasses import dataclass
 import numpy as np
@@ -130,6 +138,7 @@ from numpy.typing import NDArray
 @dataclass
 class Capsule:
 
+
     """Simple vertical capsule defined by its center, half-height, and radius.
 
 
@@ -176,6 +185,7 @@ class Capsule:
         main
         main
         main
+        main
     """Simple vertical capsule defined by its center, half-height, and radius."""
         main
         main
@@ -183,10 +193,13 @@ class Capsule:
         main
         main
 
+
+
     center: NDArray[np.float32, Literal[3]]
 
 
 
+        main
         main
         main
         main
@@ -203,11 +216,15 @@ class Capsule:
 
         """Center of the top spherical cap."""
 
+
+        """Center of the top spherical cap."""
+
         """Center of the top spherical 
  
 
 
 
+         main
          main
          main
          main
@@ -232,6 +249,8 @@ __all__ = ["Capsule"]
 
 
 
+
+
  
 
 
@@ -244,6 +263,7 @@ __all__ = ["Capsule"]
 
 
 
+        main
         main
         main
         main

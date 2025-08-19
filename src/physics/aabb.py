@@ -1,7 +1,10 @@
+
+
  
 """Axis-aligned bounding box helpers for collision tests."""
  
 
+        main
 """Axis-aligned bounding box helpers for collision tests."""
 
 """Axis-aligned bounding box utilities."""
@@ -18,6 +21,9 @@ from numpy.typing import NDArray
 
 @dataclass
 class AABB:
+
+    """Simple axis-aligned bounding box."""
+
  
     """Simple axis-aligned bounding box."""
  
@@ -30,6 +36,7 @@ class AABB:
     half:
         Half extents of the box along each axis.
     """
+        main
         main
 
     center: NDArray[np.float32]
@@ -55,10 +62,13 @@ class AABB:
     def overlap_aabb(self, other: "AABB") -> bool:
 
         """Return ``True`` if this box intersects ``other``."""
+
+
  
 
         """Check if this box overlaps another."""
 
+        main
         main
         main
         return not (
