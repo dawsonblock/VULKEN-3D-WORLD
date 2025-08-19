@@ -1,0 +1,64 @@
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Tuple
+
+
+@dataclass
+class Material:
+    """Simple container for material properties."""
+
+    id: int
+    albedo: Tuple[float, float, float]
+    metallic: float
+    roughness: float
+
+
+class MaterialManager:
+    """Loads material definitions and exposes GPU friendly data."""
+
+    def __init__(self, config_path: Path | str | None = None) -> None:
+        root = Path(__file__).resolve().parents[2]
+        default = root / "assets" / "config" / "materials.json"
+        self._config_path = Path(config_path) if config_path else default
+        self._materials_by_name: Dict[str, Material] = {}
+        self._materials_by_id: List[Material] = []
+        self._load()
+
+    def _load(self) -> None:
+        data = json.loads(self._config_path.read_text())
+        mats = data.get("materials", {})
+        self._materials_by_name.clear()
+        self._materials_by_id.clear()
+        for idx, (name, props) in enumerate(mats.items()):
+            albedo = tuple(props.get("albedo", [1.0, 1.0, 1.0]))  # type: ignore[arg-type]
+            metallic = float(props.get("metallic", 0.0))
+            roughness = float(props.get("roughness", 1.0))
+            mat = Material(idx, albedo, metallic, roughness)
+            self._materials_by_name[name] = mat
+            self._materials_by_id.append(mat)
+
+    def get_material_id(self, name: str) -> int:
+        """Return the numeric ID for a material name."""
+
+        return self._materials_by_name[name].id
+
+    def get_material(self, material_id: int) -> Material:
+        """Fetch material properties by ID."""
+
+        return self._materials_by_id[material_id]
+
+    def materials(self) -> List[Material]:
+        """Return all loaded materials."""
+
+        return list(self._materials_by_id)
+
+    def create_gpu_resources(self) -> List[Tuple[float, float, float, float, float]]:
+        """Package materials into a flat list suitable for GPU upload."""
+
+        return [
+            (*m.albedo, m.metallic, m.roughness) for m in self._materials_by_id
+        ]
+
