@@ -82,7 +82,10 @@ void MeshingPass::dispatch(VkCommandBuffer cmd,
     VkDescriptorSetAllocateInfo dsai{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     dsai.descriptorPool = m_pool; dsai.descriptorSetCount = 1; dsai.pSetLayouts = &m_dset_layout;
     VkDescriptorSet ds;
-    if (vkAllocateDescriptorSets(m_device, &dsai, &ds) != VK_SUCCESS) return;
+    if (vkAllocateDescriptorSets(m_device, &dsai, &ds) != VK_SUCCESS) {
+        std::fprintf(stderr, "[meshing_pass] Failed to allocate descriptor set in dispatch\n");
+        return;
+    }
 
     auto sb = [](VkBuffer buf) { VkDescriptorBufferInfo bi{}; bi.buffer = buf; bi.range = VK_WHOLE_SIZE; return bi; };
     VkDescriptorBufferInfo infos[4] = { sb(voxels), sb(vertexBuffer), sb(indexBuffer), sb(counterBuffer) };
