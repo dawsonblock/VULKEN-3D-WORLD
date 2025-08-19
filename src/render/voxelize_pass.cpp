@@ -183,7 +183,7 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
 
     for(uint32_t z=0; z<dim; ++z){
         Push pc{};
-        pc.mvp = glm::mat4(1.0f);
+        pc.mvp = mvp;
         pc.slice = (int)z;
         vkCmdPushConstants(cmd, pipelineLayout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
