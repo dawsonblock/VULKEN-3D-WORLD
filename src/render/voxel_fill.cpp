@@ -1,8 +1,11 @@
 #include "voxel_fill.hpp"
 #include <vector>
 #include <cstdio>
+#include "../world/material_manager.hpp"
 
 namespace voxelvk {
+
+static MaterialManager g_materials;
 
 static std::vector<uint32_t> load_spirv_file(const char* path) {
     std::vector<uint32_t> data;
@@ -26,6 +29,7 @@ static std::vector<uint32_t> load_spirv_file(const char* path) {
 
 bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     m_device = device;
+    g_materials.load();
     VkDescriptorSetLayoutBinding b[2] = {};
     for (int i = 0; i < 2; ++i) {
         b[i].binding = i; b[i].descriptorCount = 1;
@@ -84,6 +88,8 @@ void VoxelFill::dispatch(VkCommandBuffer cmd,
                          VkImageView surface_r8ui,
                          VkImageView out_r8ui,
                          uint32_t SX, uint32_t SY) {
+    auto mat = g_materials.material_by_id(0);
+    (void)mat; // placeholder for binding PBR constants
     VkDescriptorSetAllocateInfo dsai{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
     dsai.descriptorPool = m_pool; dsai.descriptorSetCount = 1; dsai.pSetLayouts = &m_dset_layout;
     VkDescriptorSet ds;
