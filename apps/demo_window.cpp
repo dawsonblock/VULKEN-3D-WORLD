@@ -3,6 +3,10 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include "world/chunk_lod.hpp"
+#include "world/lod_component.hpp"
+#include <glm/vec3.hpp>
+#include <glm/geometric.hpp>
 
 int main() {
     if (!glfwInit()) return 1;
@@ -115,6 +119,12 @@ int main() {
         vkCreateFramebuffer(device,&fb,nullptr,&fbs[i]);
     }
 
+    voxelvk::LODComponent lod("world_lod.cfg");
+    voxelvk::ChunkLODCache cache;
+    glm::vec3 cameraPos(0.0f);
+    glm::vec3 chunkPos(0.0f);
+    int chunkId = 0;
+
     VkCommandPoolCreateInfo cp{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO}; cp.queueFamilyIndex = graphicsQueue;
     VkCommandPool pool; vkCreateCommandPool(device,&cp,nullptr,&pool);
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
@@ -137,6 +147,12 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
+        float dist = glm::length(cameraPos - chunkPos);
+        voxelvk::LODLevel level = lod.Select(dist);
+        auto mesh = cache.Request(chunkId, level);
+        cache.Update();
+        (void)mesh;
+        (void)cache.RenderList(level);
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
