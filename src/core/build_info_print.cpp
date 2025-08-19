@@ -1,66 +1,50 @@
 
 #include "build_info_print.hpp"
 #include "build_info.hpp"
-#include <cstdio>
 #include <mutex>
+#include <memory>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 namespace voxelvk {
 static std::once_flag g_once;
-static FILE* g_log = nullptr;
+static std::shared_ptr<spdlog::logger> g_logger;
 
 void InitBuildInfoLogging(){
-    if(!g_log){
-        g_log = std::fopen("debug_vk_runtime.log", "a");
-        if(g_log){
-            std::setvbuf(g_log, nullptr, _IOLBF, 0); // line-buffered
-        }
+    if(!g_logger){
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("debug_vk_runtime.log", true);
+        g_logger = std::make_shared<spdlog::logger>("build", spdlog::sinks_init_list{console_sink, file_sink});
+        g_logger->set_pattern("%v");
+        g_logger->flush_on(spdlog::level::info);
+        spdlog::set_default_logger(g_logger);
     }
 }
 
-void ShutdownBuildInfoLogging(){
-    if(g_log){ std::fclose(g_log); g_log=nullptr; }
-}
+void ShutdownBuildInfoLogging(){ g_logger.reset(); }
 
 void LogLine(const char* line){
-    if(!g_log) InitBuildInfoLogging();
-    if(g_log){ std::fputs(line, g_log); std::fputc('\n', g_log); }
-    std::fputs(line, stdout); std::fputc('\n', stdout);
+    if(!g_logger) InitBuildInfoLogging();
+    g_logger->info(line);
 }
 
 static void _print(){
-    std::printf("[BUILD INFO]\n");
-    std::printf("Branch Sources: %s\n", VOXELVK_BUILD_BRANCH_SOURCES);
-    std::printf("Build Time: %s\n", VOXELVK_BUILD_TIME);
-    std::printf("Build Hash: %s\n", VOXELVK_BUILD_HASH);
-    std::printf("Vulkan SDK: %s\n", VOXELVK_VULKAN_SDK_VERSION);
+    spdlog::info("[BUILD INFO]");
+    spdlog::info("Branch Sources: {}", VOXELVK_BUILD_BRANCH_SOURCES);
+    spdlog::info("Build Time: {}", VOXELVK_BUILD_TIME);
+    spdlog::info("Build Hash: {}", VOXELVK_BUILD_HASH);
+    spdlog::info("Vulkan SDK: {}", VOXELVK_VULKAN_SDK_VERSION);
 #if VOXELVK_GPU_COMPAT_LAYER
-    std::printf("GPU Compatibility Layer: ENABLED\n");
+    spdlog::info("GPU Compatibility Layer: ENABLED");
 #else
-    std::printf("GPU Compatibility Layer: DISABLED\n");
+    spdlog::info("GPU Compatibility Layer: DISABLED");
 #endif
 #if VOXELVK_RUNTIME_DEBUG_TOGGLE
-    std::printf("Runtime Vulkan Debug Toggle: ENABLED (Hotkey: F9)\n");
+    spdlog::info("Runtime Vulkan Debug Toggle: ENABLED (Hotkey: F9)");
 #else
-    std::printf("Runtime Vulkan Debug Toggle: DISABLED\n");
+    spdlog::info("Runtime Vulkan Debug Toggle: DISABLED");
 #endif
-    if(g_log){
-        std::fprintf(g_log, "[BUILD INFO]\n");
-        std::fprintf(g_log, "Branch Sources: %s\n", VOXELVK_BUILD_BRANCH_SOURCES);
-        std::fprintf(g_log, "Build Time: %s\n", VOXELVK_BUILD_TIME);
-        std::fprintf(g_log, "Build Hash: %s\n", VOXELVK_BUILD_HASH);
-        std::fprintf(g_log, "Vulkan SDK: %s\n", VOXELVK_VULKAN_SDK_VERSION);
-#if VOXELVK_GPU_COMPAT_LAYER
-        std::fprintf(g_log, "GPU Compatibility Layer: ENABLED\n");
-#else
-        std::fprintf(g_log, "GPU Compatibility Layer: DISABLED\n");
-#endif
-#if VOXELVK_RUNTIME_DEBUG_TOGGLE
-        std::fprintf(g_log, "Runtime Vulkan Debug Toggle: ENABLED (Hotkey: F9)\n");
-#else
-        std::fprintf(g_log, "Runtime Vulkan Debug Toggle: DISABLED\n");
-#endif
-        std::fflush(g_log);
-    }
 }
 
 void PrintBuildInfoOnce(){ std::call_once(g_once, [](){ InitBuildInfoLogging(); _print(); }); }

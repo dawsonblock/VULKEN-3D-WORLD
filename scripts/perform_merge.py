@@ -7,10 +7,17 @@ artifacts to keep the tree clean.
 """
 from __future__ import annotations
 import argparse
+import logging
 import os
 import pathlib
 import shutil
 import sys
+
+root = pathlib.Path(__file__).resolve().parents[1]
+sys.path.append(str(root))
+from src.utils.logging_config import configure_logging
+
+logger = logging.getLogger(__name__)
 
 def copytree(src: pathlib.Path, dst: pathlib.Path, force: bool) -> None:
     if dst.exists() and force:
@@ -22,20 +29,24 @@ def main() -> int:
     parser.add_argument('--force', action='store_true', help='overwrite existing files')
     args = parser.parse_args()
 
+    configure_logging()
+
     root = pathlib.Path(__file__).resolve().parents[1]
     ext = root / 'external' / 'VULKEN-3D-WORLD'
     if not (ext / 'CMakeLists.txt').exists():
-        print('Missing external/VULKEN-3D-WORLD. Clone with:\n  gh repo clone user/VULKEN-3D-WORLD external/VULKEN-3D-WORLD', file=sys.stderr)
+        logger.error(
+            'Missing external/VULKEN-3D-WORLD. Clone with:\n  gh repo clone user/VULKEN-3D-WORLD external/VULKEN-3D-WORLD'
+        )
         return 1
 
     mirror = root / 'VULKEN-3D-WORLD.mirror'
     copytree(ext, mirror, args.force)
-    print('Merged', ext, '->', mirror)
+    logger.info('Merged %s -> %s', ext, mirror)
     return 0
 
 if __name__ == '__main__':
     try:
         raise SystemExit(main())
-    except Exception as exc:  # pragma: no cover
-        print(f'FATAL: {exc}', file=sys.stderr)
+    except Exception:  # pragma: no cover
+        logger.exception('FATAL')
         raise SystemExit(1)
