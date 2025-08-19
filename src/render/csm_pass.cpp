@@ -1,6 +1,8 @@
 
 #include "csm_pass.hpp"
 #include "csm_descriptor.hpp"
+#include "frame_graph.hpp"
+#include "global_layout.hpp"
 #include <stdexcept>
 #include <cstring>
 
@@ -180,10 +182,9 @@ bool CSMShadowPass::createPipeline(VkPhysicalDevice /*phys*/){
     VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; pcr.offset = 0; pcr.size = sizeof(int);
 
     // Pipeline layout
-    VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-    lci.setLayoutCount = 1; lci.pSetLayouts = &uboSetLayout;
-    lci.pushConstantRangeCount = 1; lci.pPushConstantRanges = &pcr;
-    if(vkCreatePipelineLayout(device, &lci, nullptr, &pipelineLayout) != VK_SUCCESS) return false;
+    VkDescriptorSetLayout sets[] = { uboSetLayout };
+    pipelineLayout = createGlobalPipelineLayout(device, sets, 1, &pcr, 1);
+    if(pipelineLayout == VK_NULL_HANDLE) return false;
 
     VkDynamicState dynStatesArr[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_DEPTH_BIAS };
     VkPipelineDynamicStateCreateInfo dyn{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
@@ -259,6 +260,13 @@ void CSMShadowPass::record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawSce
 
         vkCmdEndRendering(cmd);
     }
+}
+
+void CSMShadowPass::registerToGraph(FrameGraph& graph){
+    FrameGraphPass pass{};
+    pass.name = "csm";
+    pass.writes = {"csmDepth"};
+    graph.addPass(pass);
 }
 
 // --- simple file loader for SPV (engine likely has its own) ---

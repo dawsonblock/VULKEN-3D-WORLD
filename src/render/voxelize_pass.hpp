@@ -4,6 +4,9 @@
 #include <functional>
 #include <cstdint>
 
+#include "frame_graph.hpp"
+#include "global_layout.hpp"
+
 struct VmaAllocator_T;
 using VmaAllocator = VmaAllocator_T*;
 struct VmaAllocation_T;
@@ -36,6 +39,9 @@ struct VoxelizePass {
     void record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScene);
 
     VkImageView getVoxelView() const { return voxelView; }
+
+    // Register this pass with a frame graph instance.
+    void registerToGraph(FrameGraph& graph);
 
 private:
     bool createImage(VkPhysicalDevice phys);
