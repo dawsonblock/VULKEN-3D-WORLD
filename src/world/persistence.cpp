@@ -5,6 +5,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <cstring>
 
 #if __has_include(<zstd.h>)
 #define VOXELVK_HAS_ZSTD 1
@@ -189,14 +190,15 @@ std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
     std::vector<std::uint8_t> blob((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     ifs.close();
     auto raw = _decompress(blob);
-    if (raw.size() < 20) return std::nullopt;
-    const std::int32_t *header = reinterpret_cast<const std::int32_t *>(raw.data());
+    std::int32_t header[5];
+    if (raw.size() < sizeof(header)) return std::nullopt;
+    std::memcpy(header, raw.data(), sizeof(header));
     int H = header[0];
     int Y = header[1];
     int S = header[2];
     int nvals = header[3];
     int ncnt = header[4];
-    const std::uint8_t *ptr = raw.data() + 20;
+    const std::uint8_t *ptr = raw.data() + sizeof(header);
     std::vector<std::uint8_t> vox;
     if (nvals > 0) {
         std::vector<std::uint8_t> vals(ptr, ptr + nvals);
