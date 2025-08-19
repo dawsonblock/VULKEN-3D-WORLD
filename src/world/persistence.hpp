@@ -37,9 +37,12 @@ public:
     void save_async(const Chunk &chunk);
     std::optional<ChunkData> load_chunk(int cx, int cz);
     void wait_all();
+    void compact_region(int rx, int rz);
 
 private:
     std::filesystem::path _region_dir(int cx, int cz) const;
+    std::filesystem::path _manifest_path(int cx, int cz) const;
+    void _update_manifest(int cx, int cz, std::size_t size);
     std::vector<std::uint8_t> _compress(const std::vector<std::uint8_t> &data) const;
     std::vector<std::uint8_t> _decompress(const std::vector<std::uint8_t> &data) const;
 

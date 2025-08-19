@@ -28,6 +28,7 @@ class ChunkStore:
     def _region_dir(self, cx, cz):
         d = self.root / f"r.{cx//32}.{cz//32}"; d.mkdir(exist_ok=True); return d
     def chunk_path(self, cx, cz): return self._region_dir(cx, cz) / f"c.{cx}.{cz}.bin"
+    def _manifest_path(self, cx, cz): return self._region_dir(cx, cz) / "region_manifest.json"
 
     def _compress(self, b: bytes) -> bytes:
         if self.codec=="zstd" and has_zstd:
@@ -57,15 +58,15 @@ class ChunkStore:
                 data = header + vox.tobytes()
             blob = self._compress(data)
             self.chunk_path(cx, cz).write_bytes(blob)
-            idx = self._region_dir(cx, cz) / "index.json"
+            manifest = self._manifest_path(cx, cz)
             table = {}
-            if idx.exists():
+            if manifest.exists():
                 try:
-                    table = json.loads(idx.read_text())
+                    table = json.loads(manifest.read_text())
                 except Exception:
                     table = {}
-            table[f"{cx},{cz}"] = {"saved": True}
-            idx.write_text(json.dumps(table))
+            table[f"{cx},{cz}"] = {"size": len(blob), "codec": self.codec, "rle": self.use_rle}
+            manifest.write_text(json.dumps(table))
         except Exception as exc:
             raise RuntimeError(f"failed to save chunk at {chunk.position}") from exc
 
@@ -107,3 +108,21 @@ class ChunkStore:
         self.pool.shutdown(wait=True)
         if errors:
             raise RuntimeError(f"{len(errors)} chunk saves failed") from errors[0]
+
+    def compact_region(self, rx: int, rz: int) -> None:
+        d = self.root / f"r.{rx}.{rz}"
+        manifest = d / "region_manifest.json"
+        if not manifest.exists():
+            return
+        try:
+            table = json.loads(manifest.read_text())
+        except Exception:
+            return
+        changed = False
+        for key in list(table.keys()):
+            cx, cz = map(int, key.split(","))
+            if not (d / f"c.{cx}.{cz}.bin").exists():
+                del table[key]
+                changed = True
+        if changed:
+            manifest.write_text(json.dumps(table))
