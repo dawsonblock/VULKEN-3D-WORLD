@@ -69,6 +69,42 @@ else()
 endif()
 find_package(Threads REQUIRED)
 
+# ---- Compression libraries ----
+include(FetchContent)
+
+set(VOXELVK_HAS_ZSTD 0)
+find_package(ZSTD QUIET)
+if(ZSTD_FOUND)
+  set(VOXELVK_HAS_ZSTD 1)
+  set(ZSTD_TARGET ZSTD::ZSTD)
+else()
+  FetchContent_Declare(zstd URL https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz)
+  FetchContent_MakeAvailable(zstd)
+  set(VOXELVK_HAS_ZSTD 1)
+  set(ZSTD_TARGET zstd)
+endif()
+
+set(VOXELVK_HAS_LZ4 0)
+find_package(LZ4 QUIET)
+if(LZ4_FOUND)
+  set(VOXELVK_HAS_LZ4 1)
+  set(LZ4_TARGET LZ4::lz4)
+else()
+  FetchContent_Declare(lz4 URL https://github.com/lz4/lz4/archive/refs/tags/v1.9.4.tar.gz)
+  FetchContent_MakeAvailable(lz4)
+  set(VOXELVK_HAS_LZ4 1)
+  set(LZ4_TARGET lz4)
+endif()
+
+add_compile_definitions(
+  VOXELVK_HAS_ZSTD=${VOXELVK_HAS_ZSTD}
+  VOXELVK_HAS_LZ4=${VOXELVK_HAS_LZ4}
+)
+
+if(TARGET VoxelVK_Elite_ALL)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE ${ZSTD_TARGET} ${LZ4_TARGET})
+endif()
+
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
 if(ENABLE_VULKAN)
