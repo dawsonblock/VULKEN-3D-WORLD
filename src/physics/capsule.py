@@ -1,3 +1,10 @@
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import numpy as np
+from numpy.typing import NDArray
+
  
 
 from __future__ import annotations
@@ -45,10 +52,20 @@ from numpy.typing import NDArray
         main
         main
 """Minimal capsule representation for tests."""
+        main
 
 
 @dataclass
 class Capsule:
+    """Vertical capsule defined by its center, half height and radius.
+
+
+    The capsule is aligned along the Y axis.  ``center`` represents the middle
+    of the cylindrical part, ``half_height`` is the half length of this
+    cylinder and ``radius`` is the radius of the spherical caps and the
+    cylinder.
+    """
+
 
 
 import numpy as np
@@ -134,7 +151,7 @@ class Capsule:
   
     """Vertical capsule represented by a center point and radius.
          main
-        main
+         main
 
     Parameters
     ----------
@@ -165,14 +182,14 @@ class Capsule:
         main
         main
         main
+        main
     center: NDArray[np.float32]
     half_height: float
     radius: float
 
     @property
     def seg_a(self) -> NDArray[np.float32]:
-        """Center of the top spherical cap."""
-
+        """Center of the top spherical 
  
 
 
@@ -182,25 +199,22 @@ class Capsule:
          main
         return self.center + np.array([0.0, self.half_height, 0.0], dtype=np.float32)
 
+         main
         return self.center + np.array(
             [0.0, self.half_height, 0.0], dtype=np.float32
         )
-         main
 
     @property
     def seg_b(self) -> NDArray[np.float32]:
         """Center of the bottom spherical cap."""
-
-
-        return self.center - np.array([0.0, self.half_height, 0.0], dtype=np.float32)
-
         return self.center - np.array(
             [0.0, self.half_height, 0.0], dtype=np.float32
         )
-        main
 
 
 __all__ = ["Capsule"]
+
+
 
  
 
@@ -214,6 +228,7 @@ __all__ = ["Capsule"]
 
 
 
+        main
         main
         main
         main
