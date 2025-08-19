@@ -163,7 +163,8 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkGraphicsPipelineCreateInfo pci{VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
     pci.pNext = &rinfo;
-    pci.stageCount = 2; pci.pStages = stages;
+    pci.stageCount = 2;
+    pci.pStages = stages;
     pci.pVertexInputState = &vi;
     pci.pInputAssemblyState = &ia;
     pci.pRasterizationState = &rs;
