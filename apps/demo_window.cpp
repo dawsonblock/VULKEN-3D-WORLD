@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include "vk/swapchain.hpp"
 
 int main() {
     if (!glfwInit()) return 1;
@@ -68,38 +69,10 @@ int main() {
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
     VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
 
-    // Swapchain
-    VkSurfaceCapabilitiesKHR caps; vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu,surface,&caps);
-    uint32_t fmtCount=0; vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,nullptr);
-    std::vector<VkSurfaceFormatKHR> formats(fmtCount); vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,formats.data());
-    VkSurfaceFormatKHR fmt = formats[0];
-    VkSwapchainCreateInfoKHR sci{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
-    sci.surface = surface;
-    sci.minImageCount = caps.minImageCount+1;
-    if(caps.maxImageCount>0 && sci.minImageCount>caps.maxImageCount) sci.minImageCount=caps.maxImageCount;
-    sci.imageFormat = fmt.format; sci.imageColorSpace = fmt.colorSpace;
-    sci.imageExtent = caps.currentExtent;
-    sci.imageArrayLayers = 1;
-    sci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    sci.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    sci.preTransform = caps.currentTransform;
-    sci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    sci.presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    sci.clipped = VK_TRUE;
-    VkSwapchainKHR swapchain;
-    if(vkCreateSwapchainKHR(device,&sci,nullptr,&swapchain)!=VK_SUCCESS){ std::cerr<<"swapchain failed\n"; return 7; }
-    uint32_t imgCount=0; vkGetSwapchainImagesKHR(device,swapchain,&imgCount,nullptr);
-    std::vector<VkImage> images(imgCount); vkGetSwapchainImagesKHR(device,swapchain,&imgCount,images.data());
+    // Swapchain helper
+    vk::Swapchain swapchain(gpu, device, window, surface);
 
-    std::vector<VkImageView> views(imgCount);
-    for(uint32_t i=0;i<imgCount;i++){
-        VkImageViewCreateInfo iv{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
-        iv.image = images[i]; iv.viewType = VK_IMAGE_VIEW_TYPE_2D; iv.format = fmt.format;
-        iv.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; iv.subresourceRange.levelCount=1; iv.subresourceRange.layerCount=1;
-        vkCreateImageView(device,&iv,nullptr,&views[i]);
-    }
-
-    VkAttachmentDescription color{}; color.format = fmt.format; color.samples = VK_SAMPLE_COUNT_1_BIT;
+    VkAttachmentDescription color{}; color.format = swapchain.getFormat(); color.samples = VK_SAMPLE_COUNT_1_BIT;
     color.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     VkAttachmentReference ref{0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
@@ -107,28 +80,42 @@ int main() {
     VkRenderPassCreateInfo rpci{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO}; rpci.attachmentCount=1; rpci.pAttachments=&color; rpci.subpassCount=1; rpci.pSubpasses=&sub;
     VkRenderPass rp; vkCreateRenderPass(device,&rpci,nullptr,&rp);
 
-    std::vector<VkFramebuffer> fbs(imgCount);
-    for(uint32_t i=0;i<imgCount;i++){
-        VkFramebufferCreateInfo fb{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
-        fb.renderPass = rp; fb.attachmentCount=1; fb.pAttachments=&views[i];
-        fb.width = sci.imageExtent.width; fb.height = sci.imageExtent.height; fb.layers = 1;
-        vkCreateFramebuffer(device,&fb,nullptr,&fbs[i]);
-    }
-
+    std::vector<VkFramebuffer> fbs;
     VkCommandPoolCreateInfo cp{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO}; cp.queueFamilyIndex = graphicsQueue;
     VkCommandPool pool; vkCreateCommandPool(device,&cp,nullptr,&pool);
-    VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
-    std::vector<VkCommandBuffer> cmds(imgCount); vkAllocateCommandBuffers(device,&cbai,cmds.data());
-    for(uint32_t i=0;i<imgCount;i++){
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
-        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
-        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-        rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
-        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
-        vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdEndRenderPass(cmds[i]);
-        vkEndCommandBuffer(cmds[i]);
-    }
+    std::vector<VkCommandBuffer> cmds;
+
+    auto rebuildFrameResources = [&](){
+        for(auto fb : fbs) vkDestroyFramebuffer(device, fb, nullptr);
+        if(!cmds.empty()) vkFreeCommandBuffers(device, pool, (uint32_t)cmds.size(), cmds.data());
+
+        uint32_t count = (uint32_t)swapchain.imageCount();
+        fbs.resize(count);
+        cmds.resize(count);
+
+        for(uint32_t i=0;i<count;i++){
+            VkFramebufferCreateInfo fb{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
+            fb.renderPass = rp; fb.attachmentCount=1; VkImageView view = swapchain.getImageViews()[i]; fb.pAttachments=&view;
+            fb.width = swapchain.getExtent().width; fb.height = swapchain.getExtent().height; fb.layers = 1;
+            vkCreateFramebuffer(device,&fb,nullptr,&fbs[i]);
+        }
+
+        VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+        cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=count;
+        vkAllocateCommandBuffers(device,&cbai,cmds.data());
+        for(uint32_t i=0;i<count;i++){
+            VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
+            VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
+            VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+            rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = swapchain.getExtent();
+            rbi.clearValueCount = 1; rbi.pClearValues = &clear;
+            vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdEndRenderPass(cmds[i]);
+            vkEndCommandBuffer(cmds[i]);
+        }
+    };
+
+    rebuildFrameResources();
 
     VkSemaphoreCreateInfo sci2{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore imgAvailable, renderFinished;
@@ -137,28 +124,33 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
-        uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
+        uint32_t imgIndex; VkResult res = swapchain.acquireNextImage(imgAvailable,&imgIndex);
+        if(res == VK_ERROR_OUT_OF_DATE_KHR){ swapchain.recreate(); rebuildFrameResources(); continue; }
+        if(res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR){ std::cerr << "acquire failed\n"; break; }
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.waitSemaphoreCount=1; si.pWaitSemaphores=&imgAvailable; si.pWaitDstStageMask=&waitStage;
         si.commandBufferCount=1; si.pCommandBuffers=&cmds[imgIndex];
         si.signalSemaphoreCount=1; si.pSignalSemaphores=&renderFinished;
         vkQueueSubmit(queue,1,&si,VK_NULL_HANDLE);
-        VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
-        pi.waitSemaphoreCount=1; pi.pWaitSemaphores=&renderFinished;
-        pi.swapchainCount=1; pi.pSwapchains=&swapchain; pi.pImageIndices=&imgIndex;
-        vkQueuePresentKHR(queue,&pi);
+        VkResult pres = swapchain.present(queue, renderFinished, imgIndex);
+        if(pres == VK_ERROR_OUT_OF_DATE_KHR || pres == VK_SUBOPTIMAL_KHR || swapchain.framebufferResized){
+            swapchain.framebufferResized = false;
+            swapchain.recreate();
+            rebuildFrameResources();
+        } else if(pres != VK_SUCCESS){
+            std::cerr << "present failed\n"; break;
+        }
         vkQueueWaitIdle(queue);
     }
 
     vkDeviceWaitIdle(device);
     vkDestroySemaphore(device,renderFinished,nullptr);
     vkDestroySemaphore(device,imgAvailable,nullptr);
-    vkDestroyCommandPool(device,pool,nullptr);
+    if(!cmds.empty()) vkFreeCommandBuffers(device,pool,(uint32_t)cmds.size(),cmds.data());
     for(auto fb:fbs) vkDestroyFramebuffer(device,fb,nullptr);
+    vkDestroyCommandPool(device,pool,nullptr);
     vkDestroyRenderPass(device,rp,nullptr);
-    for(auto v:views) vkDestroyImageView(device,v,nullptr);
-    vkDestroySwapchainKHR(device,swapchain,nullptr);
     vkDestroyDevice(device,nullptr);
     vkDestroySurfaceKHR(instance,surface,nullptr);
     vkDestroyInstance(instance,nullptr);
