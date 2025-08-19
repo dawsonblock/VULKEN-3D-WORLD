@@ -5,7 +5,7 @@ module.exports = [
   js.configs.recommended,
   {
     ignores: [
-      '**/build/**',
+      'build/**',
       'node_modules/',
       'build_ci_sanity/',
       'cmake/',
