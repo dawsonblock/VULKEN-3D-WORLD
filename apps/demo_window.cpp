@@ -4,11 +4,18 @@
 #include <iostream>
 #include <cstring>
 
+#include "render/resource_registry.hpp"
+#include "render/frame_allocator.hpp"
+#include "render/upload_helpers.hpp"
+
 int main() {
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window = glfwCreateWindow(800, 600, "demo_window", nullptr, nullptr);
     if (!window) { glfwTerminate(); return 1; }
+
+    voxelvk::ResourceRegistry& registry = voxelvk::ResourceRegistry::instance();
+    voxelvk::FrameAllocator frameAlloc;
 
     // Instance
     std::vector<const char*> layers;
@@ -68,6 +75,12 @@ int main() {
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
     VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
 
+    VkBuffer stagingBuf = VK_NULL_HANDLE;
+    VkDeviceMemory stagingMem = VK_NULL_HANDLE;
+    if (voxelvk::createStagingBuffer(gpu, device, 4096, &stagingBuf, &stagingMem)) {
+        registry.acquire(stagingBuf);
+    }
+
     // Swapchain
     VkSurfaceCapabilitiesKHR caps; vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu,surface,&caps);
     uint32_t fmtCount=0; vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,nullptr);
@@ -90,6 +103,8 @@ int main() {
     if(vkCreateSwapchainKHR(device,&sci,nullptr,&swapchain)!=VK_SUCCESS){ std::cerr<<"swapchain failed\n"; return 7; }
     uint32_t imgCount=0; vkGetSwapchainImagesKHR(device,swapchain,&imgCount,nullptr);
     std::vector<VkImage> images(imgCount); vkGetSwapchainImagesKHR(device,swapchain,&imgCount,images.data());
+    registry.acquire(swapchain);
+    for (auto img : images) registry.acquire(img);
 
     std::vector<VkImageView> views(imgCount);
     for(uint32_t i=0;i<imgCount;i++){
@@ -97,6 +112,7 @@ int main() {
         iv.image = images[i]; iv.viewType = VK_IMAGE_VIEW_TYPE_2D; iv.format = fmt.format;
         iv.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; iv.subresourceRange.levelCount=1; iv.subresourceRange.layerCount=1;
         vkCreateImageView(device,&iv,nullptr,&views[i]);
+        registry.acquire(views[i]);
     }
 
     VkAttachmentDescription color{}; color.format = fmt.format; color.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -130,12 +146,69 @@ int main() {
         vkEndCommandBuffer(cmds[i]);
     }
 
+    auto cleanupSwapchain = [&]() {
+        for (auto fb : fbs) vkDestroyFramebuffer(device, fb, nullptr);
+        fbs.clear();
+        vkDestroyRenderPass(device, rp, nullptr);
+        for (auto v : views) {
+            registry.release(v);
+            vkDestroyImageView(device, v, nullptr);
+        }
+        views.clear();
+        for (auto img : images) registry.release(img);
+        images.clear();
+        registry.release(swapchain);
+        vkDestroySwapchainKHR(device, swapchain, nullptr);
+    };
+
+    auto recreateSwapchain = [&](VkExtent2D newExtent) {
+        cleanupSwapchain();
+        sci.imageExtent = newExtent;
+        if (vkCreateSwapchainKHR(device, &sci, nullptr, &swapchain) != VK_SUCCESS) {
+            std::cerr << "swapchain failed\n";
+            return false;
+        }
+        registry.acquire(swapchain);
+        vkGetSwapchainImagesKHR(device, swapchain, &imgCount, nullptr);
+        images.resize(imgCount);
+        vkGetSwapchainImagesKHR(device, swapchain, &imgCount, images.data());
+        for (auto img : images) registry.acquire(img);
+        views.resize(imgCount);
+        for (uint32_t i = 0; i < imgCount; ++i) {
+            VkImageViewCreateInfo iv{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+            iv.image = images[i]; iv.viewType = VK_IMAGE_VIEW_TYPE_2D; iv.format = fmt.format;
+            iv.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; iv.subresourceRange.levelCount = 1; iv.subresourceRange.layerCount = 1;
+            vkCreateImageView(device, &iv, nullptr, &views[i]);
+            registry.acquire(views[i]);
+        }
+        VkRenderPassCreateInfo rpci2 = rpci;
+        vkCreateRenderPass(device, &rpci2, nullptr, &rp);
+        fbs.resize(imgCount);
+        for (uint32_t i = 0; i < imgCount; ++i) {
+            VkFramebufferCreateInfo fb{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
+            fb.renderPass = rp; fb.attachmentCount = 1; fb.pAttachments = &views[i];
+            fb.width = sci.imageExtent.width; fb.height = sci.imageExtent.height; fb.layers = 1;
+            vkCreateFramebuffer(device, &fb, nullptr, &fbs[i]);
+        }
+        cbai.commandBufferCount = imgCount;
+        cmds.resize(imgCount);
+        vkAllocateCommandBuffers(device, &cbai, cmds.data());
+        return true;
+    };
+
     VkSemaphoreCreateInfo sci2{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore imgAvailable, renderFinished;
     vkCreateSemaphore(device,&sci2,nullptr,&imgAvailable);
     vkCreateSemaphore(device,&sci2,nullptr,&renderFinished);
 
     while(!glfwWindowShouldClose(window)){
+        frameAlloc.beginFrame();
+        int w, h; glfwGetFramebufferSize(window, &w, &h);
+        VkExtent2D curExtent{ static_cast<uint32_t>(w), static_cast<uint32_t>(h) };
+        if (curExtent.width != sci.imageExtent.width || curExtent.height != sci.imageExtent.height) {
+            recreateSwapchain(curExtent);
+        }
+
         glfwPollEvents();
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -154,11 +227,15 @@ int main() {
     vkDeviceWaitIdle(device);
     vkDestroySemaphore(device,renderFinished,nullptr);
     vkDestroySemaphore(device,imgAvailable,nullptr);
+    cleanupSwapchain();
     vkDestroyCommandPool(device,pool,nullptr);
-    for(auto fb:fbs) vkDestroyFramebuffer(device,fb,nullptr);
-    vkDestroyRenderPass(device,rp,nullptr);
-    for(auto v:views) vkDestroyImageView(device,v,nullptr);
-    vkDestroySwapchainKHR(device,swapchain,nullptr);
+    if (stagingBuf) {
+        registry.release(stagingBuf);
+        vkDestroyBuffer(device, stagingBuf, nullptr);
+    }
+    if (stagingMem) {
+        vkFreeMemory(device, stagingMem, nullptr);
+    }
     vkDestroyDevice(device,nullptr);
     vkDestroySurfaceKHR(instance,surface,nullptr);
     vkDestroyInstance(instance,nullptr);
