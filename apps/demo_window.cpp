@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstring>
 
+#include "vk/debug_utils.hpp"
+
 int main() {
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -68,6 +70,10 @@ int main() {
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
     VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
 
+    vkutil::init_debug_utils(device);
+    vkutil::GPUTimer frameTimer;
+    frameTimer.init(gpu, device);
+
     // Swapchain
     VkSurfaceCapabilitiesKHR caps; vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu,surface,&caps);
     uint32_t fmtCount=0; vkGetPhysicalDeviceSurfaceFormatsKHR(gpu,surface,&fmtCount,nullptr);
@@ -119,16 +125,6 @@ int main() {
     VkCommandPool pool; vkCreateCommandPool(device,&cp,nullptr,&pool);
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
     std::vector<VkCommandBuffer> cmds(imgCount); vkAllocateCommandBuffers(device,&cbai,cmds.data());
-    for(uint32_t i=0;i<imgCount;i++){
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
-        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
-        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-        rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
-        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
-        vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdEndRenderPass(cmds[i]);
-        vkEndCommandBuffer(cmds[i]);
-    }
 
     VkSemaphoreCreateInfo sci2{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore imgAvailable, renderFinished;
@@ -138,10 +134,27 @@ int main() {
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
+
+        VkCommandBuffer cmd = cmds[imgIndex];
+        vkResetCommandBuffer(cmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmd,&bi);
+        frameTimer.reset(cmd);
+        frameTimer.write_start(cmd);
+        vkutil::begin_label(cmd, "ClearPass");
+        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
+        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        rbi.renderPass = rp; rbi.framebuffer = fbs[imgIndex]; rbi.renderArea.extent = sci.imageExtent;
+        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
+        vkCmdBeginRenderPass(cmd,&rbi,VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdEndRenderPass(cmd);
+        vkutil::end_label(cmd);
+        frameTimer.write_end(cmd);
+        vkEndCommandBuffer(cmd);
+
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.waitSemaphoreCount=1; si.pWaitSemaphores=&imgAvailable; si.pWaitDstStageMask=&waitStage;
-        si.commandBufferCount=1; si.pCommandBuffers=&cmds[imgIndex];
+        si.commandBufferCount=1; si.pCommandBuffers=&cmd;
         si.signalSemaphoreCount=1; si.pSignalSemaphores=&renderFinished;
         vkQueueSubmit(queue,1,&si,VK_NULL_HANDLE);
         VkPresentInfoKHR pi{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
@@ -149,9 +162,13 @@ int main() {
         pi.swapchainCount=1; pi.pSwapchains=&swapchain; pi.pImageIndices=&imgIndex;
         vkQueuePresentKHR(queue,&pi);
         vkQueueWaitIdle(queue);
+
+        double ms = frameTimer.get_elapsed_ms();
+        std::cout << "Frame time: " << ms << " ms" << std::endl;
     }
 
     vkDeviceWaitIdle(device);
+    frameTimer.destroy();
     vkDestroySemaphore(device,renderFinished,nullptr);
     vkDestroySemaphore(device,imgAvailable,nullptr);
     vkDestroyCommandPool(device,pool,nullptr);

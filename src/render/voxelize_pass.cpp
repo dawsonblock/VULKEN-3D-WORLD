@@ -4,6 +4,7 @@
 #include <cstdio>
 
 #include "vk_mem_alloc.h"
+#include "vk/debug_utils.hpp"
 
 namespace voxelvk {
 
@@ -218,6 +219,8 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
     VkViewport vp{0,0,(float)dim,(float)dim,0.0f,1.0f};
     VkRect2D sc{{0,0},{dim,dim}};
 
+    vkutil::begin_label(cmd, "VoxelizePass");
+
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descSet, 0, nullptr);
     vkCmdSetViewport(cmd, 0, 1, &vp);
@@ -244,6 +247,8 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
         drawScene(cmd, (int)z);
         vkCmdEndRendering(cmd);
     }
+
+    vkutil::end_label(cmd);
 }
 
 static std::vector<char> readFile(const char* path){
