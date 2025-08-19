@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+#include "frame_graph.hpp"
 
 namespace voxelvk {
 
@@ -14,7 +15,7 @@ struct SkyPushConstants {
 };
 
 // Renders sky then overlays clouds using fullscreen shaders.
-struct SkyPass {
+struct SkyPass : public RenderPass {
     VkDevice              device = VK_NULL_HANDLE;
     VkPipeline            skyPipeline = VK_NULL_HANDLE;
     VkPipeline            cloudPipeline = VK_NULL_HANDLE;
@@ -27,6 +28,20 @@ struct SkyPass {
 
     // Record commands to draw sky then clouds (uses noiseSet for clouds).
     void record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc);
+
+    // Set resources used during execution.
+    void setInputs(VkDescriptorSet noise, const SkyPushConstants& constants) {
+        noiseSet = noise; push = constants;
+    }
+
+    // RenderPass interface
+    const char* name() const override { return "sky"; }
+    void execute(VkCommandBuffer cmd) override {
+        record(cmd, noiseSet, push);
+    }
+
+    VkDescriptorSet noiseSet = VK_NULL_HANDLE;
+    SkyPushConstants push{};
 };
 
 } // namespace voxelvk
