@@ -30,7 +30,7 @@ float computeShadow(vec3 worldPos, float viewSpaceZ){
     if(any(lessThan(uvw.xy, vec2(0.0))) || any(greaterThan(uvw.xy, vec2(1.0))))
         return 1.0;
     return pcss_visibility(uShadowMap, vec3(uvw.xy, cas),
-                           uMapTexelSize, uPCSSSearch, uPCSSMin, uPCSSMax, 0.0008);
+                           uMapTexelSize, uPCSSSearch, uPCSSMin, uPCSSMax, SHADOW_BIAS);
 }
 
 void main(){
