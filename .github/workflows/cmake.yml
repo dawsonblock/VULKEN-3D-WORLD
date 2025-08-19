@@ -23,6 +23,8 @@ jobs:
           sudo apt-get install -y ninja-build cmake g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
       - name: Set Vulkan env
         run: echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
+      - name: Validate shaders
+        run: python scripts/validate_shaders.py
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
@@ -61,6 +63,8 @@ jobs:
         run: choco install vulkan-sdk glfw --yes
       - name: Set Vulkan env
         run: echo "VULKAN_SDK=C:\VulkanSDK\latest" >> $Env:GITHUB_ENV
+      - name: Validate shaders
+        run: python scripts/validate_shaders.py
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
