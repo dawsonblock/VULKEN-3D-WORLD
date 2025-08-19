@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 try:
-    from player_controller_capsule import PlayerControllerCapsule, SPRINT_SPEED_MULTIPLIER, get_horizontal_speed
+    from src.physics.player_controller_capsule import PlayerControllerCapsule, SPRINT_SPEED_MULTIPLIER, get_horizontal_speed
 except Exception:
     pytest.skip(
         "player_controller_capsule module unavailable",
