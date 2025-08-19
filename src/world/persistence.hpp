@@ -2,11 +2,15 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <future>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
+#include <queue>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 namespace world {
 
@@ -53,8 +57,14 @@ private:
     std::filesystem::path root_;
     std::string codec_;
     bool use_rle_;
-    std::vector<std::future<void>> futures_;
     int thread_count_;
+    std::vector<std::thread> workers_;
+    std::queue<Chunk> tasks_;
+    std::mutex queue_mutex_;
+    std::condition_variable cv_;
+    std::atomic<bool> stop_{false};
+    std::atomic<int> active_tasks_{0};
+    std::mutex index_mutex_;
 };
 
 } // namespace world
