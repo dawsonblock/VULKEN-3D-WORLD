@@ -44,7 +44,9 @@ class MaterialManager:
         """Return the numeric ID for a material name."""
 
         return self._materials_by_name[name].id
-
+        if name not in self._materials_by_name:
+            raise ValueError(f"Material {name} not found")
+        return self._materials_by_name[name].id
     def get_material(self, material_id: int) -> Material:
         """Fetch material properties by ID."""
 
