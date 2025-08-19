@@ -2,15 +2,19 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <unordered_set>
 
 namespace voxelvk {
 
-ChunkStreamer::ChunkStreamer(const std::string& cfgPath)
-    : lod_(cfgPath) {}
+static constexpr int CHUNK_HASH_X_MULTIPLIER = 73856093;
+static constexpr int CHUNK_HASH_Z_MULTIPLIER = 19349669;
+
+ChunkStreamer::ChunkStreamer(std::size_t cacheCapacity, const std::string& cfgPath)
+    : cache_(cacheCapacity), lod_(cfgPath) {}
 
 ChunkStreamer::~ChunkStreamer() {
-    for(auto& kv : loading_){
-        if(kv.second.valid()) kv.second.wait();
+    for (auto& kv : loading_) {
+        if (kv.second.valid()) kv.second.wait();
     }
 }
 
@@ -24,18 +28,18 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
     std::unordered_set<int> desired;
     for(int dx=-radius_; dx<=radius_; ++dx){
         for(int dz=-radius_; dz<=radius_; ++dz){
-            glm::vec2 offset(dx, dz);
-            float dist = glm::length(offset);
-            int id = (center.x+dx)*CHUNK_HASH_X_MULTIPLIER ^ (center.z+dz)*CHUNK_HASH_Z_MULTIPLIER;
+            int cx = center.x + dx;
+            int cz = center.z + dz;
+            int id = cx*CHUNK_HASH_X_MULTIPLIER ^ cz*CHUNK_HASH_Z_MULTIPLIER;
             desired.insert(id);
             if(loading_.find(id)==loading_.end()){
-                LoadChunkAsync(id);
+                LoadChunkAsync(cx, cz, id);
             }
         }
     }
     for(auto it = loading_.begin(); it != loading_.end(); ){
         if(desired.count(it->first)==0){
-            UnloadChunk(it->first);
+            if(it->second.valid()) it->second.wait();
             it = loading_.erase(it);
         }else{
             ++it;
@@ -43,18 +47,28 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
     }
 }
 
-void ChunkStreamer::LoadChunkAsync(int id){
-    loading_[id] = std::async(std::launch::async, [id]{
-    loading_[id] = std::async(std::launch::async, [this, id]{
-        this->LoadChunk(id);
+void ChunkStreamer::LoadChunkAsync(int cx, int cz, int id){
+    loading_[id] = std::async(std::launch::async, [this, cx, cz, id]{
+        cache_.Get(id, [this, cx, cz](int){
+            auto chunk = GenerateChunk(cx, cz);
+            MeshChunk(*chunk);
+            return chunk;
+        });
     });
 }
 
-void ChunkStreamer::UnloadChunk(int id){
-    auto it = loading_.find(id);
-    if(it != loading_.end()){
-        if(it->second.valid()) it->second.wait();
-    }
+std::shared_ptr<world::ChunkData> ChunkStreamer::GenerateChunk(int cx, int cz){
+    (void)cx; (void)cz;
+    auto chunk = std::make_shared<world::ChunkData>();
+    chunk->height = 0;
+    chunk->size = 0;
+    return chunk;
+}
+
+void ChunkStreamer::MeshChunk(const world::ChunkData& chunk){
+    (void)chunk;
+    // placeholder for meshing pipeline
 }
 
 } // namespace voxelvk
+
