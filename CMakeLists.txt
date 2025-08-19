@@ -178,4 +178,9 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
+
+# --- ImGui overlay layer ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/imgui_layer.cpp)
+endif()
         main

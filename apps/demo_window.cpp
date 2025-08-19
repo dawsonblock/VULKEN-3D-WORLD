@@ -3,6 +3,56 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <unordered_map>
+#include <string>
+
+#include "render/imgui_layer.hpp"
+
+namespace fs = std::filesystem;
+
+struct ShaderEntry {
+    VkShaderModule module{VK_NULL_HANDLE};
+    fs::file_time_type timestamp{};
+};
+
+static std::unordered_map<std::string, ShaderEntry> gShaders;
+
+static void LoadShader(VkDevice device, const std::string& path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) return;
+    size_t size = (size_t)file.tellg();
+    std::vector<char> buffer(size);
+    file.seekg(0);
+    file.read(buffer.data(), size);
+    VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+    ci.codeSize = buffer.size();
+    ci.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
+    VkShaderModule module;
+    if (vkCreateShaderModule(device, &ci, nullptr, &module) == VK_SUCCESS) {
+        auto it = gShaders.find(path);
+        if (it != gShaders.end()) {
+            vkDestroyShaderModule(device, it->second.module, nullptr);
+        }
+        gShaders[path] = {module, fs::last_write_time(path)};
+        std::cout << "Loaded " << path << "\n";
+    }
+}
+
+static void ScanShaders(VkDevice device) {
+    fs::path dir{"shaders"};
+    if (!fs::exists(dir)) return;
+    for (const auto& entry : fs::directory_iterator(dir)) {
+        if (entry.path().extension() != ".spv") continue;
+        std::string path = entry.path().string();
+        auto stamp = fs::last_write_time(entry);
+        auto it = gShaders.find(path);
+        if (it == gShaders.end() || it->second.timestamp != stamp) {
+            LoadShader(device, path);
+        }
+    }
+}
 
 int main() {
     if (!glfwInit()) return 1;
@@ -67,6 +117,13 @@ int main() {
     VkDevice device;
     if(vkCreateDevice(gpu,&dci,nullptr,&device)!=VK_SUCCESS){ std::cerr<<"vkCreateDevice failed\n"; return 6; }
     VkQueue queue; vkGetDeviceQueue(device,graphicsQueue,0,&queue);
+
+    // Initial shader load
+    ScanShaders(device);
+    bool autoReload = true;
+    bool debugToggle = false;
+    bool requestReload = false;
+    voxelvk::render::ImGuiLayer imgui;
 
     // Swapchain
     VkSurfaceCapabilitiesKHR caps; vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu,surface,&caps);
@@ -137,6 +194,10 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
+        imgui.begin();
+        imgui.draw(requestReload, autoReload, debugToggle);
+        imgui.end();
+        if (autoReload || requestReload) { ScanShaders(device); requestReload = false; }
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
@@ -159,6 +220,7 @@ int main() {
     vkDestroyRenderPass(device,rp,nullptr);
     for(auto v:views) vkDestroyImageView(device,v,nullptr);
     vkDestroySwapchainKHR(device,swapchain,nullptr);
+    for(auto& kv : gShaders) vkDestroyShaderModule(device, kv.second.module, nullptr);
     vkDestroyDevice(device,nullptr);
     vkDestroySurfaceKHR(instance,surface,nullptr);
     vkDestroyInstance(instance,nullptr);
