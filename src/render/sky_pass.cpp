@@ -178,5 +178,11 @@ void SkyPass::record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPus
     vkCmdDraw(cmd, 3, 1, 0, 0);
 }
 
+void SkyPass::add_to_graph(FrameGraph &fg, VkDescriptorSet noiseSet, const SkyPushConstants &pc) {
+    fg.add_pass("post-processing", {"lighting"}, [this, noiseSet, pc](VkCommandBuffer cmd) {
+        this->record(cmd, noiseSet, pc);
+    });
+}
+
 } // namespace voxelvk
 

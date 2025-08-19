@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+#include "frame_graph.hpp"
 
 namespace voxelvk {
 
@@ -27,6 +28,10 @@ struct SkyPass {
 
     // Record commands to draw sky then clouds (uses noiseSet for clouds).
     void record(VkCommandBuffer cmd, VkDescriptorSet noiseSet, const SkyPushConstants& pc);
+
+    // Register a post-processing node that renders the sky. Depends on the
+    // lighting pass being completed.
+    void add_to_graph(FrameGraph &fg, VkDescriptorSet noiseSet, const SkyPushConstants &pc);
 };
 
 } // namespace voxelvk

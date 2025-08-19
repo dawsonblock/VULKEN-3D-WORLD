@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
+#include "frame_graph.hpp"
 
 // Forward-declare VMA
 struct VmaAllocator_T;
@@ -64,6 +65,10 @@ struct CSMShadowPass {
 
     // record rendering: renders each cascade layer by layer with dynamic rendering
     void record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawScene);
+
+    // Emit a shadow pass node into the frame graph. The draw callback is
+    // executed for each cascade when the graph is run.
+    void add_to_graph(FrameGraph &fg, const RecordDepthDrawFn &drawScene);
 
     // utility: get descriptor info for sampling in lighting pass
     VkImageView getDepthArrayView() const { return depthArrayView; }
