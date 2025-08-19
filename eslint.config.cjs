@@ -1,6 +1,8 @@
 const js = require('@eslint/js');
 
 
+
+        main
 const globals = require('globals');
 
 module.exports = [
@@ -12,6 +14,7 @@ module.exports = [
       globals: { ...globals.node, ...globals.es2021 }
     },
     ignores: [
+
 
 
         main
@@ -47,6 +50,7 @@ module.exports = [
         main
         main
         main
+        main
       'node_modules/**',
       'build_ci_sanity/**',
       'cmake/**',
@@ -57,6 +61,11 @@ module.exports = [
       'tools/**',
       'tests/**',
       'apps/**',
+
+      'scripts/**',
+      '**/build/**'
+    ]
+
 
       'scripts/**',
       '**/build/**'
@@ -81,6 +90,7 @@ module.exports = [
       '**/build/**',
     ],
         main
+        main
   },
   {
 
@@ -95,6 +105,12 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'warn',
+
+      'semi': ['error', 'always']
+    }
+  }
+];
+
 
       semi: ['error', 'always']
     }
@@ -118,3 +134,4 @@ module.exports = [
         main
 ];
 
+        main
