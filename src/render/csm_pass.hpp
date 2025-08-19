@@ -6,6 +6,8 @@
 #include <functional>
 #include <cstdint>
 
+#include "allocators.hpp"
+
 // Forward-declare VMA
 struct VmaAllocator_T;
 using VmaAllocator = VmaAllocator_T*;
@@ -51,8 +53,7 @@ struct CSMShadowPass {
     VkDescriptorSet         uboSet = VK_NULL_HANDLE;
 
     // UBO
-    VkBuffer        ubo = VK_NULL_HANDLE;
-    VmaAllocation   uboAlloc = nullptr;
+    StagingBuffer   ubo{};
 
     // init / destroy
     bool init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc,
