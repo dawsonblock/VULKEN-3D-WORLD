@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
+#include "frame_graph.hpp"
 
 // Forward-declare VMA
 struct VmaAllocator_T;
@@ -28,7 +29,8 @@ struct CSMGpuUBO {
 // You MUST bind vertex buffers (location=0 : vec3 position) and issue draws.
 using RecordDepthDrawFn = std::function<void(VkCommandBuffer cmd, int cascadeIndex)>;
 
-struct CSMShadowPass {
+// Cascaded shadow map rendering pass.
+struct CSMShadowPass : public RenderPass {
     // resources
     VkDevice        device = VK_NULL_HANDLE;
     VmaAllocator    allocator = nullptr;
@@ -62,8 +64,17 @@ struct CSMShadowPass {
     // per-frame updates
     void updateUBO(const CSMGpuUBO& data);
 
+    // Set callback used to draw depth geometry for each cascade.
+    void setDrawCallback(const RecordDepthDrawFn& fn) { drawCallback = fn; }
+
     // record rendering: renders each cascade layer by layer with dynamic rendering
     void record(VkCommandBuffer cmd, const RecordDepthDrawFn& drawScene);
+
+    // RenderPass interface
+    const char* name() const override { return "csm"; }
+    void execute(VkCommandBuffer cmd) override {
+        if (drawCallback) record(cmd, drawCallback);
+    }
 
     // utility: get descriptor info for sampling in lighting pass
     VkImageView getDepthArrayView() const { return depthArrayView; }
@@ -78,6 +89,8 @@ private:
 
     // helpers
     uint32_t findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags);
+
+    RecordDepthDrawFn drawCallback{};
 };
 
 } // namespace voxelvk

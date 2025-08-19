@@ -3,6 +3,10 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include "../src/render/frame_graph.hpp"
+#include "../src/render/voxelize_pass.hpp"
+#include "../src/render/csm_pass.hpp"
+#include "../src/render/sky_pass.hpp"
 
 int main() {
     if (!glfwInit()) return 1;
@@ -118,17 +122,18 @@ int main() {
     VkCommandPoolCreateInfo cp{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO}; cp.queueFamilyIndex = graphicsQueue;
     VkCommandPool pool; vkCreateCommandPool(device,&cp,nullptr,&pool);
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=imgCount;
-    std::vector<VkCommandBuffer> cmds(imgCount); vkAllocateCommandBuffers(device,&cbai,cmds.data());
-    for(uint32_t i=0;i<imgCount;i++){
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi);
-        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
-        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-        rbi.renderPass = rp; rbi.framebuffer = fbs[i]; rbi.renderArea.extent = sci.imageExtent;
-        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
-        vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdEndRenderPass(cmds[i]);
-        vkEndCommandBuffer(cmds[i]);
-    }
+    std::vector<VkCommandBuffer> cmds(imgCount);
+    vkAllocateCommandBuffers(device,&cbai,cmds.data());
+
+    // Build a simple frame graph with example passes. The passes are not fully
+    // initialized but demonstrate how to hook into the graph.
+    voxelvk::FrameGraph frameGraph;
+    voxelvk::VoxelizePass voxelPass;
+    voxelvk::CSMShadowPass csmPass;
+    voxelvk::SkyPass skyPass;
+    frameGraph.addPass(&voxelPass);
+    frameGraph.addPass(&csmPass, {voxelPass.name()});
+    frameGraph.addPass(&skyPass, {csmPass.name()});
 
     VkSemaphoreCreateInfo sci2{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore imgAvailable, renderFinished;
@@ -138,6 +143,24 @@ int main() {
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
+
+        // Record commands for this frame
+        vkResetCommandBuffer(cmds[imgIndex],0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        vkBeginCommandBuffer(cmds[imgIndex],&bi);
+        VkClearValue clear; clear.color = { {0.1f, 0.2f, 0.3f, 1.0f} };
+        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        rbi.renderPass = rp; rbi.framebuffer = fbs[imgIndex];
+        rbi.renderArea.extent = sci.imageExtent;
+        rbi.clearValueCount = 1; rbi.pClearValues = &clear;
+        vkCmdBeginRenderPass(cmds[imgIndex],&rbi,VK_SUBPASS_CONTENTS_INLINE);
+
+        // Execute the frame graph which will run passes in dependency order
+        frameGraph.execute(cmds[imgIndex]);
+
+        vkCmdEndRenderPass(cmds[imgIndex]);
+        vkEndCommandBuffer(cmds[imgIndex]);
+
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.waitSemaphoreCount=1; si.pWaitSemaphores=&imgAvailable; si.pWaitDstStageMask=&waitStage;
