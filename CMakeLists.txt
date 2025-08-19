@@ -69,6 +69,16 @@ else()
 endif()
 find_package(Threads REQUIRED)
 
+if(ENABLE_VULKAN)
+  include(FetchContent)
+  FetchContent_Declare(
+    VulkanMemoryAllocator
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG v3.1.0
+  )
+  FetchContent_MakeAvailable(VulkanMemoryAllocator)
+endif()
+
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
 if(ENABLE_VULKAN)
@@ -119,6 +129,20 @@ if(ENABLE_VULKAN)
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+
+  add_executable(smoke_graphics_headless apps/smoke_graphics_headless.cpp src/vk/allocator.cpp)
+  target_include_directories(smoke_graphics_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
+  target_link_libraries(smoke_graphics_headless PRIVATE Vulkan::Vulkan VulkanMemoryAllocator Threads::Threads ${GLFW_LIB})
+  target_compile_definitions(smoke_graphics_headless PRIVATE
+    $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
+    $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
+    $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
+    $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+
+  if(TARGET VoxelVK_Elite_ALL)
+    target_sources(VoxelVK_Elite_ALL PRIVATE src/vk/allocator.cpp)
+    target_link_libraries(VoxelVK_Elite_ALL PRIVATE VulkanMemoryAllocator)
+  endif()
 endif()
 
 # Tests
@@ -178,4 +202,3 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main

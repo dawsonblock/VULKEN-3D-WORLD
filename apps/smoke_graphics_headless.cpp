@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdint>
-#include <limits>
+#include "src/vk/allocator.hpp"
 #if __has_include(<GLFW/glfw3.h>)
 #include <GLFW/glfw3.h>
 #endif
@@ -15,14 +15,6 @@ static bool has_layer(const char* name){
     std::vector<VkLayerProperties> L(n); vkEnumerateInstanceLayerProperties(&n,L.data());
     for(auto& p:L){ if(std::strcmp(p.layerName,name)==0) return true; } return false;
 }
-static uint32_t find_memory_type(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags req){
-    VkPhysicalDeviceMemoryProperties mp; vkGetPhysicalDeviceMemoryProperties(phys,&mp);
-    for(uint32_t i=0;i<mp.memoryTypeCount;i++){
-        if((typeBits & (1u<<i)) && (mp.memoryTypes[i].propertyFlags & req) == req) return i;
-    }
-    return UINT32_MAX;
-}
-
 int main(){
     voxelvk::InitBuildInfoLogging();
     voxelvk::PrintBuildInfoOnce();
@@ -73,13 +65,15 @@ int main(){
     VkDevice device; if(vkCreateDevice(phys,&dci,nullptr,&device)!=VK_SUCCESS){ std::puts("vkCreateDevice failed"); return 5; }
     VkQueue q; vkGetDeviceQueue(device,qg,0,&q);
 
+    voxelvk::Allocator allocator(instance, phys, device);
+
     // Command buffer
     VkCommandPoolCreateInfo cpci{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO}; cpci.queueFamilyIndex=qg;
     VkCommandPool pool; vkCreateCommandPool(device,&cpci,nullptr,&pool);
     VkCommandBufferAllocateInfo cbai{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO}; cbai.commandPool=pool; cbai.level=VK_COMMAND_BUFFER_LEVEL_PRIMARY; cbai.commandBufferCount=1;
     VkCommandBuffer cmd; vkAllocateCommandBuffers(device,&cbai,&cmd);
 
-    // Create 1x1 color attachment image + memory
+    // Create 1x1 color attachment image + memory via VMA
     VkImageCreateInfo ici2{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
     ici2.imageType = VK_IMAGE_TYPE_2D;
     ici2.extent = {1,1,1};
@@ -89,13 +83,8 @@ int main(){
     ici2.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     ici2.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     ici2.samples = VK_SAMPLE_COUNT_1_BIT;
-    VkImage img; if(vkCreateImage(device,&ici2,nullptr,&img)!=VK_SUCCESS){ std::puts("vkCreateImage failed"); return 6; }
-    VkMemoryRequirements mr; vkGetImageMemoryRequirements(device,img,&mr);
-    uint32_t memIdx = find_memory_type(phys, mr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    if(memIdx==UINT32_MAX){ std::puts("no mem type"); return 7; }
-    VkMemoryAllocateInfo mai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO}; mai.allocationSize = mr.size; mai.memoryTypeIndex = memIdx;
-    VkDeviceMemory mem; if(vkAllocateMemory(device,&mai,nullptr,&mem)!=VK_SUCCESS){ std::puts("alloc fail"); return 8; }
-    vkBindImageMemory(device,img,mem,0);
+    VkImage img; VmaAllocation alloc; VmaAllocationCreateInfo aci{}; aci.usage = VMA_MEMORY_USAGE_AUTO; aci.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    if(allocator.createImage(&ici2, &aci, &img, &alloc)!=VK_SUCCESS){ std::puts("vmaCreateImage failed"); return 6; }
 
     // View
     VkImageViewCreateInfo ivci{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
@@ -145,8 +134,7 @@ int main(){
     vkDestroyFramebuffer(device, fb, nullptr);
     vkDestroyRenderPass(device, rp, nullptr);
     vkDestroyImageView(device, view, nullptr);
-    vkFreeMemory(device, mem, nullptr);
-    vkDestroyImage(device, img, nullptr);
+    allocator.destroyImage(img, alloc);
     vkDestroyCommandPool(device, pool, nullptr);
     vkDestroyDevice(device, nullptr);
 #if defined(ENABLE_VK_DEBUG_MARKERS) || defined(ENABLE_VALIDATION_LAYERS)
