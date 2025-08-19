@@ -58,6 +58,7 @@ void ChunkStreamer::LoadChunkAsync(int cx, int cz, int id){
 }
 
 std::shared_ptr<world::ChunkData> ChunkStreamer::GenerateChunk(int cx, int cz){
+    // cx and cz will be used in future implementations of chunk generation.
     (void)cx; (void)cz;
     auto chunk = std::make_shared<world::ChunkData>();
     chunk->height = 0;
