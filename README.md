@@ -25,12 +25,13 @@ The compute expects image formats:
 
 ## Python setup
 
-Some utilities and tests in `src/` and `tests/` require Python. Create a virtual environment and install the required packages:
+Some utilities and tests in `src/` and `tests/` require Python. Create a virtual environment and install the required packages and development tools:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 Run the test suite:
