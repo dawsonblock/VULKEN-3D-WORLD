@@ -50,7 +50,8 @@ class ChunkManager:
         # Remove chunks that are no longer needed
         for key in list(self.chunks.keys()):
             if key not in needed:
-                del self.chunks[key]
+        for key in set(self.chunks.keys()) - needed:
+            del self.chunks[key]
         # Enforce capacity via LRU eviction
         while len(self.chunks) > self.max_chunks:
             self.chunks.popitem(last=False)
