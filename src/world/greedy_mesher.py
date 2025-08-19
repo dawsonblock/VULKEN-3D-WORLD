@@ -93,7 +93,23 @@ def greedy_mesh(voxels: np.ndarray) -> MeshBuffers:
                         b = int(voxels[tuple(pos)])
                     if bool(a) != bool(b):
                         mask[x, y] = 1 if a else -1
-
+            # Vectorized mask generation using NumPy slicing and broadcasting
+            if 0 <= slice_ < dims[d] and 0 <= slice_ + 1 < dims[d]:
+                a = voxels.take(indices=slice_, axis=d)
+                b = voxels.take(indices=slice_ + 1, axis=d)
+                mask = np.zeros((dims[u], dims[v]), dtype=int)
+                mask[(a != 0) & (b == 0)] = 1
+                mask[(a == 0) & (b != 0)] = -1
+            elif 0 <= slice_ < dims[d]:
+                a = voxels.take(indices=slice_, axis=d)
+                mask = np.zeros((dims[u], dims[v]), dtype=int)
+                mask[a != 0] = 1
+            elif 0 <= slice_ + 1 < dims[d]:
+                b = voxels.take(indices=slice_ + 1, axis=d)
+                mask = np.zeros((dims[u], dims[v]), dtype=int)
+                mask[b != 0] = -1
+            else:
+                mask = np.zeros((dims[u], dims[v]), dtype=int)
             # Greedily merge rectangles in the mask
             j = 0
             while j < mask.shape[1]:
