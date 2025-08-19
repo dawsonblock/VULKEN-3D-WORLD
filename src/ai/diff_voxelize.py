@@ -30,17 +30,7 @@ def _load_lib() -> ctypes.CDLL:
     return ctypes.CDLL(str(LIB_PATH))
 
 
-_lib = _load_lib()
-_lib.diff_voxelize.argtypes = [
-    ctypes.POINTER(ctypes.c_float),  # points
-    ctypes.POINTER(ctypes.c_float),  # occupancy out
-    ctypes.POINTER(ctypes.c_float),  # point gradients out
-    ctypes.c_int,  # n_points
-    ctypes.c_int,  # width
-    ctypes.c_int,  # height
-    ctypes.c_int,  # depth
-]
-_lib.diff_voxelize.restype = None
+_lib: ctypes.CDLL | None = None
 
 
 def diff_voxelize(points: np.ndarray, grid_shape: Tuple[int, int, int]) -> tuple[np.ndarray, np.ndarray]:
@@ -67,7 +57,30 @@ def diff_voxelize(points: np.ndarray, grid_shape: Tuple[int, int, int]) -> tuple
         raise ValueError(f"`points` must have shape (N, 3), got {points.shape}")
     pts = np.ascontiguousarray(points, dtype=np.float32)
     n, _ = pts.shape
-    w, h, d = grid_shape
+
+    try:
+        w, h, d = grid_shape
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError("`grid_shape` must be a sequence of three integers") from exc
+    if any(not isinstance(dim, int) for dim in (w, h, d)):
+        raise ValueError("`grid_shape` must be a sequence of three integers")
+    if any(dim <= 0 for dim in (w, h, d)):
+        raise ValueError("`grid_shape` dimensions must be positive")
+
+    global _lib
+    if _lib is None:  # pragma: no cover - library compiled once
+        _lib = _load_lib()
+        _lib.diff_voxelize.argtypes = [
+            ctypes.POINTER(ctypes.c_float),  # points
+            ctypes.POINTER(ctypes.c_float),  # occupancy out
+            ctypes.POINTER(ctypes.c_float),  # point gradients out
+            ctypes.c_int,  # n_points
+            ctypes.c_int,  # width
+            ctypes.c_int,  # height
+            ctypes.c_int,  # depth
+        ]
+        _lib.diff_voxelize.restype = None
+
     occ = np.zeros((w, h, d), dtype=np.float32)
     grad = np.zeros((n, 3), dtype=np.float32)
     _lib.diff_voxelize(
