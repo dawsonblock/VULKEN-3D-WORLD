@@ -3,3 +3,4 @@ zstandard
 lz4
 pytest
 mypy
+ruff
