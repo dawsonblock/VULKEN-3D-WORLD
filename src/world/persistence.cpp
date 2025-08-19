@@ -150,20 +150,21 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
     std::vector<std::uint8_t> vals;
     std::vector<std::int32_t> counts;
     std::vector<std::uint8_t> data;
+
+    std::int32_t header[5] = {chunk.height, chunk.size, chunk.size, 0, 0};
     if (use_rle_) {
         rle_encode(vox, vals, counts);
-        std::int32_t header[5] = {chunk.size, chunk.height, chunk.height,
-                                  static_cast<std::int32_t>(vals.size()),
-                                  static_cast<std::int32_t>(counts.size())};
-        data.insert(data.end(), reinterpret_cast<std::uint8_t *>(header),
-                    reinterpret_cast<std::uint8_t *>(header) + 20);
+        header[3] = static_cast<std::int32_t>(vals.size());
+        header[4] = static_cast<std::int32_t>(counts.size());
+    }
+
+    data.insert(data.end(), reinterpret_cast<std::uint8_t *>(header),
+                reinterpret_cast<std::uint8_t *>(header) + sizeof(header));
+    if (use_rle_) {
         data.insert(data.end(), vals.begin(), vals.end());
         data.insert(data.end(), reinterpret_cast<const std::uint8_t *>(counts.data()),
                     reinterpret_cast<const std::uint8_t *>(counts.data()) + counts.size() * sizeof(std::int32_t));
     } else {
-        std::int32_t header[5] = {chunk.height, chunk.size, chunk.size, 0, 0};
-        data.insert(data.end(), reinterpret_cast<std::uint8_t *>(header),
-                    reinterpret_cast<std::uint8_t *>(header) + 20);
         data.insert(data.end(), vox.begin(), vox.end());
     }
     auto blob = _compress(data);
@@ -189,24 +190,29 @@ std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
     std::vector<std::uint8_t> blob((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     ifs.close();
     auto raw = _decompress(blob);
-    if (raw.size() < 20) return std::nullopt;
+    if (raw.size() < sizeof(std::int32_t) * 5) return std::nullopt;
     const std::int32_t *header = reinterpret_cast<const std::int32_t *>(raw.data());
-    int H = header[0];
-    int Y = header[1];
-    int S = header[2];
+    int height = header[0];
+    int size_x = header[1];
+    int size_z = header[2];
     int nvals = header[3];
     int ncnt = header[4];
-    const std::uint8_t *ptr = raw.data() + 20;
+    std::size_t total = static_cast<std::size_t>(height) * size_x * size_z;
+    const std::uint8_t *ptr = raw.data() + sizeof(std::int32_t) * 5;
     std::vector<std::uint8_t> vox;
     if (nvals > 0) {
+        if (raw.size() < sizeof(std::int32_t) * 5 + static_cast<std::size_t>(nvals) + static_cast<std::size_t>(ncnt) * sizeof(std::int32_t)) {
+            return std::nullopt;
+        }
         std::vector<std::uint8_t> vals(ptr, ptr + nvals);
         const std::int32_t *cnt_ptr = reinterpret_cast<const std::int32_t *>(ptr + nvals);
         std::vector<std::int32_t> counts(cnt_ptr, cnt_ptr + ncnt);
-        vox = rle_decode(vals, counts, static_cast<std::size_t>(H) * Y * S);
+        vox = rle_decode(vals, counts, total);
     } else {
-        vox.assign(ptr, ptr + static_cast<std::size_t>(H) * Y * S);
+        if (raw.size() < sizeof(std::int32_t) * 5 + total) return std::nullopt;
+        vox.assign(ptr, ptr + total);
     }
-    return ChunkData{std::move(vox), Y, S};
+    return ChunkData{std::move(vox), height, size_x};
 }
 
 void ChunkStore::wait_all() {
