@@ -1,5 +1,13 @@
 
 
+from __future__ import annotations
+
+
+
+from __future__ import annotations
+
+
+
 """AABB-based player controller for movement inside a voxel world."""
 
 """Simple axis-aligned bounding box player controller used in tests."""
@@ -8,6 +16,8 @@
         main
 from __future__ import annotations
 
+        main
+        main
 from typing import Any, Dict, Tuple
 
 import numpy as np
@@ -19,6 +29,24 @@ from .voxel_solid import is_solid
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
+
+
+
+
+        main
+class PlayerController:
+    """Axis-aligned bounding box player controller."""
+
+    def __init__(
+        self,
+        world_manager: Any,
+        spawn: np.ndarray | None = None,
+    ) -> None:
+
+        """Simplified AABB-based player controller used for typing tests."""
+
+        if spawn is None:
+            spawn = np.array([0.0, 100.0, 0.0], dtype=np.float32)
 
 SPRINT_SPEED_MULTIPLIER = 1.6
 
@@ -44,14 +72,30 @@ class PlayerController:
 
         main
         main
+        main
+        main
         self.world = world_manager
         if spawn is None:
             spawn = np.array([0.0, 100.0, 0.0], dtype=np.float32)
         self.pos = spawn.astype(np.float32)
         self.vel = np.zeros(3, dtype=np.float32)
 
+
+
+        self.aabb = AABB(
+            center=self.pos,
+            half=np.array([0.3, 0.9, 0.3], dtype=np.float32),
+        )
+        main
+
+
+
         self.aabb = AABB(center=self.pos, half=np.array([0.3, 0.9, 0.3], dtype=np.float32))
 
+
+
+        main
+        main
         self.gravity = 28.0
         self.max_speed = 11.0
         self.accel = 50.0
@@ -75,12 +119,25 @@ class PlayerController:
     def set_input(self, keymap: Dict[str, int]) -> None:
         """Update the input mapping."""
 
+
+        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
+
+    def update(
+        self,
+        dt: float,
+        camera_forward: np.ndarray,
+        camera_right: np.ndarray,
+    ) -> None:
+        """Advance the controller one step using simple kinematics."""
+
+
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
     def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
         """Advance the controller one step."""
 
 
+        main
         self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
     def update(self, dt: float, camera_forward: np.ndarray, camera_right: np.ndarray) -> None:
@@ -99,6 +156,7 @@ class PlayerController:
 
         main
         main
+        main
         wish = (
             camera_forward * (self.input["f"] - self.input["b"])
             + camera_right * (self.input["r"] - self.input["l"])
@@ -113,11 +171,23 @@ class PlayerController:
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
 
+
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
+
+
+        target_speed = self.max_speed * (
+            SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
+        )
+
         target_speed = self.max_speed * (SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0)
 
         target_speed = self.max_speed * (
             SPRINT_SPEED_MULTIPLIER if self.input["sprint"] else 1.0
         )
+        main
+        main
         main
         main
         accel = self.accel if self.on_ground else self.air_accel
@@ -129,9 +199,12 @@ class PlayerController:
             self.vel[2] *= max(0.0, 1.0 - self.friction * dt)
 
         self.vel[1] -= self.gravity * dt
+        pos_before = self.pos.copy()
         if self.on_ground and self.input["jump"]:
             self.vel[1] = self.jump_speed
             self.on_ground = False
+
+
 
 
 
@@ -139,7 +212,9 @@ class PlayerController:
 
         main
         main
+        main
         pos_before = self.pos.copy()
+        main
         self._move_and_collide(dt)
         if np.allclose(self.pos, pos_before, atol=1e-5) and (
             self.input["f"] or self.input["l"] or self.input["r"] or self.input["b"]
@@ -226,3 +301,7 @@ class PlayerController:
 
 __all__ = ["PlayerController"]
 
+
+
+        main
+        main
