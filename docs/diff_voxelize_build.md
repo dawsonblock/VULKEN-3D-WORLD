@@ -3,7 +3,8 @@
 The differentiable voxelizer exposes a small native library used by
 `src/ai/diff_voxelize.py`. No binaries are checked into the repository;
 build the library for your platform using the script described below.
-Prebuilt artifacts may be provided in project releases for convenience.
+Official release artifacts include prebuilt binaries for Linux and Windows.
+Other platforms should compile the library from source.
 
 ## Prerequisites
 

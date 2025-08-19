@@ -39,7 +39,6 @@ Run the test suite:
 pytest
 ```
 
-```
 ### diff_voxelize native library
 
 The differentiable voxelizer used in `src/ai/diff_voxelize.py` relies on a
@@ -49,11 +48,10 @@ prebuilt binaries for convenience.
 
 ## Linting
 To check JavaScript or TypeScript sources, run:
+
 ```bash
 npx eslint .
-
-
-
+```
 
 ## Samples
 
