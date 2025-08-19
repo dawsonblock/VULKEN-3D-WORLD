@@ -69,6 +69,43 @@ else()
 endif()
 find_package(Threads REQUIRED)
 
+# --- External dependencies ---
+include(FetchContent)
+
+# Vulkan Memory Allocator
+FetchContent_Declare(
+  vma
+  GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+  GIT_TAG v3.0.1
+)
+FetchContent_Populate(vma)
+add_library(vma INTERFACE)
+target_include_directories(vma INTERFACE ${vma_SOURCE_DIR}/src)
+
+# zstd compression
+FetchContent_Declare(
+  zstd
+  GIT_REPOSITORY https://github.com/facebook/zstd.git
+  GIT_TAG v1.5.5
+  SOURCE_SUBDIR build/cmake
+)
+set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(zstd)
+add_library(zstd ALIAS libzstd_static)
+
+# lz4 compression
+FetchContent_Declare(
+  lz4
+  GIT_REPOSITORY https://github.com/lz4/lz4.git
+  GIT_TAG v1.9.4
+  SOURCE_SUBDIR build/cmake
+)
+set(LZ4_BUILD_CLI OFF CACHE BOOL "" FORCE)
+set(LZ4_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(lz4)
+add_library(lz4 ALIAS lz4_static)
+
 # Shader pipeline (glslc preferred; fallback glslangValidator)
 set(SPV_OUT "")
 if(ENABLE_VULKAN)
@@ -113,12 +150,17 @@ if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
   add_dependencies(smoke_headless VoxelVK_Shaders)
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
-  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB} vma zstd lz4)
   target_compile_definitions(smoke_headless PRIVATE
     $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+endif()
+
+# Link external libraries to main renderer if present
+if(TARGET VoxelVK_Elite_ALL)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE vma zstd lz4)
 endif()
 
 # Tests
