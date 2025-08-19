@@ -3,9 +3,13 @@ import json
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 from concurrent.futures import Future, ThreadPoolExecutor
 from .rle import rle_encode, rle_decode
+
+if TYPE_CHECKING:
+    import zstandard as zstd
+    import lz4.frame as lz4f
 
 try:
     import zstandard as zstd
