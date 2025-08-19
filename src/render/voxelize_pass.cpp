@@ -143,7 +143,8 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     dyn.pDynamicStates = dynStates;
 
     VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pcr.offset = 0; pcr.size = sizeof(glm::mat4) + sizeof(int);
+    pcr.offset = 0;
+    pcr.size = sizeof(glm::mat4) + sizeof(int);
 
     VkPipelineLayoutCreateInfo lci{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
     lci.setLayoutCount = 1; lci.pSetLayouts = &setLayout;
