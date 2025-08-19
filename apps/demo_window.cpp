@@ -3,12 +3,62 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#ifdef ENABLE_IMGUI_OVERLAY
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+#endif
 
 int main() {
     if (!glfwInit()) return 1;
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window = glfwCreateWindow(800, 600, "demo_window", nullptr, nullptr);
     if (!window) { glfwTerminate(); return 1; }
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    struct Camera {
+        glm::vec3 pos{0.0f, 0.0f, 3.0f};
+        float yaw{-90.0f};
+        float pitch{0.0f};
+    } camera;
+    double lastX = 400.0, lastY = 300.0;
+    bool firstMouse = true;
+    auto cursor_callback = [](GLFWwindow* win, double xpos, double ypos) {
+        Camera* cam = reinterpret_cast<Camera*>(glfwGetWindowUserPointer(win));
+        if (!cam) return;
+        static double lastX = 0.0, lastY = 0.0;
+        static bool first = true;
+        if (first) {
+    auto cursor_callback = [&](GLFWwindow* win, double xpos, double ypos) {
+        Camera* cam = reinterpret_cast<Camera*>(glfwGetWindowUserPointer(win));
+        if (firstMouse) {
+            lastX = xpos; lastY = ypos; firstMouse = false;
+        }
+        double xoffset = xpos - lastX;
+        double yoffset = lastY - ypos;
+        lastX = xpos; lastY = ypos;
+        const float sensitivity = 0.1f;
+        cam->yaw += static_cast<float>(xoffset) * sensitivity;
+        cam->pitch += static_cast<float>(yoffset) * sensitivity;
+        cam->pitch = std::clamp(cam->pitch, -89.0f, 89.0f);
+    };
+    glfwSetWindowUserPointer(window, &camera);
+    glfwSetCursorPosCallback(window, cursor_callback);
+
+#ifdef ENABLE_IMGUI_OVERLAY
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForVulkan(window, true);
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
+    io.DisplaySize = ImVec2(800, 600); // Set display size to match window
+#endif
 
     // Instance
     std::vector<const char*> layers;
@@ -135,8 +185,52 @@ int main() {
     vkCreateSemaphore(device,&sci2,nullptr,&imgAvailable);
     vkCreateSemaphore(device,&sci2,nullptr,&renderFinished);
 
+    auto lastTime = std::chrono::high_resolution_clock::now();
+    std::filesystem::path shaderPath = "shaders/demo_window.frag.spv";
+    auto shaderTime = std::filesystem::exists(shaderPath)
+                           ? std::filesystem::last_write_time(shaderPath)
+                           : std::filesystem::file_time_type::min();
+
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
+
+        auto now = std::chrono::high_resolution_clock::now();
+        float delta = std::chrono::duration<float>(now - lastTime).count();
+        lastTime = now;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        front.y = sin(glm::radians(camera.pitch));
+        front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        front = glm::normalize(front);
+        glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0.0f,1.0f,0.0f)));
+
+        float speed = 2.5f * delta;
+        if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.pos += front * speed;
+        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.pos -= front * speed;
+        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.pos -= right * speed;
+        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.pos += right * speed;
+
+        if(std::filesystem::exists(shaderPath)) {
+            auto t = std::filesystem::last_write_time(shaderPath);
+            if(t != shaderTime){
+                shaderTime = t;
+                vkDeviceWaitIdle(device);
+                // TODO: recompile and recreate pipelines
+                std::cout << "Shader changed, reload triggered\n";
+            }
+        }
+
+#ifdef ENABLE_IMGUI_OVERLAY
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("Stats");
+        ImGui::Text("FPS: %.1f", 1.0f / delta);
+        ImGui::Text("Camera: (%.2f, %.2f, %.2f)", camera.pos.x, camera.pos.y, camera.pos.z);
+        ImGui::End();
+        ImGui::Render();
+#endif
+
         uint32_t imgIndex; vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,imgAvailable,VK_NULL_HANDLE,&imgIndex);
         VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
@@ -162,6 +256,10 @@ int main() {
     vkDestroyDevice(device,nullptr);
     vkDestroySurfaceKHR(instance,surface,nullptr);
     vkDestroyInstance(instance,nullptr);
+#ifdef ENABLE_IMGUI_OVERLAY
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+#endif
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
