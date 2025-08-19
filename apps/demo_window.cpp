@@ -56,7 +56,8 @@ int main() {
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForVulkan(window, true);
     ImGuiIO& io = ImGui::GetIO();
-    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
+    io.DisplaySize = ImVec2(800, 600); // Set display size to match window
 #endif
 
     // Instance
