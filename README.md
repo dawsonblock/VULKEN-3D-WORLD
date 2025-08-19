@@ -39,15 +39,17 @@ Run the test suite:
 pytest
 ```
 
+Run JavaScript linting and tests:
+
+```bash
+npm test
 ```
 
 ## Linting
-To check JavaScript or TypeScript sources, run:
+To check JavaScript or TypeScript sources manually, run:
 ```bash
 npx eslint .
-
-
-
+```
 
 ## Samples
 
