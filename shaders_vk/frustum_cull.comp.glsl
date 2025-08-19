@@ -35,6 +35,8 @@ void main(){
     uint outIdx = atomicAdd(count,1);
     draws[outIdx].vertexCount = 36;
     draws[outIdx].instanceCount = 1;
-    draws[outIdx].firstVertex = idx*36;
+    draws[outIdx].vertexCount = VERTICES_PER_DRAW;
+    draws[outIdx].instanceCount = 1;
+    draws[outIdx].firstVertex = idx*VERTICES_PER_DRAW;
     draws[outIdx].firstInstance = 0;
 }
