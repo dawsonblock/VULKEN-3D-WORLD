@@ -47,7 +47,7 @@ class PlayerController:
 
     def set_input(self, keymap: Dict[str, int]) -> None:
         """Update input mapping from ``keymap``."""
-        self.input.update({k:int(bool(v)) for k,v in keymap.items() if k in self.input})
+        self.input.update({k: int(bool(v)) for k, v in keymap.items() if k in self.input})
 
     def update(self, dt: float, camera_forward: NDArray[np.float32], camera_right: NDArray[np.float32]) -> None:
         """Advance the controller one step using very simple kinematics."""
