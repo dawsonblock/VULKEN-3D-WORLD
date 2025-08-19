@@ -50,6 +50,17 @@ if(ENABLE_VULKAN)
   endif()
 endif()
 
+# ---- External: Vulkan Memory Allocator ----
+if(ENABLE_VULKAN)
+  include(FetchContent)
+  FetchContent_Declare(
+    VulkanMemoryAllocator
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG v3.3.0
+  )
+  FetchContent_MakeAvailable(VulkanMemoryAllocator)
+endif()
+
 # --- Build tagging injection ---
 set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + voxel_upgrades_patch + project_compute_graphics_chain + project_dynamic_pbr + project_next_tier_all")
 include(${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake)
@@ -113,12 +124,18 @@ if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
   add_dependencies(smoke_headless VoxelVK_Shaders)
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
-  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  target_sources(smoke_headless PRIVATE src/vk/vma_allocator.cpp)
+  target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB} GPUOpen::VulkanMemoryAllocator)
   target_compile_definitions(smoke_headless PRIVATE
     $<$<BOOL:${ENABLE_VALIDATION_LAYERS}>:ENABLE_VALIDATION_LAYERS=1>
     $<$<BOOL:${ENABLE_IMGUI_OVERLAY}>:ENABLE_IMGUI_OVERLAY=1>
     $<$<BOOL:${VOXELVK_ENABLE_CUDA}>:VOXELVK_ENABLE_CUDA=1>
     $<$<BOOL:${VOXELVK_ENABLE_TENSORRT}>:VOXELVK_ENABLE_TENSORRT=1>)
+endif()
+
+if(ENABLE_VULKAN AND TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/vk/vma_allocator.cpp)
+  target_link_libraries(VoxelVK_Elite_ALL PRIVATE GPUOpen::VulkanMemoryAllocator)
 endif()
 
 # Tests
@@ -178,4 +195,3 @@ endif()
 if(TARGET VoxelVK_Elite_ALL)
   # target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
 endif()
-        main
