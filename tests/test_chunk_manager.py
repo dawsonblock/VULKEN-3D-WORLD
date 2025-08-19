@@ -28,6 +28,6 @@ def test_chunk_manager_load_and_evict() -> None:
     assert chunk.biomes.shape == (32, 32, 32)
 
     # Move player far enough to unload the original center chunk
-    world.step((96.0, 0.0, 0.0))  # move to chunk x=3 (since 96/32=3)
+    world.step((3 * CHUNK_SIZE, 0.0, 0.0))  # move to chunk x=3 (since (3 * CHUNK_SIZE)/CHUNK_SIZE=3)
     assert (0, 0, 0) not in mgr.chunks
     assert (3, 0, 0) in mgr.chunks
