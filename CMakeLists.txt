@@ -165,6 +165,11 @@ if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 endif()
 
+# --- Chunk drawer ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/chunk_drawer.cpp)
+endif()
+
 # --- Sparse voxel octree ---
 if(TARGET VoxelVK_Elite_ALL)
   target_sources(VoxelVK_Elite_ALL PRIVATE
