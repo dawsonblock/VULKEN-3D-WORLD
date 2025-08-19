@@ -206,7 +206,28 @@ found_device:
 
     for(uint32_t i=0;i<imgCount;i++){ VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO}; vkBeginCommandBuffer(cmds[i],&bi); VkClearValue clear; clear.color={{0.1f,0.2f,0.3f,1.0f}}; VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO}; rbi.renderPass=rp; rbi.framebuffer=fbs[i]; rbi.renderArea.extent=sci.imageExtent; rbi.clearValueCount=1; rbi.pClearValues=&clear; vkCmdBeginRenderPass(cmds[i],&rbi,VK_SUBPASS_CONTENTS_INLINE); dbg.beginLabel(cmds[i],"DrawChunks"); // placeholder for chunk rendering
         // TODO: bind PBR pipeline and draw chunk meshes here
-        dbg.endLabel(cmds[i]); vkCmdEndRenderPass(cmds[i]); vkEndCommandBuffer(cmds[i]); }
+    for (uint32_t i = 0; i < imgCount; i++) {
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        vkBeginCommandBuffer(cmds[i], &bi);
+
+        VkClearValue clear;
+        clear.color = {{0.1f, 0.2f, 0.3f, 1.0f}};
+
+        VkRenderPassBeginInfo rbi{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        rbi.renderPass = rp;
+        rbi.framebuffer = fbs[i];
+        rbi.renderArea.extent = sci.imageExtent;
+        rbi.clearValueCount = 1;
+        rbi.pClearValues = &clear;
+
+        vkCmdBeginRenderPass(cmds[i], &rbi, VK_SUBPASS_CONTENTS_INLINE);
+        dbg.beginLabel(cmds[i], "DrawChunks");
+        // placeholder for chunk rendering
+        // TODO: bind PBR pipeline and draw chunk meshes here
+        dbg.endLabel(cmds[i]);
+        vkCmdEndRenderPass(cmds[i]);
+        vkEndCommandBuffer(cmds[i]);
+    }
 
 #if VOXELVK_HAS_IMGUI
     IMGUI_CHECKVERSION(); ImGui::CreateContext(); ImGui_ImplGlfw_InitForVulkan(window,true);
