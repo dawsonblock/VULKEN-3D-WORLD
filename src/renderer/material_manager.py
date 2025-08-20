@@ -5,6 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, cast
 
+
+
+
+        main
 MATERIAL_COMPONENTS_COUNT = 5
 
 
@@ -36,6 +40,12 @@ class MaterialManager:
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
 
+            albedo = cast(
+                Tuple[float, float, float],
+                tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])),
+            )
+
+
             raw_albedo = props.get("albedo", [1.0, 1.0, 1.0])[:3]
             albedo = cast(
                 Tuple[float, float, float], tuple(float(x) for x in raw_albedo)
@@ -51,6 +61,7 @@ class MaterialManager:
 
             albedo_vals = [float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])]
             albedo = (albedo_vals[0], albedo_vals[1], albedo_vals[2])
+        main
         main
         main
             metallic = float(props.get("metallic", 0.0))
