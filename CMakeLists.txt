@@ -7,6 +7,13 @@ cmake_policy(SET CMP0126 NEW) # cmake -E env behavior
 
 project(VoxelVK_Elite_ALL LANGUAGES CXX)
 
+add_library(VoxelVK_Elite_ALL STATIC
+  # List your source files here, for example:
+  src/main.cpp
+  src/voxel.cpp
+  src/vk_elite.cpp
+)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -141,21 +148,27 @@ message(STATUS "Vulkan Enabled: ${ENABLE_VULKAN}")
 message(STATUS "=====================")
 
 # --- Build tagging sources ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/core/build_info_print.cpp
-    src/core/runtime_debug.cpp
-    src/core/gpu_compat.cpp)
-endif()
+target_sources(VoxelVK_Elite_ALL PRIVATE
+  src/core/build_info_print.cpp
+  src/core/runtime_debug.cpp
+  src/core/gpu_compat.cpp)
 
 # --- CSM integration sources ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE
-    src/render/csm_cpu.cpp
-    src/render/csm_pass.cpp)
-endif()
+target_sources(VoxelVK_Elite_ALL PRIVATE
+  src/render/csm_cpu.cpp
+  src/render/csm_pass.cpp)
+
+# --- Voxelization pass ---
+target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_pass.cpp)
 
 # --- CSM descriptor layout helper ---
-if(TARGET VoxelVK_Elite_ALL)
-  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
-endif()
+target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
+
+# --- Sparse voxel octree ---
+target_sources(VoxelVK_Elite_ALL PRIVATE
+  src/world/svo_builder.cpp
+  src/world/svo_io.cpp
+  src/render/svo_traversal.cpp)
+
+# --- Voxel SAT compute dispatch ---
+# target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_sat.cpp) # Removed duplicate registration
