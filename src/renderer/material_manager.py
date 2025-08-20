@@ -5,13 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, cast
 
-
-
-
-
-
-        main
-        main
 MATERIAL_COMPONENTS_COUNT = 5
 
 
@@ -42,38 +35,8 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
-
             albedo_list = props.get("albedo", [1.0, 1.0, 1.0])[:3]
-            albedo = cast(
-                Tuple[float, float, float],
-                tuple(float(x) for x in albedo_list),
-            )
-
-            albedo = cast(
-                Tuple[float, float, float],
-                tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])),
-            )
-
-
-            raw_albedo = props.get("albedo", [1.0, 1.0, 1.0])[:3]
-            albedo = cast(
-                Tuple[float, float, float], tuple(float(x) for x in raw_albedo)
-            )
-
-
-            albedo_list = props.get("albedo", [1.0, 1.0, 1.0])
-            albedo = (
-                float(albedo_list[0]),
-                float(albedo_list[1]),
-                float(albedo_list[2]),
-            )
-
-            albedo_vals = [float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])]
-            albedo = (albedo_vals[0], albedo_vals[1], albedo_vals[2])
-        main
-        main
-        main
-        main
+            albedo = cast(Tuple[float, float, float], tuple(float(x) for x in albedo_list))
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
@@ -81,32 +44,20 @@ class MaterialManager:
             self._materials_by_id.append(mat)
 
     def get_material_id(self, name: str) -> int:
-        """Return the numeric ID for a material name."""
-
-
-        return self._materials_by_name[name].id
-
         if name not in self._materials_by_name:
             raise ValueError(f"Material {name} not found")
         return self._materials_by_name[name].id
 
-        main
     def get_material(self, material_id: int) -> Material:
-        """Fetch material properties by ID."""
-
         if not (0 <= material_id < len(self._materials_by_id)):
-            raise IndexError(
-                f"Material ID {material_id} is out of bounds. "
-                f"Valid IDs are between 0 and {len(self._materials_by_id) - 1}."
-            )
+            raise IndexError(f"Material ID {material_id} out of range")
         return self._materials_by_id[material_id]
 
     def materials(self) -> List[Material]:
-        """Return all loaded materials."""
-
         return list(self._materials_by_id)
 
     def create_gpu_resources(self) -> List[Tuple[float, float, float, float, float]]:
-        """Package materials into a flat list suitable for GPU upload."""
-
         return [(*m.albedo, m.metallic, m.roughness) for m in self._materials_by_id]
+
+
+__all__ = ["MaterialManager", "MATERIAL_COMPONENTS_COUNT"]
