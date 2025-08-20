@@ -33,8 +33,17 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
+
+            albedo_list = props.get("albedo", [1.0, 1.0, 1.0])
+            albedo = (
+                float(albedo_list[0]),
+                float(albedo_list[1]),
+                float(albedo_list[2]),
+            )
+
             albedo_vals = [float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])]
             albedo = (albedo_vals[0], albedo_vals[1], albedo_vals[2])
+        main
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
