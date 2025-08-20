@@ -1,14 +1,9 @@
 const js = require('@eslint/js');
 const globals = require('globals');
-        main
 
 module.exports = [
   js.configs.recommended,
   {
-    ignores: ['node_modules/**'],
-  },
-];
-
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
@@ -31,4 +26,4 @@ module.exports = [
     ]
   }
 ];
-        main
+
