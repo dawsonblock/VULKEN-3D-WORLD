@@ -1,48 +1,7 @@
-
-from __future__ import annotations
-
-        main
-"""Collision helpers for a capsule against a voxel world using simple SAT tests."""
-
-
-from __future__ import annotations
-
-from typing import Any, Optional, Protocol, Tuple, cast
-
-
-
-"""Collision helpers for a capsule against a voxel world."""
-
-
-
-"""Collision helpers for a capsule against a voxel world using SAT tests."""
-        main
-
-from typing import Optional, Protocol, Tuple, cast
-
-
-
-
-"""Collision helpers for a capsule against a voxel world."""
-
-
-"""Capsule to voxel collision helpers used in tests."""
-
-from __future__ import annotations
-
-from typing import Any, Optional, Protocol, Tuple, cast
-        main
-        main
-        main
-
-        main
 from __future__ import annotations
 
 from typing import Optional, Protocol, Tuple
-        main
-        main
 
-        main
 import numpy as np
 from numpy.typing import NDArray
 
@@ -51,421 +10,91 @@ from .voxel_solid import is_solid
 
 
 class WorldProtocol(Protocol):
-
-    """Minimal protocol required from the voxel world used in tests."""
-
-
-
-
     """Minimal protocol expected from the world used in tests."""
 
-
- 
-
-        main
-    """Minimal protocol required from the voxel world used in tests."""
-
- 
-        main
     def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
         """Return the block type at the given world position."""
         ...
 
 
-
-    """Minimal protocol expected from the world used in tests."""
-        main
-
-        main
-    def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
-        ...
-
-        main
-        main
-
 def closest_point_on_aabb(
-    p: NDArray[np.float32],
-    mn: NDArray[np.float32],
-    mx: NDArray[np.float32],
+    p: NDArray[np.float32], mn: NDArray[np.float32], mx: NDArray[np.float32]
 ) -> NDArray[np.float32]:
-
-    """Return the closest point on the AABB defined by ``mn`` and ``mx``."""
-
-
     """Clamp point ``p`` to the box defined by ``mn`` and ``mx``."""
     return np.minimum(np.maximum(p, mn), mx)
 
 
-
-
-    """Return the closest point on the axis-aligned box defined by ``mn`` and ``mx``."""
-
-    return np.minimum(np.maximum(p, mn), mx)
-
-    """Clamp point ``p`` to the axis-aligned box defined by ``mn`` and ``mx``."""
-
-
-
-    return np.minimum(np.maximum(p, mn), mx)
-
-    
-        main
-        main
-
-        main
-    return cast(NDArray[np.float32], np.minimum(np.maximum(p, mn), mx))
-
- 
-
-
-
-
-        main
-        main
-    return np.minimum(np.maximum(p, mn), mx)
-
-
-        main
-        main
-        main
-        main
-        main
 def closest_point_on_segment(
-
     p: NDArray[np.float32], a: NDArray[np.float32], b: NDArray[np.float32]
 ) -> NDArray[np.float32]:
-
-
-    p: NDArray[np.float32], a: NDArray[np.float32], b: NDArray[np.float32]
-) -> NDArray[np.float32]:
-
-    p: NDArray[np.float32],
-    a: NDArray[np.float32],
-    b: NDArray[np.float32],
-) -> NDArray[np.float32]:
-
-    """Return the closest point on segment ``ab`` to point ``p``."""
-
-        main
-        main
     """Return the closest point on the segment ``ab`` to ``p``."""
-        main
     ab = b - a
     t = float(np.dot(p - a, ab) / (np.dot(ab, ab) + 1e-9))
     return a + np.clip(t, 0.0, 1.0) * ab
 
 
 def capsule_box_penetration(
-
     cap: Capsule, mn: NDArray[np.float32], mx: NDArray[np.float32]
 ) -> Tuple[bool, Optional[NDArray[np.float32]], float]:
     """Check penetration of ``cap`` against an axis-aligned box."""
-
-
-    cap: Capsule, mn: NDArray[np.float32], mx: NDArray[np.float32]
-) -> Tuple[bool, Optional[NDArray[np.float32]], float]:
-    """Check penetration of ``cap`` against an axis-aligned box."""
-
-    cap: Capsule,
-    mn: NDArray[np.float32],
-    mx: NDArray[np.float32],
-) -> Tuple[bool, Optional[NDArray[np.float32]], float]:
-
-    """Check penetration of ``cap`` against an axis-aligned box.
-
-    Returns
-    -------
-    tuple
-        ``(hit, normal, penetration_depth)``
-    """
-
-    """Check penetration of ``cap`` against an axis-aligned box."""
- 
-
     center = (mn + mx) * 0.5
     q_seg = closest_point_on_segment(center, cap.seg_a, cap.seg_b)
-
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-    box_center = (mn + mx) * 0.5
-    q_seg = closest_point_on_segment(box_center, cap.seg_a, cap.seg_b)
-        main
     q_box = closest_point_on_aabb(q_seg, mn, mx)
-    v = q_seg - q_box
-    dist = float(np.linalg.norm(v))
-    pen = cap.radius - dist
-    if pen > 0.0:
-
-        normal = (
-            v / (dist + 1e-9) if dist > 1e-9 else np.array([0, 1, 0], dtype=np.float32)
-        )
-
-
-        normal = (
-            v / (dist + 1e-9)
-            if dist > 1e-9
-            else np.array([0.0, 1.0, 0.0], dtype=np.float32)
-        )
-        return True, cast(NDArray[np.float32], normal), float(pen)
+    delta = q_seg - q_box
+    dist = float(np.linalg.norm(delta))
+    if dist < cap.radius:
+        if dist > 1e-6:
+            normal = delta / dist
+        else:
+            normal = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+        depth = cap.radius - dist
+        return True, normal, depth
     return False, None, 0.0
-
-
-def compute_capsule_voxel_bounds(
-    cap: Capsule,
-) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
-    """Return integer min/max voxel coordinates overlapped by ``cap``."""
-
- 
-        normal = v / (dist + 1e-9) if dist > 1e-9 else np.array(
-            [0.0, 1.0, 0.0], dtype=np.float32
-        )
-
-
-
-
-        normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0, 1, 0], dtype=np.float32)
-
-        return True, cast(NDArray[np.float32], normal), float(pen)
-    return False, None, 0.0
-
-
-def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[np.ndarray, np.ndarray]:
-    """Return integer min/max voxel coordinates overlapped by ``cap``."""
-    mn = cap.center - np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
-    )
-    mx = cap.center + np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
-    )
-    return np.floor(mn).astype(int), np.floor(mx).astype(int)
-
-
-        main
-        main
-        return True, cast(NDArray[np.float32], normal), float(pen)
-    return False, None, 0.0
-
-
-        main
-        normal = v / (dist + 1e-9) if dist > 1e-9 else np.array([0.0, 1.0, 0.0], dtype=np.float32)
-        return True, normal, pen
-    return False, None, 0.0
-
-
-        main
-
-def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int_], NDArray[np.int_]]:
-    """Return integer min/max voxel coordinates overlapped by ``cap``."""
-
-        main
-def compute_capsule_voxel_bounds(cap: Capsule) -> Tuple[NDArray[np.int32], NDArray[np.int32]]:
-    """Return integer min/max voxel coordinates overlapped by ``cap``."""
-
-    mn = cap.center - np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
-    )
-    mx = cap.center + np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
-    )
-    return np.floor(mn).astype(int), np.floor(mx).astype(int)
 
 
 def resolve_capsule_world(
     cap: Capsule, world: WorldProtocol, max_iters: int = 8
 ) -> Tuple[NDArray[np.float32], bool]:
-    """Resolve capsule against the voxel ``world`` and return total offset and ground state."""
-    total_offset = np.zeros(3, dtype=np.float32)
-    ground = False
-
- 
-
-
-    mn = cap.center - np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
-    mx = cap.center + np.array([cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32)
-    return np.floor(mn).astype(np.int32), np.floor(mx).astype(np.int32)
-        main
-        main
-
-        main
-        main
-        main
-    mn = cap.center - np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius],
-        dtype=np.float32,
-    )
-    mx = cap.center + np.array(
-        [cap.radius, cap.half_height + cap.radius, cap.radius],
-        dtype=np.float32,
-    )
-
-return np.floor(mn).astype(int), np.floor(mx).astype(int)
-
-    return np.floor(mn).astype(np.int32), np.floor(mx).astype(np.int32)
-
-
-
-        main
-        main
-
-def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[NDArray[np.float32], bool]:
-    """Keep ``cap`` above solid blocks in ``world`` and report displacement and ground state."""
-
-
-def resolve_capsule_world(
-    cap: Capsule, world: WorldProtocol, max_iters: int = 8
-) -> Tuple[NDArray[np.float32], bool]:
-    """Resolve capsule against the voxel ``world`` and return offset and ground state."""
-    total_offset: NDArray[np.float32] = np.zeros(3, dtype=np.float32)
-    ground = False
- 
-
-def resolve_capsule_world(cap: Capsule, world: WorldProtocol) -> tuple[np.ndarray, bool]:
-    """Very small helper used in tests to keep the capsule above solid blocks."""
-
-        main
-        main
-    off = np.zeros(3, dtype=np.float32)
-    ground = False
-    mn, mx = compute_capsule_voxel_bounds(cap)
-    for y in range(mn[1], mx[1] + 1):
-        for z in range(mn[2], mx[2] + 1):
-            for x in range(mn[0], mx[0] + 1):
-                if not is_solid(
-                    world.get_block_at_world_position(float(x), float(y), float(z))
-                ):
-                    continue
-                block_top = y + 1.0
-                bottom = cap.center[1] - (cap.half_height + cap.radius)
-                if bottom < block_top:
-                    delta = block_top - bottom
-                    cap.center[1] += delta
-                    off[1] += delta
-                    ground = True
-    return off, ground
-
-        main
-        main
-        main
-
-        main
-def resolve_capsule_world(
-    cap: Capsule,
-    world: WorldProtocol,
-    max_iters: int = 8,
-) -> Tuple[NDArray[np.float32], bool]:
-        main
-
-    """Resolve ``cap`` against the voxel ``world``.
-
-    Returns the total offset applied and whether the capsule ended on the
-    ground.
-    """
-
-    """Resolve ``cap`` against the voxel ``world`` and return total offset and ground state."""
-
-
-
-__all__ = ["WorldProtocol", "compute_capsule_voxel_bounds", "resolve_capsule_world"]
-
-
-
-def resolve_capsule_world(
-    cap: Capsule, world: WorldProtocol, max_iters: int = 8
-) -> Tuple[NDArray[np.float32], bool]:
-    """Resolve capsule against the voxel ``world`` and return total offset and ground state."""
-    total_offset = np.zeros(3, dtype=np.float32)
-    ground = False
-        main
-
-        main
-        main
-    total_offset = np.zeros(3, dtype=np.float32)
-    ground = False
+    """Resolve collisions between ``cap`` and the voxel ``world``."""
+    offset = np.zeros(3, dtype=np.float32)
+    grounded = False
     for _ in range(max_iters):
-        bb_min, bb_max = compute_capsule_voxel_bounds(cap)
-
-
-        hit_n: Optional[NDArray[np.float32]] = None
-          main
-        max_pen = 0.0
-
-
-
-        main
-        hit_n: Optional[NDArray[np.float32]] = None
-        for y in range(bb_min[1] - 1, bb_max[1] + 2):
-            for z in range(bb_min[2] - 1, bb_max[2] + 2):
-                for x in range(bb_min[0] - 1, bb_max[0] + 2):
-                    bt = world.get_block_at_world_position(
-                        float(x), float(y), float(z)
+        mn = cap.center - np.array(
+            [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
+        )
+        mx = cap.center + np.array(
+            [cap.radius, cap.half_height + cap.radius, cap.radius], dtype=np.float32
+        )
+        x0, y0, z0 = np.floor(mn).astype(int)
+        x1, y1, z1 = np.floor(mx).astype(int)
+        hit_any = False
+        for x in range(x0, x1 + 1):
+            for y in range(y0, y1 + 1):
+                for z in range(z0, z1 + 1):
+                    block = world.get_block_at_world_position(
+                        x + 0.5, y + 0.5, z + 0.5
                     )
-                    if not is_solid(bt):
- 
-        for y in range(bb_min[1] - 1, bb_max[1] + 2):
-            for z in range(bb_min[2] - 1, bb_max[2] + 2):
-                for x in range(bb_min[0] - 1, bb_max[0] + 2):
-                    if not is_solid(world.get_block_at_world_position(float(x), float(y), float(z))):
-        main
+                    if not is_solid(block):
                         continue
-                    mnv = np.array([x, y, z], dtype=np.float32)
-                    mxv = mnv + 1.0
-                    hit, n, pen = capsule_box_penetration(cap, mnv, mxv)
-                    if hit and pen > max_pen:
-                        max_pen, hit_n = pen, n
-
-        if max_pen <= 1e-6 or hit_n is None:
+                    box_mn = np.array([x, y, z], dtype=np.float32)
+                    box_mx = box_mn + 1.0
+                    hit, normal, depth = capsule_box_penetration(cap, box_mn, box_mx)
+                    if hit and normal is not None:
+                        move = normal * depth
+                        cap.center = cap.center + move
+                        offset += move
+                        if normal[1] > 0.5:
+                            grounded = True
+                        hit_any = True
+        if not hit_any:
             break
-
-        off = hit_n * max_pen
-        cap.center += off
-        total_offset += off
-        if hit_n[1] > 0.7:
-            ground = True
-    return total_offset, ground
+    return offset, grounded
 
 
-
-
-
- 
-        main
-        main
-        main
-        main
-        main
 __all__ = [
     "WorldProtocol",
     "closest_point_on_aabb",
     "closest_point_on_segment",
     "capsule_box_penetration",
-    "compute_capsule_voxel_bounds",
     "resolve_capsule_world",
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-        main
-        main
-        main
-        main
-        main
-        main
-        main
-        main
