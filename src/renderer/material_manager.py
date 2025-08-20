@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+
+
+MATERIAL_COMPONENTS_COUNT = 5
 
 
 @dataclass
@@ -11,7 +13,7 @@ class Material:
     """Simple container for material properties."""
 
     id: int
-    albedo: Tuple[float, float, float]
+    albedo: tuple[float, float, float]
     metallic: float
     roughness: float
 
@@ -23,8 +25,8 @@ class MaterialManager:
         root = Path(__file__).resolve().parents[2]
         default = root / "assets" / "config" / "materials.json"
         self._config_path = Path(config_path) if config_path else default
-        self._materials_by_name: Dict[str, Material] = {}
-        self._materials_by_id: List[Material] = []
+        self._materials_by_name: dict[str, Material] = {}
+        self._materials_by_id: list[Material] = []
         self._load()
 
     def _load(self) -> None:
@@ -33,7 +35,12 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
-            albedo = tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0]))
+            albedo_vals = props.get("albedo", [1.0, 1.0, 1.0])
+            albedo = (
+                float(albedo_vals[0]),
+                float(albedo_vals[1]),
+                float(albedo_vals[2]),
+            )
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
@@ -43,9 +50,6 @@ class MaterialManager:
     def get_material_id(self, name: str) -> int:
         """Return the numeric ID for a material name."""
 
-        return self._materials_by_name[name].id
-        if name not in self._materials_by_name:
-            raise ValueError(f"Material {name} not found")
         return self._materials_by_name[name].id
     def get_material(self, material_id: int) -> Material:
         """Fetch material properties by ID."""
@@ -57,12 +61,12 @@ class MaterialManager:
             )
         return self._materials_by_id[material_id]
 
-    def materials(self) -> List[Material]:
+    def materials(self) -> list[Material]:
         """Return all loaded materials."""
 
         return list(self._materials_by_id)
 
-    def create_gpu_resources(self) -> List[Tuple[float, float, float, float, float]]:
+    def create_gpu_resources(self) -> list[tuple[float, float, float, float, float]]:
         """Package materials into a flat list suitable for GPU upload."""
 
         return [
