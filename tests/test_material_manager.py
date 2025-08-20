@@ -1,3 +1,5 @@
+
+
 import pytest
 
 
@@ -23,11 +25,15 @@ from src.renderer.material_manager import MaterialManager
         main
 
 
+        main
 from src.renderer.material_manager import (
     MaterialManager,
     MATERIAL_COMPONENTS_COUNT,
 )
 
+
+
+def test_material_manager_loads_and_ids_unique() -> None:
 
 from src.renderer.material_manager import (
     MATERIAL_COMPONENTS_COUNT,
@@ -51,6 +57,7 @@ MATERIAL_COMPONENTS_COUNT = 5
 MATERIAL_COMPONENTS_COUNT = 5
 
 def test_material_manager_loads_and_ids_unique():
+        main
         main
     mgr = MaterialManager()
     grass = mgr.get_material_id("GRASS")
