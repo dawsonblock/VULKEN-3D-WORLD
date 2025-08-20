@@ -4,6 +4,8 @@ const globals = require('globals');
 
 
 
+
+
 module.exports = [{
   ...js.configs.recommended,
   languageOptions: {
@@ -26,6 +28,7 @@ module.exports = [{
   ],
   rules: { 'no-unused-vars': 'warn', 'semi': ['error', 'always'] }
 }];
+        main
         main
 
 module.exports = [
@@ -58,6 +61,9 @@ module.exports = [
 
 
 
+
+
+        main
         main
         main
         main
