@@ -1,6 +1,13 @@
 
+from src.renderer.material_manager import (
+    MATERIAL_COMPONENTS_COUNT,
+    MaterialManager,
+)
+
+
 
 from src.renderer.material_manager import MaterialManager
+        main
 
 
 from src.renderer.material_manager import (

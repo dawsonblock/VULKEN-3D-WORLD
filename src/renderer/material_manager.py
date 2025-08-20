@@ -7,6 +7,10 @@ from typing import Dict, List, Tuple, cast
 
 
 
+# Number of scalar components used to represent a single material.
+MATERIAL_COMPONENTS_COUNT = 5
+
+
 
 
 
@@ -17,6 +21,7 @@ from typing import Dict, List, Tuple, cast
         main
         main
 MATERIAL_COMPONENTS_COUNT = 5
+        main
         main
         main
 
@@ -51,6 +56,8 @@ class MaterialManager:
 
 
 
+
+
             albedo_raw = props.get("albedo", [1.0, 1.0, 1.0])
             albedo = cast(
                 Tuple[float, float, float],
@@ -69,10 +76,13 @@ class MaterialManager:
             )
 
         main
+        main
             albedo = cast(
                 Tuple[float, float, float],
                 tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])),
             )
+
+
 
 
 
@@ -98,6 +108,7 @@ class MaterialManager:
         main
         main
         main
+        main
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
@@ -110,8 +121,11 @@ class MaterialManager:
 
 
 
+
+
         return self._materials_by_name[name].id
 
+        main
         main
         if name not in self._materials_by_name:
             raise ValueError(f"Material {name} not found")
