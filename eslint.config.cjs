@@ -7,7 +7,7 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'script',
-      globals: { ...globals.node, ...globals.es2021 }
+      globals: { ...globals.node, ...globals.es2021 },
     },
     ignores: [
       'build/**',
@@ -22,8 +22,11 @@ module.exports = [
       'tests/**',
       'src/**',
       'apps/**',
-      'scripts/**'
-    ]
-  }
+      'scripts/**',
+    ],
+  },
 ];
 
+
+
+        main
