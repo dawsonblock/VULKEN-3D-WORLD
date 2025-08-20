@@ -3,6 +3,10 @@
 #include <cstdio>
 #include <cstring>
 
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
+
 namespace voxelvk {
 
 static std::vector<char> readFile(const char* path){
@@ -53,23 +57,22 @@ bool SkyPass::init(VkPhysicalDevice /*phys*/, VkDevice dev, VkFormat colorFormat
     plci.pushConstantRangeCount = 1; plci.pPushConstantRanges = &pcr;
     if(vkCreatePipelineLayout(device,&plci,nullptr,&pipelineLayout)!=VK_SUCCESS) return false;
 
-    VkShaderModule vs = loadShader(device, "spv/common/fullscreen.vert.spv");
-    VkShaderModule fsSky = loadShader(device, "spv/post/atmosphere.frag.spv");
-    VkShaderModule vs = loadShader(device, FULLSCREEN_VERT_SHADER_PATH);
-    VkShaderModule fsSky = loadShader(device, ATMOSPHERE_FRAG_SHADER_PATH);
-    VkShaderModule fsCloud = loadShader(device, CLOUDS_FRAG_SHADER_PATH);
+    VkShaderModule vs = loadShader(device, VOXELVK_SHADER_DIR "/common/fullscreen.vert.spv");
     if (!vs) {
-        std::fprintf(stderr, "Failed to load shader: spv/common/fullscreen.vert.spv\n");
+        std::fprintf(stderr, "Failed to load shader: %s\n", VOXELVK_SHADER_DIR "/common/fullscreen.vert.spv");
         return false;
     }
-    VkShaderModule fsSky = loadShader(device, "spv/post/atmosphere.frag.spv");
+    VkShaderModule fsSky = loadShader(device, VOXELVK_SHADER_DIR "/post/atmosphere.frag.spv");
     if (!fsSky) {
-        std::fprintf(stderr, "Failed to load shader: spv/post/atmosphere.frag.spv\n");
+        std::fprintf(stderr, "Failed to load shader: %s\n", VOXELVK_SHADER_DIR "/post/atmosphere.frag.spv");
+        vkDestroyShaderModule(device, vs, nullptr);
         return false;
     }
-    VkShaderModule fsCloud = loadShader(device, "spv/post/clouds.frag.spv");
+    VkShaderModule fsCloud = loadShader(device, VOXELVK_SHADER_DIR "/post/clouds.frag.spv");
     if (!fsCloud) {
-        std::fprintf(stderr, "Failed to load shader: spv/post/clouds.frag.spv\n");
+        std::fprintf(stderr, "Failed to load shader: %s\n", VOXELVK_SHADER_DIR "/post/clouds.frag.spv");
+        vkDestroyShaderModule(device, fsSky, nullptr);
+        vkDestroyShaderModule(device, vs, nullptr);
         return false;
     }
 

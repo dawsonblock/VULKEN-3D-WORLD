@@ -4,6 +4,10 @@
 #include <cassert>
 #include <cstring>
 
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
+
 namespace voxelvk {
 
 static uint32_t FindMemoryType(VkPhysicalDevice phys, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
@@ -130,13 +134,8 @@ bool CreateBRDFLUT(VkDevice device,
     vkUpdateDescriptorSets(device, 1, &w, 0, nullptr);
 
     // Compute shader module
-    // Expect SPV at runtime path "spv/ibl/brdf_lut.comp.spv" (your CMake should mirror there)
-    VkShaderModule cs = LoadShaderModuleFromFile(device, "spv/ibl/brdf_lut.comp.spv");
-    if (cs == VK_NULL_HANDLE) {
-        // Fallback to shaders/ibl/brdf_lut.comp.glsl.spv (build dir)
-        cs = LoadShaderModuleFromFile(device, "shaders/ibl/brdf_lut.comp.glsl.spv");
-        if (cs == VK_NULL_HANDLE) return false;
-    }
+    VkShaderModule cs = LoadShaderModuleFromFile(device, VOXELVK_SHADER_DIR "/ibl/brdf_lut.comp.spv");
+    if (cs == VK_NULL_HANDLE) return false;
 
     VkComputePipelineCreateInfo cpci{ VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
     VkPipelineShaderStageCreateInfo s{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };

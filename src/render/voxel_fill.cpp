@@ -2,6 +2,10 @@
 #include <vector>
 #include <cstdio>
 
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
+
 namespace voxelvk {
 
 static std::vector<uint32_t> load_spirv_file(const char* path) {
@@ -42,7 +46,7 @@ bool VoxelFill::init(VkDevice device, VkPipelineCache cache) {
     VkResult pl_result = vkCreatePipelineLayout(device, &plci, nullptr, &m_pipe_layout);
     if (pl_result != VK_SUCCESS) return false;
 
-    auto spirv = load_spirv_file("spv/voxel_fill.comp.spv");
+    auto spirv = load_spirv_file(VOXELVK_SHADER_DIR "/voxel_fill.comp.spv");
     if (spirv.empty()) return false;
     VkShaderModuleCreateInfo smci{ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
     smci.codeSize = spirv.size() * 4; smci.pCode = spirv.data();

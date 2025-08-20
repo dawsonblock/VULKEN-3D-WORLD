@@ -9,6 +9,10 @@
 // Expect VMA headers available
 #include "vk_mem_alloc.h"
 
+#ifndef VOXELVK_SHADER_DIR
+#define VOXELVK_SHADER_DIR "spv"
+#endif
+
 namespace voxelvk {
 
 static VkShaderModule loadShader(VkDevice dev, const char* path);
@@ -135,8 +139,8 @@ bool CSMShadowPass::createUBO(){
 
 bool CSMShadowPass::createPipeline(VkPhysicalDevice /*phys*/){
     // Vertex & fragment shaders
-    VkShaderModule vs = loadShader(device, "spv/shadows/csm_depth.vert.spv");
-    VkShaderModule fs = loadShader(device, "spv/shadows/csm_depth.frag.spv");
+    VkShaderModule vs = loadShader(device, VOXELVK_SHADER_DIR "/shadows/csm_depth.vert.spv");
+    VkShaderModule fs = loadShader(device, VOXELVK_SHADER_DIR "/shadows/csm_depth.frag.spv");
     if(!vs || !fs) return false;
 
     VkPipelineShaderStageCreateInfo stages[2] = {};
