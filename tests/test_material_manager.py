@@ -1,5 +1,11 @@
 
 from src.renderer.material_manager import (
+    MaterialManager,
+    MATERIAL_COMPONENTS_COUNT,
+)
+
+
+from src.renderer.material_manager import (
     MATERIAL_COMPONENTS_COUNT,
     MaterialManager,
 )
@@ -9,6 +15,7 @@ from src.renderer.material_manager import MaterialManager, MATERIAL_COMPONENTS_C
 # Each material is represented by RGB albedo plus metallic and roughness
 # components, resulting in five floats per material.
 MATERIAL_COMPONENTS_COUNT = 5
+        main
         main
 
 
