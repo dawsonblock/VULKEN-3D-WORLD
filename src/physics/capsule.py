@@ -8,6 +8,15 @@ from numpy.typing import NDArray
 class Capsule:
     """Vertical capsule defined by its center, half-height, and radius."""
 
+import numpy as np
+from numpy.typing import NDArray
+
+
+@dataclass
+class Capsule:
+    """Vertical capsule defined by a center point, half height and radius."""
+        main
+
     center: NDArray[np.float32]
     half_height: float
     radius: float

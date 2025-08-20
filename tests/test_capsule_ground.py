@@ -1,15 +1,12 @@
-import ctypes
-import subprocess
-from dataclasses import dataclass
+import sys
 from pathlib import Path
 
 import numpy as np
-import pytest
 
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-@dataclass
-class CapsulePy:
-    """Simple vertical capsule used for Python collision checks."""
+from src.physics.capsule import Capsule
+from src.physics.capsule_voxel_sat import resolve_capsule_world
 
     center: np.ndarray
     half_height: float
@@ -32,9 +29,12 @@ def resolve_capsule_world(cap: CapsulePy, world) -> tuple[np.ndarray, bool]:
 
 class DummyWorld:
     """World with solid blocks below ``y == 0``."""
+        main
 
+class EmptyWorld:
     def get_block_at_world_position(self, x: float, y: float, z: float) -> int:
-        return 1 if y < 0.0 else 0
+
+      return 1 if y < 0.0 else 0
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,8 +77,9 @@ lib.resolve_capsule_ground.argtypes = [ctypes.POINTER(Capsule), ctypes.POINTER(V
 lib.resolve_capsule_ground.restype = ctypes.c_int
 
 
-def test_capsule_ground_collision() -> None:
-    """Capsule should be pushed above the ground by both Python and C++ helpers."""
+        return 0
+        main
+
 
     world = DummyWorld()
 
@@ -95,3 +96,14 @@ def test_capsule_ground_collision() -> None:
     assert abs(cap.center.y - 1.2) < 1e-4
     assert off_c.y == pytest.approx(1.0, abs=1e-4)
 
+
+def test_capsule_in_empty_world_has_no_offset() -> None:
+    cap = Capsule(
+        center=np.array([0.0, 1.0, 0.0], dtype=np.float32),
+        half_height=0.5,
+        radius=0.25,
+    )
+    off, ground = resolve_capsule_world(cap, EmptyWorld())
+    assert np.allclose(off, 0.0)
+    assert ground is False
+        main
