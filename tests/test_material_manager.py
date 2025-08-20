@@ -1,4 +1,7 @@
-from src.renderer.material_manager import MaterialManager
+from src.renderer.material_manager import (
+    MATERIAL_COMPONENTS_COUNT,
+    MaterialManager,
+)
 
 
 def test_material_manager_loads_and_ids_unique():

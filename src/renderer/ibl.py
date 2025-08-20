@@ -1,15 +1,6 @@
-
 """Image based lighting helpers."""
 
 from .material_manager import MaterialManager
-
-_manager = MaterialManager()
-
-
-def build_brdf_lut(material_name: str, *args, **kwargs):
-    """Build a BRDF lookup texture for the given material."""
-
-
 
 
 def build_brdf_lut(material_name: str, manager: MaterialManager, *args, **kwargs):
@@ -19,3 +10,7 @@ def build_brdf_lut(material_name: str, manager: MaterialManager, *args, **kwargs
     raise NotImplementedError(
         f"Implement using your rendering backend (material id {material_id})."
     )
+
+
+__all__ = ["build_brdf_lut"]
+
