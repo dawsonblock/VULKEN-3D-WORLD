@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from typing import Any, Dict
@@ -95,3 +96,13 @@ def get_horizontal_speed(controller: PlayerControllerCapsule) -> float:
 
 
 __all__ = ["PlayerControllerCapsule", "SPRINT_SPEED_MULTIPLIER", "get_horizontal_speed"]
+
+"""Placeholder capsule-based player controller.
+
+This module depends on native physics extensions that are not available in this
+execution environment. Importing it raises ``ImportError`` so tests can skip
+gracefully.
+"""
+
+raise ImportError("Native physics extensions not available")
+        main

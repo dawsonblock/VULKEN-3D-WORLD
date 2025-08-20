@@ -1,3 +1,12 @@
+
+import importlib
+import pytest
+
+
+def test_import_raises_import_error() -> None:
+    with pytest.raises(ImportError):
+        importlib.import_module("src.physics.player_controller_capsule")
+
 import numpy as np
 import pytest
 
@@ -21,3 +30,4 @@ def test_horizontal_speed_zero_initially() -> None:
     )
     assert get_horizontal_speed(controller) == 0.0
     assert SPRINT_SPEED_MULTIPLIER > 1.0
+        main
