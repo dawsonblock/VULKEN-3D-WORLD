@@ -1,4 +1,4 @@
-from src.renderer.material_manager import MaterialManager
+from src.renderer.material_manager import MaterialManager, MATERIAL_COMPONENTS_COUNT
 
 
 def test_material_manager_loads_and_ids_unique():
@@ -13,4 +13,3 @@ def test_material_manager_gpu_resources_shape():
     resources = mgr.create_gpu_resources()
     assert len(resources) == len(mgr.materials())
     assert all(len(r) == MATERIAL_COMPONENTS_COUNT for r in resources)
-
