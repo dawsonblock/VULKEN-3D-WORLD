@@ -27,6 +27,3 @@ module.exports = [
   },
 ];
 
-
-
-        main
