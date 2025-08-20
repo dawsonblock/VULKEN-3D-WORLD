@@ -3,14 +3,6 @@
 
 from .material_manager import MaterialManager
 
-_manager = MaterialManager()
-
-
-def build_brdf_lut(material_name: str, *args, **kwargs):
-    """Build a BRDF lookup texture for the given material."""
-
-
-
 
 def build_brdf_lut(material_name: str, manager: MaterialManager, *args, **kwargs):
     """Build a BRDF lookup texture for the given material."""

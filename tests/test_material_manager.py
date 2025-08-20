@@ -1,5 +1,9 @@
 from src.renderer.material_manager import MaterialManager
 
+# Each material is represented by RGB albedo plus metallic and roughness
+# components, resulting in five floats per material.
+MATERIAL_COMPONENTS_COUNT = 5
+
 
 def test_material_manager_loads_and_ids_unique():
     mgr = MaterialManager()
