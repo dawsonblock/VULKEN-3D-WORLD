@@ -12,9 +12,12 @@ from typing import Dict, List, Tuple, cast
 
 
 
+
+
         main
         main
 MATERIAL_COMPONENTS_COUNT = 5
+        main
         main
 
 
@@ -46,6 +49,8 @@ class MaterialManager:
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
 
+
+
             albedo_raw = props.get("albedo", [1.0, 1.0, 1.0])
             albedo = cast(
                 Tuple[float, float, float],
@@ -63,10 +68,13 @@ class MaterialManager:
                 tuple(float(x) for x in albedo_list),
             )
 
+        main
             albedo = cast(
                 Tuple[float, float, float],
                 tuple(float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])),
             )
+
+
 
 
             raw_albedo = props.get("albedo", [1.0, 1.0, 1.0])[:3]
@@ -84,6 +92,7 @@ class MaterialManager:
 
             albedo_vals = [float(x) for x in props.get("albedo", [1.0, 1.0, 1.0])]
             albedo = (albedo_vals[0], albedo_vals[1], albedo_vals[2])
+        main
         main
         main
         main
