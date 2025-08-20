@@ -10,9 +10,12 @@ from typing import Dict, List, Tuple, cast
 
 
 
+
+
         main
         main
 MATERIAL_COMPONENTS_COUNT = 5
+        main
 
 
 @dataclass
@@ -42,6 +45,17 @@ class MaterialManager:
         self._materials_by_name.clear()
         self._materials_by_id.clear()
         for idx, (name, props) in enumerate(mats.items()):
+
+            albedo_raw = props.get("albedo", [1.0, 1.0, 1.0])
+            albedo = cast(
+                Tuple[float, float, float],
+                (
+                    float(albedo_raw[0]),
+                    float(albedo_raw[1]),
+                    float(albedo_raw[2]),
+                ),
+            )
+
 
             albedo_list = props.get("albedo", [1.0, 1.0, 1.0])[:3]
             albedo = cast(
@@ -74,6 +88,7 @@ class MaterialManager:
         main
         main
         main
+        main
             metallic = float(props.get("metallic", 0.0))
             roughness = float(props.get("roughness", 1.0))
             mat = Material(idx, albedo, metallic, roughness)
@@ -84,8 +99,11 @@ class MaterialManager:
         """Return the numeric ID for a material name."""
 
 
+
+
         return self._materials_by_name[name].id
 
+        main
         if name not in self._materials_by_name:
             raise ValueError(f"Material {name} not found")
         return self._materials_by_name[name].id
