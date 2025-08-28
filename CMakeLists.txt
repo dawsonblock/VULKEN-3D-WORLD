@@ -85,6 +85,7 @@ if(ENABLE_VULKAN)
     if(GLSLANG_VALIDATOR)
       set(SHADER_COMPILER ${GLSLANG_VALIDATOR})
       set(SHADER_FLAGS -V --target-env vulkan1.3 -g)
+      set(USE_GLSLC OFF)
     else()
       message(WARNING "No shader compiler found (glslc/glslangValidator). Shader compilation disabled.")
       set(ENABLE_VULKAN OFF)
@@ -92,6 +93,7 @@ if(ENABLE_VULKAN)
   else()
     set(SHADER_COMPILER ${GLSLC_EXECUTABLE})
     set(SHADER_FLAGS --target-env=vulkan1.3 -O -g)
+    set(USE_GLSLC ON)
   endif()
 
   if(ENABLE_VULKAN)
@@ -120,11 +122,18 @@ if(ENABLE_VULKAN)
       file(MAKE_DIRECTORY "${OUT_DIR}")
       set(SPV_FILE "${OUT_DIR}/${FILE_STEM}.spv")
       set(DEP_FILE "${SPV_FILE}.d")
-      add_custom_command(OUTPUT ${SPV_FILE}
-        COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
-        DEPFILE ${DEP_FILE}
-        DEPENDS ${GLSL_FILE}
-        COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
+      if(USE_GLSLC)
+        add_custom_command(OUTPUT ${SPV_FILE}
+          COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
+          DEPFILE ${DEP_FILE}
+          DEPENDS ${GLSL_FILE}
+          COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
+      else()
+        add_custom_command(OUTPUT ${SPV_FILE}
+          COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -o ${SPV_FILE} ${GLSL_FILE}
+          DEPENDS ${GLSL_FILE}
+          COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
+      endif()
       list(APPEND SPV_OUT ${SPV_FILE})
     endforeach()
     add_custom_target(VoxelVK_Shaders ALL DEPENDS ${SPV_OUT})
