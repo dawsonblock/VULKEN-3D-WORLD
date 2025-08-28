@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+# Number of floats per material record when uploading to GPU buffers
+MATERIAL_COMPONENTS_COUNT = 5  # 3 (albedo) + 1 (metallic) + 1 (roughness)
+
 
 @dataclass
 class Material:
