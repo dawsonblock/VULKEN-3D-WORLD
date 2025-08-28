@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstdio>
+#include <glm/glm.hpp>
 
 #include "vk_mem_alloc.h"
 #include "frame_graph.hpp"
@@ -9,31 +10,70 @@
 
 namespace voxelvk {
 
-static VkShaderModule loadShader(VkDevice dev, const char* path);
+static std::vector<char> readFile(const char* path){
+    std::vector<char> data;
+    FILE* f = std::fopen(path, "rb");
+    if(!f) return data;
+    std::fseek(f, 0, SEEK_END);
+    long n = std::ftell(f);
+    std::fseek(f, 0, SEEK_SET);
+    data.resize(n);
+    std::fread(data.data(), 1, n, f);
+    std::fclose(f);
+    return data;
+}
+
+static VkShaderModule loadShader(VkDevice dev, const char* path){
+    auto bytes = readFile(path);
+    if(bytes.empty()){
+        // Fallback: support stage-in-subdir layout spv/<group>/<stage>/<name>.spv
+        // Detect pattern ".vert.spv" or ".frag.spv" and rewrite to "/vert/" or "/frag/"
+        std::string orig(path);
+        auto pos = orig.rfind(".vert.spv");
+        std::string alt = orig;
+        if(pos != std::string::npos){
+            // Replace last "/" preceding filename with "/vert/" and trim stage from filename
+            auto slash = alt.find_last_of('/');
+            if(slash != std::string::npos){
+                std::string dir = alt.substr(0, slash);
+                std::string name = alt.substr(slash+1);
+                // name like foo.vert.spv -> foo.spv
+                if(name.size() > 9) name = name.substr(0, name.size()-9) + ".spv";
+                alt = dir + "/vert/" + name;
+                bytes = readFile(alt.c_str());
+            }
+        } else if((pos = orig.rfind(".frag.spv")) != std::string::npos){
+            auto slash = alt.find_last_of('/');
+            if(slash != std::string::npos){
+                std::string dir = alt.substr(0, slash);
+                std::string name = alt.substr(slash+1);
+                if(name.size() > 9) name = name.substr(0, name.size()-9) + ".spv";
+                alt = dir + "/frag/" + name;
+                bytes = readFile(alt.c_str());
+            }
+        }
+        if(bytes.empty()) return VK_NULL_HANDLE;
+    }
+    VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+    ci.codeSize = bytes.size();
+    ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
+    VkShaderModule m;
+    if(vkCreateShaderModule(dev, &ci, nullptr, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
+    return m;
+}
 
 uint32_t VoxelizePass::findMemoryType(VkPhysicalDevice phys, uint32_t typeBits, VkMemoryPropertyFlags flags){
     VkPhysicalDeviceMemoryProperties memProps{};
     vkGetPhysicalDeviceMemoryProperties(phys, &memProps);
-
-    for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
-
     for(uint32_t i=0;i<memProps.memoryTypeCount;i++){
-        main
         if((typeBits & (1u<<i)) && (memProps.memoryTypes[i].propertyFlags & flags) == flags)
             return i;
     }
     throw std::runtime_error("No suitable memory type");
 }
 
-
-bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
-    device = dev;
-    allocator = alloc;
-    dim = dimension;
-
 bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc, uint32_t dimension){
     device = dev; allocator = alloc; dim = dimension;
-        main
     if(!createImage(phys)) return false;
     if(!createDescriptors()) return false;
     if(!createPipeline(phys)) return false;
@@ -43,14 +83,13 @@ bool VoxelizePass::init(VkPhysicalDevice phys, VkDevice dev, VmaAllocator alloc,
 void VoxelizePass::destroy(){
     if(pipeline) vkDestroyPipeline(device, pipeline, nullptr);
     if(pipelineLayout) vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-    // Descriptor sets are freed when the descriptor pool is destroyed.
     if(descPool) vkDestroyDescriptorPool(device, descPool, nullptr);
     if(setLayout) vkDestroyDescriptorSetLayout(device, setLayout, nullptr);
     if(voxelView) vkDestroyImageView(device, voxelView, nullptr);
     if(voxelImage) vmaDestroyImage(allocator, voxelImage, voxelAlloc);
 }
 
-bool VoxelizePass::createImage(VkPhysicalDevice phys){
+bool VoxelizePass::createImage(VkPhysicalDevice /*phys*/){
     VkImageCreateInfo ci{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
     ci.imageType = VK_IMAGE_TYPE_3D;
     ci.format = voxelFormat;
@@ -77,29 +116,14 @@ bool VoxelizePass::createImage(VkPhysicalDevice phys){
 }
 
 bool VoxelizePass::createDescriptors(){
-    VkDescriptorSetLayoutBinding b{};
-    b.binding = 0;
-    b.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    b.descriptorCount = 1;
-    b.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutBinding b{}; b.binding = 0; b.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; b.descriptorCount = 1; b.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     VkDescriptorSetLayoutCreateInfo lci{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-
-    lci.bindingCount = 1;
-    lci.pBindings = &b;
-
     lci.bindingCount = 1; lci.pBindings = &b;
-        main
     if(vkCreateDescriptorSetLayout(device, &lci, nullptr, &setLayout) != VK_SUCCESS) return false;
 
     VkDescriptorPoolSize ps{}; ps.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; ps.descriptorCount = 1;
     VkDescriptorPoolCreateInfo pci{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-
-    pci.maxSets = 1;
-    pci.poolSizeCount = 1;
-    pci.pPoolSizes = &ps;
-
     pci.maxSets = 1; pci.poolSizeCount = 1; pci.pPoolSizes = &ps;
-        main
     if(vkCreateDescriptorPool(device, &pci, nullptr, &descPool) != VK_SUCCESS) return false;
 
     VkDescriptorSetAllocateInfo ai{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
@@ -108,13 +132,12 @@ bool VoxelizePass::createDescriptors(){
 
     VkDescriptorImageInfo ii{}; ii.imageView = voxelView; ii.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     VkWriteDescriptorSet w{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-    w.dstSet = descSet; w.dstBinding = 0; w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    w.descriptorCount = 1; w.pImageInfo = &ii;
+    w.dstSet = descSet; w.dstBinding = 0; w.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; w.descriptorCount = 1; w.pImageInfo = &ii;
     vkUpdateDescriptorSets(device, 1, &w, 0, nullptr);
     return true;
 }
 
-bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
+bool VoxelizePass::createPipeline(VkPhysicalDevice /*phys*/){
     VkShaderModule vs = loadShader(device, "spv/voxelize/voxelize.vert.spv");
     VkShaderModule fs = loadShader(device, "spv/voxelize/voxelize.frag.spv");
     if(!vs || !fs) return false;
@@ -140,12 +163,8 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
     VkPipelineInputAssemblyStateCreateInfo ia{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
     ia.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    VkPipelineRasterizationConservativeStateCreateInfoEXT cr{VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_CONSERVATIVE_STATE_CREATE_INFO_EXT};
-    cr.conservativeRasterizationMode = VK_CONSERVATIVE_RASTERIZATION_MODE_OVERESTIMATE_EXT;
-    cr.extraPrimitiveOverestimationSize = 0.0f;
-
     VkPipelineRasterizationStateCreateInfo rs{VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO};
-    rs.pNext = &cr; rs.polygonMode = VK_POLYGON_MODE_FILL; rs.cullMode = VK_CULL_MODE_NONE;
+    rs.polygonMode = VK_POLYGON_MODE_FILL; rs.cullMode = VK_CULL_MODE_NONE;
     rs.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; rs.lineWidth = 1.0f;
 
     VkPipelineMultisampleStateCreateInfo ms{VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO};
@@ -158,13 +177,9 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkDynamicState dynStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
     VkPipelineDynamicStateCreateInfo dyn{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
+    dyn.dynamicStateCount = 2; dyn.pDynamicStates = dynStates;
 
-    dyn.dynamicStateCount = 2;
-    dyn.pDynamicStates = dynStates;
-
-    VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pcr.offset = 0;
-    pcr.size = sizeof(glm::mat4) + sizeof(int);
+    VkPushConstantRange pcr{}; pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; pcr.offset = 0; pcr.size = sizeof(glm::mat4) + sizeof(int);
 
     VkDescriptorSetLayout sets[] = { setLayout };
     pipelineLayout = createGlobalPipelineLayout(device, sets, 1, &pcr, 1);
@@ -181,12 +196,7 @@ bool VoxelizePass::createPipeline(VkPhysicalDevice phys){
 
     VkGraphicsPipelineCreateInfo pci{VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
     pci.pNext = &rinfo;
-
-    pci.stageCount = 2;
-    pci.pStages = stages;
-
     pci.stageCount = 2; pci.pStages = stages;
-        main
     pci.pVertexInputState = &vi;
     pci.pInputAssemblyState = &ia;
     pci.pRasterizationState = &rs;
@@ -214,22 +224,13 @@ void VoxelizePass::record(VkCommandBuffer cmd, const RecordVoxelDrawFn& drawScen
     vkCmdSetScissor(cmd, 0, 1, &sc);
 
     for(uint32_t z=0; z<dim; ++z){
-
         struct Push { glm::mat4 mvp; int slice; } pc{};
         pc.mvp = glm::mat4(1.0f);
-
-        Push pc{};
-        pc.mvp = mvp;
-        main
         pc.slice = (int)z;
-        vkCmdPushConstants(cmd, pipelineLayout,
-                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                           0, sizeof(Push), &pc);
+        vkCmdPushConstants(cmd, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push), &pc);
 
         VkRenderingInfo ri{VK_STRUCTURE_TYPE_RENDERING_INFO};
-        ri.renderArea = sc;
-        ri.layerCount = 1;
-        ri.colorAttachmentCount = 0;
+        ri.renderArea = sc; ri.layerCount = 1; ri.colorAttachmentCount = 0;
         vkCmdBeginRendering(cmd, &ri);
         drawScene(cmd, (int)z);
         vkCmdEndRendering(cmd);
@@ -241,37 +242,6 @@ void VoxelizePass::registerToGraph(FrameGraph& graph){
     pass.name = "voxelize";
     pass.writes = {"voxelData"};
     graph.addPass(pass);
-}
-
-static std::vector<char> readFile(const char* path){
-    std::vector<char> data;
-    FILE* f = std::fopen(path, "rb");
-    if(!f) return data;
-    std::fseek(f, 0, SEEK_END);
-    long n = std::ftell(f);
-    std::fseek(f, 0, SEEK_SET);
-    data.resize(n);
-    std::fread(data.data(), 1, n, f);
-    std::fclose(f);
-    return data;
-}
-
-static VkShaderModule loadShader(VkDevice dev, const char* path){
-    auto bytes = readFile(path);
-
-    if(bytes.empty()) return VK_NULL_HANDLE;
-
-    if(bytes.empty()) {
-        std::fprintf(stderr, "Error: Failed to load shader file '%s'\n", path);
-        return VK_NULL_HANDLE;
-    }
-        main
-    VkShaderModuleCreateInfo ci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-    ci.codeSize = bytes.size();
-    ci.pCode = reinterpret_cast<const uint32_t*>(bytes.data());
-    VkShaderModule m;
-    if(vkCreateShaderModule(dev, &ci, nullptr, &m) != VK_SUCCESS) return VK_NULL_HANDLE;
-    return m;
 }
 
 } // namespace voxelvk

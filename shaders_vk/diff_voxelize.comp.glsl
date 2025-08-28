@@ -1,4 +1,5 @@
 #version 450
+#extension GL_EXT_shader_atomic_float : enable
 layout(local_size_x = 64) in;
 
 layout(set = 0, binding = 0) readonly buffer Points {
@@ -22,7 +23,6 @@ void main() {
     ivec3 size = imageSize(uOccupancy);
     if (any(lessThan(p, vec3(0.0))) || any(greaterThanEqual(p, vec3(size)))) return;
 
-
     ivec3 base = ivec3(floor(p));
     if (any(lessThan(base, ivec3(0))) || any(greaterThan(base, size - ivec3(1)))) return;
     vec3 frac = p - vec3(base);
@@ -45,26 +45,5 @@ void main() {
                 imageAtomicAdd(uGradZ, vox, gz);
             }
         }
-                sOccupancy[gl_LocalInvocationIndex] += w;
-                float gx = (dx == 1 ? 1.0 : -1.0) * wy * wz;
-                float gy = wx * (dy == 1 ? 1.0 : -1.0) * wz;
-                float gz = wx * wy * (dz == 1 ? 1.0 : -1.0);
-                sGradX[gl_LocalInvocationIndex] += gx;
-                sGradY[gl_LocalInvocationIndex] += gy;
-                sGradZ[gl_LocalInvocationIndex] += gz;
-            }
-        }
-    }
-
-    // Synchronize threads in the workgroup
-    barrier();
-
-    // Each thread writes its accumulated value to the global images
-    ivec3 vox = ivec3(floor(p));
-    if (all(greaterThanEqual(vox, ivec3(0))) && all(lessThan(vox, size))) {
-        imageAtomicAdd(uOccupancy, vox, sOccupancy[gl_LocalInvocationIndex]);
-        imageAtomicAdd(uGradX, vox, sGradX[gl_LocalInvocationIndex]);
-        imageAtomicAdd(uGradY, vox, sGradY[gl_LocalInvocationIndex]);
-        imageAtomicAdd(uGradZ, vox, sGradZ[gl_LocalInvocationIndex]);
     }
 }
