@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/app/build_novk",
+  "command": "/usr/bin/c++ -I/app/build_novk/generated -O2 -g -DNDEBUG -fPIE -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wdouble-promotion -Wformat=2 -Wno-unused-parameter -std=gnu++20 -o tools/ipc_smoke_test/CMakeFiles/ipc_smoke_test.dir/main.cpp.o -c /app/tools/ipc_smoke_test/main.cpp",
+  "file": "/app/tools/ipc_smoke_test/main.cpp"
+}
+]
