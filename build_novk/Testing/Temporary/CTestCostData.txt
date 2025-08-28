@@ -1,2 +1,2 @@
-ipc_smoke_test 1 0.00331768
+ipc_smoke_test 2 0.00167242
 ---
