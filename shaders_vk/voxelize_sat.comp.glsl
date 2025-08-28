@@ -83,8 +83,8 @@ void main() {
     if(any(greaterThanEqual(coord, pc.gridDim))) return;
     vec3 boxMin = pc.origin + vec3(coord) * pc.voxelSize;
     vec3 center = boxMin + vec3(pc.voxelSize * 0.5);
-    vec3 half = vec3(pc.voxelSize * 0.5);
-    if(triBoxOverlap(center, half, pc.v0, pc.v1, pc.v2)) {
+    vec3 halfSize = vec3(pc.voxelSize * 0.5);
+    if(triBoxOverlap(center, halfSize, pc.v0, pc.v1, pc.v2)) {
         imageAtomicOr(uOccupancy, coord, 1u);
     }
 }
