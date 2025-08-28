@@ -99,13 +99,26 @@ if(ENABLE_VULKAN)
     set(SPV_DIR "${CMAKE_BINARY_DIR}/spv")
     foreach(GLSL_FILE IN LISTS GLSL_SOURCES)
       get_filename_component(FILE_BASE ${GLSL_FILE} NAME)       # includes extension, e.g., csm_depth.frag.glsl
-      get_filename_component(FILE_NAME_WE ${GLSL_FILE} NAME_WE) # e.g., csm_depth.frag
+      get_filename_component(FILE_STEM ${GLSL_FILE} NAME_WE)   # e.g., csm_depth.frag
       get_filename_component(FILE_DIR  ${GLSL_FILE} DIRECTORY)
       file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders_vk" "${FILE_DIR}")
-      set(OUT_DIR "${SPV_DIR}/${REL_DIR}")
+      # Derive shader stage from suffix before .glsl
+      set(STAGE "")
+      if(FILE_BASE MATCHES ".*\\.vert\\.glsl$")
+        set(STAGE "vert")
+        string(REPLACE ".vert" "" FILE_STEM ${FILE_STEM})
+      elseif(FILE_BASE MATCHES ".*\\.frag\\.glsl$")
+        set(STAGE "frag")
+        string(REPLACE ".frag" "" FILE_STEM ${FILE_STEM})
+      elseif(FILE_BASE MATCHES ".*\\.comp\\.glsl$")
+        set(STAGE "comp")
+        string(REPLACE ".comp" "" FILE_STEM ${FILE_STEM})
+      else()
+        set(STAGE "misc")
+      endif()
+      set(OUT_DIR "${SPV_DIR}/${REL_DIR}/${STAGE}")
       file(MAKE_DIRECTORY "${OUT_DIR}")
-      # Keep stage in filename to avoid collisions (e.g., .vert vs .frag)
-      set(SPV_FILE "${OUT_DIR}/${FILE_NAME_WE}.spv")
+      set(SPV_FILE "${OUT_DIR}/${FILE_STEM}.spv")
       set(DEP_FILE "${SPV_FILE}.d")
       add_custom_command(OUTPUT ${SPV_FILE}
         COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
