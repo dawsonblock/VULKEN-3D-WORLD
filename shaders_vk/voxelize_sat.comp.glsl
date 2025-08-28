@@ -13,15 +13,15 @@ layout(push_constant) uniform PC {
     ivec3 gridDim;
 } pc;
 
-bool planeBoxOverlap(vec3 normal, float d, vec3 half) {
+bool planeBoxOverlap(vec3 normal, float d, vec3 halfSize) {
     vec3 vmin, vmax;
     for(int q = 0; q < 3; ++q) {
         if(normal[q] > 0.0) {
-            vmin[q] = -half[q];
-            vmax[q] =  half[q];
+            vmin[q] = -halfSize[q];
+            vmax[q] =  halfSize[q];
         } else {
-            vmin[q] =  half[q];
-            vmax[q] = -half[q];
+            vmin[q] =  halfSize[q];
+            vmax[q] = -halfSize[q];
         }
     }
     if(dot(normal, vmin) + d > 0.0) return false;
@@ -29,7 +29,7 @@ bool planeBoxOverlap(vec3 normal, float d, vec3 half) {
     return false;
 }
 
-bool triBoxOverlap(vec3 center, vec3 half, vec3 v0, vec3 v1, vec3 v2) {
+bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
     vec3 tv0 = v0 - center;
     vec3 tv1 = v1 - center;
     vec3 tv2 = v2 - center;
