@@ -149,7 +149,7 @@ endif()
 
 if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
-  add_dependencies(smoke_headless VoxelVK_Shaders)
+  # Shaders not required for this CPU-only smoke sample
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
   target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
   target_compile_definitions(smoke_headless PRIVATE
