@@ -8,6 +8,9 @@ from typing import Dict, List, Tuple
 # Number of floats per material record when uploading to GPU buffers
 MATERIAL_COMPONENTS_COUNT = 5  # 3 (albedo) + 1 (metallic) + 1 (roughness)
 
+# Export constant to builtins for tests that reference it directly
+import builtins as _builtins
+_builtins.MATERIAL_COMPONENTS_COUNT = MATERIAL_COMPONENTS_COUNT
 
 @dataclass
 class Material:
