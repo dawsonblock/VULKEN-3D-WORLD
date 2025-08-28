@@ -13,6 +13,8 @@ add_library(VoxelVK_Elite_ALL STATIC
   src/voxel.cpp
   src/vk_elite.cpp
 )
+# Ensure headers under src/ are discoverable for includes like "world/svo.hpp"
+target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/third_party/vma)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
