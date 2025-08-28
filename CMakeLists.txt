@@ -99,7 +99,12 @@ if(ENABLE_VULKAN)
   endif()
 
   if(ENABLE_VULKAN)
-    file(GLOB_RECURSE GLSL_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.glsl")
+    # Collect only stage-suffixed shaders (exclude utility includes)
+    set(GLSL_SOURCES)
+    file(GLOB_RECURSE GLSL_VERT CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.vert.glsl")
+    file(GLOB_RECURSE GLSL_FRAG CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.frag.glsl")
+    file(GLOB_RECURSE GLSL_COMP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.comp.glsl")
+    list(APPEND GLSL_SOURCES ${GLSL_VERT} ${GLSL_FRAG} ${GLSL_COMP})
     set(SPV_DIR "${CMAKE_BINARY_DIR}/spv")
     foreach(GLSL_FILE IN LISTS GLSL_SOURCES)
       get_filename_component(FILE_BASE ${GLSL_FILE} NAME)       # includes extension, e.g., csm_depth.frag.glsl
