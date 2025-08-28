@@ -98,18 +98,20 @@ if(ENABLE_VULKAN)
     file(GLOB_RECURSE GLSL_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.glsl")
     set(SPV_DIR "${CMAKE_BINARY_DIR}/spv")
     foreach(GLSL_FILE IN LISTS GLSL_SOURCES)
-      get_filename_component(FILE_NAME ${GLSL_FILE} NAME_WE)
+      get_filename_component(FILE_BASE ${GLSL_FILE} NAME)       # includes extension, e.g., csm_depth.frag.glsl
+      get_filename_component(FILE_NAME_WE ${GLSL_FILE} NAME_WE) # e.g., csm_depth.frag
       get_filename_component(FILE_DIR  ${GLSL_FILE} DIRECTORY)
       file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders_vk" "${FILE_DIR}")
       set(OUT_DIR "${SPV_DIR}/${REL_DIR}")
       file(MAKE_DIRECTORY "${OUT_DIR}")
-      set(SPV_FILE "${OUT_DIR}/${FILE_NAME}.spv")
+      # Keep stage in filename to avoid collisions (e.g., .vert vs .frag)
+      set(SPV_FILE "${OUT_DIR}/${FILE_NAME_WE}.spv")
       set(DEP_FILE "${SPV_FILE}.d")
       add_custom_command(OUTPUT ${SPV_FILE}
         COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
         DEPFILE ${DEP_FILE}
         DEPENDS ${GLSL_FILE}
-        COMMENT "Compiling ${REL_DIR}/${FILE_NAME}.glsl")
+        COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
       list(APPEND SPV_OUT ${SPV_FILE})
     endforeach()
     add_custom_target(VoxelVK_Shaders ALL DEPENDS ${SPV_OUT})
