@@ -143,7 +143,7 @@ if(ENABLE_VULKAN)
       endif()
       list(APPEND SPV_OUT ${SPV_FILE})
     endforeach()
-    add_custom_target(VoxelVK_Shaders ALL DEPENDS ${SPV_OUT})
+    add_custom_target(VoxelVK_Shaders DEPENDS ${SPV_OUT})
   endif()
 endif()
 
