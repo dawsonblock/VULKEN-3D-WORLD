@@ -74,7 +74,7 @@ bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
 
     vec3 normal = cross(e0, e1);
     float d = -dot(normal, tv0);
-    if(!planeBoxOverlap(normal, d, half)) return false;
+    if(!planeBoxOverlap(normal, d, halfSize)) return false;
     return true;
 }
 
