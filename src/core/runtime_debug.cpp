@@ -1,7 +1,7 @@
-
 #include "runtime_debug.hpp"
 #include "build_info_print.hpp"
 #include <cstring>
+#include <cstdio>
 
 #if __has_include(<GLFW/glfw3.h>)
 #include <GLFW/glfw3.h>
