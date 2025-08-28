@@ -9,10 +9,9 @@ typedef struct VmaAllocation_T* VmaAllocation;
 typedef struct VmaAllocator_T* VmaAllocator;
 
 // Flags subset (stubs)
-typedef enum VmaAllocationCreateFlags {
-    VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT = 0x00000001,
-    VMA_ALLOCATION_CREATE_MAPPED_BIT = 0x00000002,
-} VmaAllocationCreateFlags;
+typedef uint32_t VmaAllocationCreateFlags;
+static const VmaAllocationCreateFlags VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT = 0x00000001u;
+static const VmaAllocationCreateFlags VMA_ALLOCATION_CREATE_MAPPED_BIT = 0x00000002u;
 
 typedef enum VmaMemoryUsage {
     VMA_MEMORY_USAGE_AUTO = 0,
