@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
+#include <cstdint>
 
 namespace voxelvk {
 
@@ -24,45 +27,39 @@ std::vector<SvoNode> LoadSvo(const std::string& path) {
     if (!in) {
         throw std::runtime_error("Failed to open file for reading: " + path);
     }
+
     uint32_t count = 0;
     in.read(reinterpret_cast<char*>(&count), sizeof(count));
-    if (!in || in.gcount() != sizeof(count)) {
+    if (!in) {
         throw std::runtime_error("Failed to read SVO node count from file: " + path);
     }
 
-    if (!in || count == 0 || count > MAX_SVO_NODES) {
+    constexpr uint32_t MAX_SVO_NODES = 50'000'000u; // sanity limit to avoid bad inputs
+    if (count == 0 || count > MAX_SVO_NODES) {
         throw std::runtime_error("Invalid SVO node count in file: " + path);
     }
 
-        main
     std::vector<SvoNode> nodes(count);
     for (uint32_t i = 0; i < count; ++i) {
         SvoNode& n = nodes[i];
-        in.read(reinterpret_cast<char*>(&n.morton), sizeof(n.morton));
-        in.read(reinterpret_cast<char*>(&n.childMask), sizeof(n.childMask));
-        in.read(reinterpret_cast<char*>(&n.morton), sizeof(n.morton));
 
-        if (in.gcount() != sizeof(n.morton)) {
-            throw std::runtime_error("File truncated or corrupted while reading morton value for node " + std::to_string(i));
-        }
-        in.read(reinterpret_cast<char*>(&n.childMask), sizeof(n.childMask));
-        if (in.gcount() != sizeof(n.childMask)) {
-            throw std::runtime_error("File truncated or corrupted while reading childMask for node " + std::to_string(i));
-        }
-        in.read(reinterpret_cast<char*>(n.children.data()), sizeof(uint32_t) * 8);
-        if (in.gcount() != sizeof(uint32_t) * 8) {
-            throw std::runtime_error("File truncated or corrupted while reading children for node " + std::to_string(i));
+        in.read(reinterpret_cast<char*>(&n.morton), sizeof(n.morton));
+        if (!in) {
+            throw std::runtime_error("File truncated while reading morton for node " + std::to_string(i) + ": " + path);
         }
 
-        if (!in) throw std::runtime_error("File corrupted or truncated while reading morton value for node " + std::to_string(i) + " in " + path);
         in.read(reinterpret_cast<char*>(&n.childMask), sizeof(n.childMask));
-        if (!in) throw std::runtime_error("File corrupted or truncated while reading childMask for node " + std::to_string(i) + " in " + path);
+        if (!in) {
+            throw std::runtime_error("File truncated while reading childMask for node " + std::to_string(i) + ": " + path);
+        }
+
         in.read(reinterpret_cast<char*>(n.children.data()), sizeof(uint32_t) * 8);
-        if (!in) throw std::runtime_error("File corrupted or truncated while reading children for node " + std::to_string(i) + " in " + path);
-        main
+        if (!in) {
+            throw std::runtime_error("File truncated while reading children for node " + std::to_string(i) + ": " + path);
+        }
     }
+
     return nodes;
 }
 
 } // namespace voxelvk
-

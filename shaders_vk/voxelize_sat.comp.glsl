@@ -1,7 +1,6 @@
 #version 450
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-
 layout(set = 0, binding = 0, r32ui) uniform uimage3D uOccupancy;
 
 layout(push_constant) uniform PC {
@@ -14,15 +13,15 @@ layout(push_constant) uniform PC {
     ivec3 gridDim;
 } pc;
 
-bool planeBoxOverlap(vec3 normal, float d, vec3 half) {
+bool planeBoxOverlap(vec3 normal, float d, vec3 halfSize) {
     vec3 vmin, vmax;
     for(int q = 0; q < 3; ++q) {
         if(normal[q] > 0.0) {
-            vmin[q] = -half[q];
-            vmax[q] =  half[q];
+            vmin[q] = -halfSize[q];
+            vmax[q] =  halfSize[q];
         } else {
-            vmin[q] =  half[q];
-            vmax[q] = -half[q];
+            vmin[q] =  halfSize[q];
+            vmax[q] = -halfSize[q];
         }
     }
     if(dot(normal, vmin) + d > 0.0) return false;
@@ -30,7 +29,7 @@ bool planeBoxOverlap(vec3 normal, float d, vec3 half) {
     return false;
 }
 
-bool triBoxOverlap(vec3 center, vec3 half, vec3 v0, vec3 v1, vec3 v2) {
+bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
     vec3 tv0 = v0 - center;
     vec3 tv1 = v1 - center;
     vec3 tv2 = v2 - center;
@@ -53,7 +52,7 @@ bool triBoxOverlap(vec3 center, vec3 half, vec3 v0, vec3 v1, vec3 v2) {
     for(int i = 0; i < 9; ++i) {
         vec3 axis = axes[i];
         if(length(axis) < 1e-6) continue;
-        float r = half.x * abs(axis.x) + half.y * abs(axis.y) + half.z * abs(axis.z);
+        float r = halfSize.x * abs(axis.x) + halfSize.y * abs(axis.y) + halfSize.z * abs(axis.z);
         float p0 = dot(tv0, axis);
         float p1 = dot(tv1, axis);
         float p2 = dot(tv2, axis);
@@ -65,17 +64,17 @@ bool triBoxOverlap(vec3 center, vec3 half, vec3 v0, vec3 v1, vec3 v2) {
     float minv, maxv;
     minv = min(tv0.x, min(tv1.x, tv2.x));
     maxv = max(tv0.x, max(tv1.x, tv2.x));
-    if(minv > half.x || maxv < -half.x) return false;
+    if(minv > halfSize.x || maxv < -halfSize.x) return false;
     minv = min(tv0.y, min(tv1.y, tv2.y));
     maxv = max(tv0.y, max(tv1.y, tv2.y));
-    if(minv > half.y || maxv < -half.y) return false;
+    if(minv > halfSize.y || maxv < -halfSize.y) return false;
     minv = min(tv0.z, min(tv1.z, tv2.z));
     maxv = max(tv0.z, max(tv1.z, tv2.z));
-    if(minv > half.z || maxv < -half.z) return false;
+    if(minv > halfSize.z || maxv < -halfSize.z) return false;
 
     vec3 normal = cross(e0, e1);
     float d = -dot(normal, tv0);
-    if(!planeBoxOverlap(normal, d, half)) return false;
+    if(!planeBoxOverlap(normal, d, halfSize)) return false;
     return true;
 }
 
@@ -84,19 +83,8 @@ void main() {
     if(any(greaterThanEqual(coord, pc.gridDim))) return;
     vec3 boxMin = pc.origin + vec3(coord) * pc.voxelSize;
     vec3 center = boxMin + vec3(pc.voxelSize * 0.5);
-    vec3 half = vec3(pc.voxelSize * 0.5);
-    if(triBoxOverlap(center, half, pc.v0, pc.v1, pc.v2)) {
+    vec3 halfSize = vec3(pc.voxelSize * 0.5);
+    if(triBoxOverlap(center, halfSize, pc.v0, pc.v1, pc.v2)) {
         imageAtomicOr(uOccupancy, coord, 1u);
     }
-
-layout(push_constant) uniform TrianglePC {
-    vec4 v0;
-    vec4 v1;
-    vec4 v2;
-} pc;
-
-// Placeholder compute shader for voxelization.
-void main() {
-    // Implementation would voxelize the triangle defined by pc.v0, pc.v1 and pc.v2.
-        main
 }

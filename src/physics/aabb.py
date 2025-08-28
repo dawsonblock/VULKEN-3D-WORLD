@@ -13,6 +13,13 @@ class AABB:
     center: NDArray[np.float32]
     half: NDArray[np.float32]
 
+    def __post_init__(self) -> None:
+        """Ensure inputs are 3-element float32 arrays."""
+        self.center = np.asarray(self.center, dtype=np.float32)
+        self.half = np.asarray(self.half, dtype=np.float32)
+        assert self.center.shape == (3,)
+        assert self.half.shape == (3,)
+
     @property
     def min(self) -> NDArray[np.float32]:
         return self.center - self.half

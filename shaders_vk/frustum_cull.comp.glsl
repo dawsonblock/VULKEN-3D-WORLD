@@ -1,6 +1,8 @@
 #version 450
 layout(local_size_x = 64) in;
 
+#define VERTICES_PER_DRAW 36
+
 struct AABB { vec3 min; vec3 max; };
 layout(set = 0, binding = 0, std430) readonly buffer Bounds { AABB bounds[]; };
 
@@ -33,8 +35,6 @@ void main(){
     if(idx >= bounds.length()) return;
     if(!aabbInFrustum(bounds[idx])) return;
     uint outIdx = atomicAdd(count,1);
-    draws[outIdx].vertexCount = 36;
-    draws[outIdx].instanceCount = 1;
     draws[outIdx].vertexCount = VERTICES_PER_DRAW;
     draws[outIdx].instanceCount = 1;
     draws[outIdx].firstVertex = idx*VERTICES_PER_DRAW;

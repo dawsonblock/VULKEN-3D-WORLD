@@ -1,5 +1,4 @@
-#version 460
-#extension GL_EXT_conservative_rasterization : enable
+#version 450
 
 layout(location=0) in vec3 inPosition;
 

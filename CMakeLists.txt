@@ -13,6 +13,8 @@ add_library(VoxelVK_Elite_ALL STATIC
   src/voxel.cpp
   src/vk_elite.cpp
 )
+# Ensure headers under src/ are discoverable for includes like "world/svo.hpp"
+target_include_directories(VoxelVK_Elite_ALL PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/third_party/vma)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -85,6 +87,7 @@ if(ENABLE_VULKAN)
     if(GLSLANG_VALIDATOR)
       set(SHADER_COMPILER ${GLSLANG_VALIDATOR})
       set(SHADER_FLAGS -V --target-env vulkan1.3 -g)
+      set(USE_GLSLC OFF)
     else()
       message(WARNING "No shader compiler found (glslc/glslangValidator). Shader compilation disabled.")
       set(ENABLE_VULKAN OFF)
@@ -92,33 +95,61 @@ if(ENABLE_VULKAN)
   else()
     set(SHADER_COMPILER ${GLSLC_EXECUTABLE})
     set(SHADER_FLAGS --target-env=vulkan1.3 -O -g)
+    set(USE_GLSLC ON)
   endif()
 
   if(ENABLE_VULKAN)
-    file(GLOB_RECURSE GLSL_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.glsl")
+    # Collect only stage-suffixed shaders (exclude utility includes)
+    set(GLSL_SOURCES)
+    file(GLOB_RECURSE GLSL_VERT CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.vert.glsl")
+    file(GLOB_RECURSE GLSL_FRAG CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.frag.glsl")
+    file(GLOB_RECURSE GLSL_COMP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/shaders_vk/*.comp.glsl")
+    list(APPEND GLSL_SOURCES ${GLSL_VERT} ${GLSL_FRAG} ${GLSL_COMP})
     set(SPV_DIR "${CMAKE_BINARY_DIR}/spv")
     foreach(GLSL_FILE IN LISTS GLSL_SOURCES)
-      get_filename_component(FILE_NAME ${GLSL_FILE} NAME_WE)
+      get_filename_component(FILE_BASE ${GLSL_FILE} NAME)       # includes extension, e.g., csm_depth.frag.glsl
+      get_filename_component(FILE_STEM ${GLSL_FILE} NAME_WE)   # e.g., csm_depth.frag
       get_filename_component(FILE_DIR  ${GLSL_FILE} DIRECTORY)
       file(RELATIVE_PATH REL_DIR "${CMAKE_SOURCE_DIR}/shaders_vk" "${FILE_DIR}")
-      set(OUT_DIR "${SPV_DIR}/${REL_DIR}")
+      # Derive shader stage from suffix before .glsl
+      set(STAGE "")
+      if(FILE_BASE MATCHES ".*\\.vert\\.glsl$")
+        set(STAGE "vert")
+        string(REPLACE ".vert" "" FILE_STEM ${FILE_STEM})
+      elseif(FILE_BASE MATCHES ".*\\.frag\\.glsl$")
+        set(STAGE "frag")
+        string(REPLACE ".frag" "" FILE_STEM ${FILE_STEM})
+      elseif(FILE_BASE MATCHES ".*\\.comp\\.glsl$")
+        set(STAGE "comp")
+        string(REPLACE ".comp" "" FILE_STEM ${FILE_STEM})
+      else()
+        set(STAGE "misc")
+      endif()
+      set(OUT_DIR "${SPV_DIR}/${REL_DIR}/${STAGE}")
       file(MAKE_DIRECTORY "${OUT_DIR}")
-      set(SPV_FILE "${OUT_DIR}/${FILE_NAME}.spv")
+      set(SPV_FILE "${OUT_DIR}/${FILE_STEM}.spv")
       set(DEP_FILE "${SPV_FILE}.d")
-      add_custom_command(OUTPUT ${SPV_FILE}
-        COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
-        DEPFILE ${DEP_FILE}
-        DEPENDS ${GLSL_FILE}
-        COMMENT "Compiling ${REL_DIR}/${FILE_NAME}.glsl")
+      if(USE_GLSLC)
+        add_custom_command(OUTPUT ${SPV_FILE}
+          COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -MD -MF ${DEP_FILE} -o ${SPV_FILE} ${GLSL_FILE}
+          DEPFILE ${DEP_FILE}
+          DEPENDS ${GLSL_FILE}
+          COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
+      else()
+        add_custom_command(OUTPUT ${SPV_FILE}
+          COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -o ${SPV_FILE} ${GLSL_FILE}
+          DEPENDS ${GLSL_FILE}
+          COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
+      endif()
       list(APPEND SPV_OUT ${SPV_FILE})
     endforeach()
-    add_custom_target(VoxelVK_Shaders ALL DEPENDS ${SPV_OUT})
+    add_custom_target(VoxelVK_Shaders DEPENDS ${SPV_OUT})
   endif()
 endif()
 
 if(ENABLE_VULKAN)
   add_executable(smoke_headless apps/smoke_headless.cpp)
-  add_dependencies(smoke_headless VoxelVK_Shaders)
+  # Shaders not required for this CPU-only smoke sample
   target_include_directories(smoke_headless PRIVATE ${CMAKE_SOURCE_DIR}/src)
   target_link_libraries(smoke_headless PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
   target_compile_definitions(smoke_headless PRIVATE
