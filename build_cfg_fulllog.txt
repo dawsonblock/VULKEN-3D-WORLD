@@ -1,0 +1,19 @@
+-- The CXX compiler identification is GNU 12.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- CUDA not detected (as expected)
+-- BuildInfo: hash=5a8f1e5, time=2025-08-28 23:32:24 %Z
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- === Build Summary ===
+-- Build Type: RelWithDebInfo
+-- Shader Compiler: /bin/glslangValidator
+-- Vulkan Enabled: ON
+-- =====================
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /app/build
