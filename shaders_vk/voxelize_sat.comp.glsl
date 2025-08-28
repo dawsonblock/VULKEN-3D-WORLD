@@ -70,7 +70,7 @@ bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
     if(minv > halfSize.y || maxv < -halfSize.y) return false;
     minv = min(tv0.z, min(tv1.z, tv2.z));
     maxv = max(tv0.z, max(tv1.z, tv2.z));
-    if(minv > half.z || maxv < -half.z) return false;
+    if(minv > halfSize.z || maxv < -halfSize.z) return false;
 
     vec3 normal = cross(e0, e1);
     float d = -dot(normal, tv0);
