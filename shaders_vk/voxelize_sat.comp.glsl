@@ -52,7 +52,7 @@ bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
     for(int i = 0; i < 9; ++i) {
         vec3 axis = axes[i];
         if(length(axis) < 1e-6) continue;
-        float r = half.x * abs(axis.x) + half.y * abs(axis.y) + half.z * abs(axis.z);
+        float r = halfSize.x * abs(axis.x) + halfSize.y * abs(axis.y) + halfSize.z * abs(axis.z);
         float p0 = dot(tv0, axis);
         float p1 = dot(tv1, axis);
         float p2 = dot(tv2, axis);
