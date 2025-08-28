@@ -64,7 +64,7 @@ bool triBoxOverlap(vec3 center, vec3 halfSize, vec3 v0, vec3 v1, vec3 v2) {
     float minv, maxv;
     minv = min(tv0.x, min(tv1.x, tv2.x));
     maxv = max(tv0.x, max(tv1.x, tv2.x));
-    if(minv > half.x || maxv < -half.x) return false;
+    if(minv > halfSize.x || maxv < -halfSize.x) return false;
     minv = min(tv0.y, min(tv1.y, tv2.y));
     maxv = max(tv0.y, max(tv1.y, tv2.y));
     if(minv > half.y || maxv < -half.y) return false;
