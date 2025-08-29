@@ -1,0 +1,1 @@
+/usr/bin/c++ -O2 -g -DNDEBUG -Wl,--no-undefined CMakeFiles/vulkan_bootstrap.dir/apps/vulkan_bootstrap.cpp.o CMakeFiles/vulkan_bootstrap.dir/src/vk/vma_helpers.cpp.o -o vulkan_bootstrap  /usr/lib/aarch64-linux-gnu/libvulkan.so /usr/lib/aarch64-linux-gnu/libglfw.so.3.3 
