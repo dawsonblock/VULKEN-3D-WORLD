@@ -160,7 +160,7 @@ engine = EngineInfo()
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard():
     """Serve the main dashboard."""
-    dashboard_path = Path("frontend/index.html")
+    dashboard_path = Path("../frontend/index.html")
     if dashboard_path.exists():
         return FileResponse(dashboard_path)
     else:
