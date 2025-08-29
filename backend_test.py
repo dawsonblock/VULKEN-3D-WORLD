@@ -49,7 +49,8 @@ def test_cmake_configuration():
     
     # Check that output contains the expected message
     expected_msg = "Using external VMA header at /app/external/vma"
-    assert expected_msg in result.stderr, f"Expected message not found in CMake output: {result.stderr}"
+    cmake_output = result.stdout + result.stderr
+    assert expected_msg in cmake_output, f"Expected message not found in CMake output: {cmake_output}"
     
     print("✅ CMake configuration test passed")
     return True
