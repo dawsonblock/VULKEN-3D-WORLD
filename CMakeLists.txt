@@ -140,9 +140,11 @@ if(ENABLE_VULKAN)
           COMMAND ${SHADER_COMPILER} ${SHADER_FLAGS} -o ${SPV_FILE} ${GLSL_FILE}
           DEPENDS ${GLSL_FILE}
           COMMENT "Compiling ${REL_DIR}/${FILE_BASE}")
-  add_executable(vulkan_bootstrap apps/vulkan_bootstrap.cpp)
-  target_include_directories(vulkan_bootstrap PRIVATE ${CMAKE_SOURCE_DIR}/src)
-  target_link_libraries(vulkan_bootstrap PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  if(NOT TARGET vulkan_bootstrap)
+    add_executable(vulkan_bootstrap apps/vulkan_bootstrap.cpp)
+    target_include_directories(vulkan_bootstrap PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    target_link_libraries(vulkan_bootstrap PRIVATE Vulkan::Vulkan Threads::Threads ${GLFW_LIB})
+  endif()
 
       endif()
       list(APPEND SPV_OUT ${SPV_FILE})
