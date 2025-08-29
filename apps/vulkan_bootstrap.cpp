@@ -1,5 +1,6 @@
 #include <vulkan/vulkan.h>
 #include <cstdio>
+#include <vector>
 #include "vk/vma_helpers.hpp"
 
 static bool CreateInstance(VkInstance& instance){
