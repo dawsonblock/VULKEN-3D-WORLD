@@ -56,7 +56,16 @@ MATERIAL_COMPONENTS_COUNT = 5
 # Number of floats per material returned by create_gpu_resources()
 MATERIAL_COMPONENTS_COUNT = 5
 
+
+# Each GPU resource tuple is expected to contain RGB albedo values plus
+# metallic and roughness components.
+MATERIAL_COMPONENTS_COUNT = 5
+
+
+def test_material_manager_loads_and_ids_unique() -> None:
+
 def test_material_manager_loads_and_ids_unique():
+        main
         main
         main
     mgr = MaterialManager()
