@@ -10,6 +10,15 @@ This repo contains:
 - GitHub Actions CI (Linux & Windows) that installs Vulkan SDK, builds, tests, and publishes artifacts
 See [Quickstart guide](docs/QUICKSTART.md) for setup and usage.
 
+## Prebuilt binaries
+
+Certain features under `src/ai/` require platform-specific binaries. These
+artifacts are **not** checked into the repository. If you need them, download
+the appropriate package for your operating system from the project's
+[releases page](https://github.com/<owner>/<repo>/releases) or build them
+yourself following the Quickstart guide. Place the resulting files in
+`src/ai/` to enable the optional functionality.
+
 ## Local build
 Build the engine library `VoxelVK_Elite_ALL`:
 ```bash
