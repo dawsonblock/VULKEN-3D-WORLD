@@ -28,6 +28,7 @@ option(ENABLE_TESTS             "Enable CTest targets" ON)
 option(VOXELVK_ENABLE_CUDA      "Enable CUDA acceleration" OFF)
 option(VOXELVK_ENABLE_TENSORRT  "Enable TensorRT (requires CUDA)" OFF)
 option(ENABLE_VULKAN            "Build Vulkan dependent targets" ON)
+option(USE_VMA_SHIM             "Use bundled minimal VMA shim (vk_mem_alloc.h)" ON)
 
 if(NOT VOXELVK_ENABLE_CUDA)
   include(cmake/GuardNoCuda.cmake)
