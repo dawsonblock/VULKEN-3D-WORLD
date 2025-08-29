@@ -1,1 +1,0 @@
-/usr/bin/c++ -O2 -g -DNDEBUG -Wl,--no-undefined CMakeFiles/ipc_smoke_test.dir/main.cpp.o -o ipc_smoke_test 

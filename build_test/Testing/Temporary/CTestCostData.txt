@@ -1,3 +1,0 @@
-ipc_smoke_test 2 0.001767
-smoke_headless 2 0.00165958
----
