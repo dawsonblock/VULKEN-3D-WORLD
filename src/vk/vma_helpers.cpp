@@ -1,3 +1,4 @@
+#define VMA_IMPLEMENTATION
 #include "vma_helpers.hpp"
 
 namespace voxelvk {
