@@ -43,9 +43,7 @@ pytest
 To check JavaScript or TypeScript sources, run:
 ```bash
 npx eslint .
-
-
-
+```
 
 ## Samples
 
