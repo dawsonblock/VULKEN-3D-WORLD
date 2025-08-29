@@ -62,6 +62,13 @@ endif()
 
 # --- Build tagging injection ---
 set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + voxel_upgrades_patch + project_compute_graphics_chain + project_dynamic_pbr + project_next_tier_all")
+# VMA include selection (shim by default)
+if(USE_VMA_SHIM)
+  message(STATUS "Using bundled VMA shim header")
+else()
+  message(STATUS "Expecting official vk_mem_alloc.h available on include path")
+endif()
+
 include(${CMAKE_SOURCE_DIR}/cmake/GenBuildInfo.cmake)
 include_directories(${CMAKE_BINARY_DIR}/generated)
 
