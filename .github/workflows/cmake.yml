@@ -29,21 +29,21 @@ jobs:
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
-      - name: Upload build artifacts
-
+      - name: Upload build artifacts (v4)
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-linux-${{ runner.os }}
           path: build
 
+      - name: Upload build artifacts (v3)
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: build-${{ runner.os }}
           path: |
             build/**
           if-no-files-found: ignore
-        main
 
   windows:
     runs-on: windows-latest
@@ -67,18 +67,18 @@ jobs:
         run: cmake --build build -j
       - name: Test
         run: ctest --test-dir build --output-on-failure
-      - name: Upload build artifacts
-
+      - name: Upload build artifacts (v4)
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ runner.os }}
           path: build
 
+      - name: Upload build artifacts (v3)
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: build-${{ runner.os }}
           path: |
             build/**
           if-no-files-found: ignore
-        main
