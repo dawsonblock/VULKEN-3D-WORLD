@@ -21,6 +21,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build cmake g++ libvulkan-dev vulkan-validationlayers-dev glslang-tools libglfw3-dev
+      - name: Check Vulkan tools
+        run: |
+          vulkaninfo --summary
+          glslc --version
       - name: Set Vulkan env
         run: echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
       - name: Configure
@@ -61,6 +65,10 @@ jobs:
         run: choco install vulkan-sdk glfw --yes
       - name: Set Vulkan env
         run: echo "VULKAN_SDK=C:\VulkanSDK\latest" >> $Env:GITHUB_ENV
+      - name: Check Vulkan tools
+        run: |
+          & "$Env:VULKAN_SDK\Bin\vulkaninfo.exe" --summary
+          & "$Env:VULKAN_SDK\Bin\glslc.exe" --version
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - name: Build
