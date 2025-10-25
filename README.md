@@ -60,6 +60,31 @@ Run it:
 ./build/demo_window
 ```
 
+### viewer
+Build the viewer:
+```bash
+cmake -S . -B build
+cmake --build build --target viewer
+```
+
+Generate a small sample world (chunk 0,0) using the Python `ChunkStore`:
+```bash
+python - <<'PY'
+import numpy as np
+from src.world.persistence import ChunkStore
+class Chunk: pass
+chunk=Chunk(); chunk.position=(0,0)
+chunk.voxels=np.random.randint(0,255,(16,16,16),dtype=np.uint8)
+store=ChunkStore(root="sample_world", codec="zstd", use_rle=True, threads=1)
+store.save_chunk_sync(chunk)
+PY
+```
+
+Run the viewer and point it at the generated world directory:
+```bash
+./build/apps/viewer sample_world
+```
+
 ## World streaming and LOD
 Chunks are loaded asynchronously around the player using the `ChunkStreamer` module. Mesh detail is selected by a distance-based LOD component configured through `world_lod.cfg`:
 

@@ -1,4 +1,8 @@
 find_package(Vulkan REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(ZSTD REQUIRED)
+find_package(Threads REQUIRED)
 
 # --- Build tagging injection ---
 set(VOXELVK_BRANCH_SOURCES "project_fixed + VoxelVK_Elite_ALL_release_ready + voxel_upgrades_patch + project_compute_graphics_chain + project_dynamic_pbr + project_next_tier_all")
@@ -15,6 +19,11 @@ add_executable(smoke_graphics_headless smoke_graphics_headless.cpp)
 set_target_properties(smoke_graphics_headless PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
 target_include_directories(smoke_graphics_headless PRIVATE ${CMAKE_BINARY_DIR}/generated)
 target_link_libraries(smoke_graphics_headless PRIVATE Vulkan::Vulkan)
+
+add_executable(viewer viewer.cpp ${CMAKE_SOURCE_DIR}/src/world/persistence.cpp)
+set_target_properties(viewer PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED YES)
+target_include_directories(viewer PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(viewer PRIVATE SDL2::SDL2 SDL2::SDL2main OpenGL::GL ZSTD::ZSTD Threads::Threads)
 
 # --- Build tagging sources ---
 list(APPEND VOXELVK_ELITE_SOURCES
