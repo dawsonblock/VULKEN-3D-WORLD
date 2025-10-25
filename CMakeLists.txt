@@ -192,6 +192,11 @@ target_sources(VoxelVK_Elite_ALL PRIVATE
 # --- Voxelization pass ---
 target_sources(VoxelVK_Elite_ALL PRIVATE src/render/voxelize_pass.cpp)
 
+# --- Optional occlusion pass ---
+if(TARGET VoxelVK_Elite_ALL)
+  target_sources(VoxelVK_Elite_ALL PRIVATE src/render/occlusion_pass.cpp)
+endif()
+
 # --- CSM descriptor layout helper ---
 target_sources(VoxelVK_Elite_ALL PRIVATE src/render/csm_layout.cpp)
 
