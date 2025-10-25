@@ -44,7 +44,6 @@ void ChunkStreamer::Update(const glm::vec3& playerPos){
 }
 
 void ChunkStreamer::LoadChunkAsync(int id){
-    loading_[id] = std::async(std::launch::async, [id]{
     loading_[id] = std::async(std::launch::async, [this, id]{
         this->LoadChunk(id);
     });
