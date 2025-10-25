@@ -9,6 +9,7 @@ This repo contains:
 - Self-contained smoke test + CTest
 - GitHub Actions CI (Linux & Windows) that installs Vulkan SDK, builds, tests, and publishes artifacts
 See [Quickstart guide](docs/QUICKSTART.md) for setup and usage.
+For an overview of chunk streaming, LOD, persistence, and AI palette integration, see [World Architecture overview](docs/WORLD_ARCHITECTURE.md).
 
 ## Local build
 Build the engine library `VoxelVK_Elite_ALL`:

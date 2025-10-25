@@ -46,3 +46,5 @@ cmake --build build --target demo_window
 ```
 
 The window should appear rendering the sample scene.
+
+For an overview of chunk streaming, LOD, persistence, and AI palette integration, see [World Architecture overview](WORLD_ARCHITECTURE.md).
