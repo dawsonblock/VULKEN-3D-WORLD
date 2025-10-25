@@ -5,6 +5,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iostream>
+#include <nlohmann/json.hpp>
 
 #if __has_include(<zstd.h>)
 #define VOXELVK_HAS_ZSTD 1
@@ -25,9 +26,42 @@ namespace world {
 ChunkStore::ChunkStore(const std::string &root, const std::string &codec, bool use_rle, int threads)
     : root_(root), codec_(codec), use_rle_(use_rle), thread_count_(threads) {
     std::filesystem::create_directories(root_);
+    int tc = std::max(1, thread_count_);
+    for (int i = 0; i < tc; ++i) {
+        workers_.emplace_back([this] {
+            while (true) {
+                Chunk task;
+                {
+                    std::unique_lock<std::mutex> lock(queue_mutex_);
+                    cv_.wait(lock, [this] { return stop_ || !tasks_.empty(); });
+                    if (stop_ && tasks_.empty()) return;
+                    task = std::move(tasks_.front());
+                    tasks_.pop();
+                    ++active_tasks_;
+                }
+                try {
+                    save_chunk_sync(task);
+                } catch (const std::exception &e) {
+                    std::cerr << "[ChunkStore worker] " << e.what() << std::endl;
+                }
+                {
+                    std::lock_guard<std::mutex> lock(queue_mutex_);
+                    --active_tasks_;
+                    if (tasks_.empty() && active_tasks_ == 0) cv_.notify_all();
+                }
+            }
+        });
+    }
 }
 
-ChunkStore::~ChunkStore() { wait_all(); }
+ChunkStore::~ChunkStore() {
+    wait_all();
+    stop_ = true;
+    cv_.notify_all();
+    for (auto &w : workers_) {
+        if (w.joinable()) w.join();
+    }
+}
 
 std::filesystem::path ChunkStore::_region_dir(int cx, int cz) const {
     std::filesystem::path d = root_ / ("r." + std::to_string(cx / 32) + "." + std::to_string(cz / 32));
@@ -169,23 +203,55 @@ void ChunkStore::save_chunk_sync(const Chunk &chunk) {
     auto blob = _compress(data);
     auto path = chunk_path(cx, cz);
     std::ofstream ofs(path, std::ios::binary);
+    if (!ofs.is_open()) {
+        throw std::runtime_error("failed to open chunk file for writing: " + path.string());
+    }
     ofs.write(reinterpret_cast<const char *>(blob.data()), static_cast<std::streamsize>(blob.size()));
+    if (!ofs) {
+        throw std::runtime_error("failed to write chunk data: " + path.string());
+    }
     ofs.close();
 
-    // Minimal index.json write
     auto idx = _region_dir(cx, cz) / "index.json";
-    std::ofstream idxf(idx, std::ios::binary);
-    idxf << "{\"" << cx << "," << cz << "\": {\"saved\": true}}";
+    {
+        std::lock_guard<std::mutex> lock(index_mutex_);
+        nlohmann::json table;
+        std::ifstream idx_in(idx);
+        if (idx_in.is_open()) {
+            try {
+                if (idx_in.peek() != std::ifstream::traits_type::eof()) {
+                    idx_in >> table;
+                }
+            } catch (...) {
+                table = nlohmann::json::object();
+            }
+            idx_in.close();
+        }
+        table[std::to_string(cx) + "," + std::to_string(cz)] = {{"saved", true}};
+        std::ofstream idx_out(idx, std::ios::binary | std::ios::trunc);
+        if (!idx_out.is_open()) {
+            throw std::runtime_error("failed to open index.json for writing: " + idx.string());
+        }
+        idx_out << table.dump();
+    }
 }
 
 void ChunkStore::save_async(const Chunk &chunk) {
-    futures_.emplace_back(std::async(std::launch::async, [this, chunk] { save_chunk_sync(chunk); }));
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex_);
+        tasks_.push(chunk);
+    }
+    cv_.notify_one();
 }
 
 std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
     auto path = chunk_path(cx, cz);
     if (!std::filesystem::exists(path)) return std::nullopt;
     std::ifstream ifs(path, std::ios::binary);
+    if (!ifs.is_open()) {
+        std::cerr << "[ChunkStore::load_chunk] Failed to open " << path << std::endl;
+        return std::nullopt;
+    }
     std::vector<std::uint8_t> blob((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     ifs.close();
     auto raw = _decompress(blob);
@@ -210,16 +276,8 @@ std::optional<ChunkData> ChunkStore::load_chunk(int cx, int cz) {
 }
 
 void ChunkStore::wait_all() {
-    for (auto &f : futures_) {
-        try {
-            f.get();
-        } catch (const std::exception &e) {
-            std::cerr << "[ChunkStore::wait_all] Exception in async save: " << e.what() << std::endl;
-        } catch (...) {
-            std::cerr << "[ChunkStore::wait_all] Unknown exception in async save." << std::endl;
-        }
-    }
-    futures_.clear();
+    std::unique_lock<std::mutex> lock(queue_mutex_);
+    cv_.wait(lock, [this] { return tasks_.empty() && active_tasks_ == 0; });
 }
 
 } // namespace world
